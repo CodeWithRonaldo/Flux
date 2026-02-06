@@ -5,4 +5,13 @@
     justify-content: center;
     gap: 2rem;
     padding: 4rem 1rem;
+
+}
+
+.inputGroup{
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }

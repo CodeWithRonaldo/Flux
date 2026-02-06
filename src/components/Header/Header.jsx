@@ -8,10 +8,10 @@ const Header = () => {
       <div className={styles.inner}>
         <h1 className={styles.logo}>FLUX</h1>
         <Button
-          className={styles.connectBtn}
-          text="Connect Wallet"
-          btnClass="primary"
-        />
+            variant="primary">
+                Connect Wallet
+            </Button>
+        
       </div>
     </div>
   );

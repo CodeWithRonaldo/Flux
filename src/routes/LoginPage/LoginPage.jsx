@@ -10,8 +10,18 @@ const LoginPage = () => {
   return (
     <div className={styles.container}>
       <GlassCard>
-        <Form title="Welcome Back" subtitle="Please enter your credentials to login" onSubmit={handleSubmit} />
-        <input type="username" placeholder="Username" required />
+        <Form
+          title="Welcome Back"
+          subtitle="Glad you're back!"
+          onSubmit={handleSubmit}
+        />
+        <div className={styles.inputGroup}>
+          <input type="username" placeholder="Username" required />
+        </div>
+        <div className={styles.inputGroup}>
+          <input type="password" placeholder="Password" required />
+        </div>
+        <input type="checkbox" />
       </GlassCard>
     </div>
   );
