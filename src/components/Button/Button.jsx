@@ -1,9 +1,11 @@
-import React from 'react'
+import styles from "./Button.module.css";
 
-const Button = () => {
+const Button = ({ children, variant = "primary", onClick }) => {
   return (
-    <div>Button</div>
-  )
-}
+    <button className={`${styles.btn} ${styles[variant]}`} onClick={onClick}>
+      {children}
+    </button>
+  );
+};
 
-export default Button
+export default Button;
