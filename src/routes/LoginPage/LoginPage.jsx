@@ -21,7 +21,10 @@ const LoginPage = () => {
         <div className={styles.inputGroup}>
           <input type="password" placeholder="Password" required />
         </div>
-        <input type="checkbox" />
+        <div className={styles.remember}>
+          <input type="checkbox" />
+            <label>Remember me</label>
+        </div>
       </GlassCard>
     </div>
   );
