@@ -1,0 +1,21 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 4rem 1rem;
+}
+
+.content{
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    /* justify-content: center; */
+    gap: 1.5rem;
+}
+
+.cards{
+    display: flex;
+   
+}

@@ -1,0 +1,14 @@
+.btn {
+  /* padding: 0.7rem 1.5rem; */
+  border-radius: 30px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  text-align: center;
+  line-height: 1.2;
+}
