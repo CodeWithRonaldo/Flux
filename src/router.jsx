@@ -1,6 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import LandingPage from "./routes/LandingPage/LandingPage";
 import Home from "./routes/Home/Home";
 import LoginPage from "./routes/LoginPage/LoginPage";
 
