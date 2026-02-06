@@ -1,12 +1,11 @@
-import React from 'react'
 import styles from "./Button.module.css";
 
-const Button = ({btnClass = "primary", text, onClick, disabled, icon}) => {
+const Button = ({ children, variant = "primary", onClick }) => {
   return (
-    <button className={styles[btnClass]} onClick={onClick} disabled={disabled}>
-        {text} {icon && <span className={styles.icon}>{icon}</span>}
+    <button className={`${styles.btn} ${styles[variant]}`} onClick={onClick}>
+      {children}
     </button>
-  )
-}
+  );
+};
 
-export default Button
+export default Button;
