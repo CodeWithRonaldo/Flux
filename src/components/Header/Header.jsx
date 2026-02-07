@@ -5,14 +5,8 @@ import styles from "./Header.module.css";
 const Header = () => {
   return (
     <div className={styles.header}>
-      <div className={styles.inner}>
-        <h1 className={styles.logo}>FLUX</h1>
-        <Button
-            variant="primary">
-                Connect Wallet
-            </Button>
-        
-      </div>
+      <h1 className={styles.logo}>FLUX</h1>
+      <Button variant="primary">Connect Wallet</Button>
     </div>
   );
 };
