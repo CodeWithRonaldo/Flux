@@ -2,7 +2,8 @@
     /* display: flex; */
     /* padding: 20px; */
     align-items: left;
-    padding: 0 0 20px;
+    padding: 0 0 10px;
+    width: 100%;
     
 }
 .form {
@@ -12,6 +13,12 @@
 
 }
 .title {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 600;
+    color: white;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: white;
 }
