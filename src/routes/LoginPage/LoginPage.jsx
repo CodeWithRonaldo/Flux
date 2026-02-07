@@ -10,28 +10,31 @@ const LoginPage = () => {
     e.preventDefault();
   };
   return (
-    <div className={styles.container}>
-      <GlassCard>
+    <div className={styles.loginContainer}>
+      <GlassCard className={styles.loginCard}>
         <Form
           title="Welcome Back"
           subtitle="Glad you're back!"
           onSubmit={handleSubmit}
-        />
-        <div className={styles.inputGroup}>
-          <input type="username" placeholder="Username" required />
-        </div>
-        <div className={styles.inputGroup}>
-          <input type="password" placeholder="Password" required />
-        </div>
-        <div className={styles.remember}>
-          <input type="checkbox" />
+        >
+          <div className={styles.inputGroup}>
+            <input type="username" placeholder="Username" required />
+          </div>
+          <div className={styles.inputGroup}>
+            <input type="password" placeholder="Password" required />
+          </div>
+          <div className={styles.remember}>
+            <input type="checkbox" />
             <label>Remember me</label>
-        </div>
-        <div className={styles.loginButton}>
-          <Button variant="primary">Login</Button>
-        </div>
-        <p className={styles.forgotPassword}>Forgot Password? </p>
-        <p className={styles.signup}>Don't have an account? <Link to="/signup">Sign Up</Link></p>
+          </div>
+          <div className={styles.loginButton}>
+            <Button variant="primary">Login</Button>
+          </div>
+          <p className={styles.forgotPassword}>Forgot Password? </p>
+          <p className={styles.signup}>
+            Don't have an account? <Link to="/signup">Sign Up</Link>
+          </p>
+        </Form>
       </GlassCard>
     </div>
   );

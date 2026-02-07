@@ -9,4 +9,11 @@
   --color-primary: #638cfe;
   --color-secondary: #17dcf5;
   --color-background: #f8f9fa;
+  --font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url("./assets/background.png") center/cover no-repeat;
 }

@@ -6,20 +6,19 @@ import SignupPage from "./routes/SignupPage/SignupPage";
 
 export const router = createBrowserRouter([
   {
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    path: "/signup",
+    element: <SignupPage />,
+  },
+  {
     element: <App />,
     children: [
       {
         path: "/",
         element: <Home />,
-      },
-
-      {
-        path: "/login",
-        element: <LoginPage />,
-      },
-      {
-        path: "/signup",
-        element: <SignupPage />,
       },
     ],
   },

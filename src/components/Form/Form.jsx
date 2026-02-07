@@ -1,16 +1,16 @@
-import React from 'react'
-import styles from './Form.module.css'
+import React from "react";
+import styles from "./Form.module.css";
 
-const Form = ({title,subtitle, onSubmit, children}) => {
+const Form = ({ title, subtitle, onSubmit, children }) => {
   return (
-    <div className={styles.container}>
-        <form className={styles.form} onSubmit={onSubmit}>
-            <h2 className={styles.title}>{title}</h2>
-            <p className={styles.subtitle}>{subtitle}</p>
-            {children}
-        </form>
-    </div>
-  )
-}
+    <form className={styles.form} onSubmit={onSubmit}>
+      <div className={styles.formHeader}>
+        <h2 className={styles.title}>{title}</h2>
+        <p className={styles.subtitle}>{subtitle}</p>
+      </div>
+      {children}
+    </form>
+  );
+};
 
-export default Form
+export default Form;

@@ -1,11 +1,8 @@
 import styles from "./GlassCard.module.css";
 
-const GlassCard = ({ children }) => {
+const GlassCard = ({ children, className }) => {
   return (
-    <div className={styles.glassCard}>
-      
-      {children}
-    </div>
+    <div className={`${styles.glassCard} ${className || ""}`}>{children}</div>
   );
 };
 
