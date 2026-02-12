@@ -1,21 +1,50 @@
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    padding: 4rem 1rem;
+.homeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  color: white;
+  font-family: var(--font);
 }
 
-.content{
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    /* justify-content: center; */
-    gap: 1.5rem;
+.heroContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
 }
 
-.cards{
-    display: flex;
-   
+.left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.left p {
+  line-height: 1.5rem;
+  max-width: 90%;
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.right .music {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.right .music .title {
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.right .player img {
+  width: 100%;
+  height: auto;
 }

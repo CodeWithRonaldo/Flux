@@ -1,9 +1,14 @@
-import React from 'react'
+import React from "react";
+import { MdLibraryMusic } from "react-icons/md";
+import styles from "./SearchBar.module.css";
 
-const SearchBar = () => {
+const SearchBar = ({ placeholder = "Search for music ..." }) => {
   return (
-    <div>SearchBar</div>
-  )
-}
+    <div className={styles.searchBarContainer}>
+      <input type="text" placeholder={placeholder} />
+      <MdLibraryMusic size={20} />
+    </div>
+  );
+};
 
-export default SearchBar
+export default SearchBar;
