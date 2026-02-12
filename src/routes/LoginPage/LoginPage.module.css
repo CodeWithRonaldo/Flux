@@ -85,6 +85,44 @@
   text-decoration: underline;
 }
 
+.or {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #928e8e;
+  font-size: 0.9rem;
+  position: relative;
+}
+
+.or::before {
+  content: "";
+  display: block;
+  width: 45%;
+  height: 1px;
+  background-color: #928e8e;
+  position: absolute;
+  top: 50%;
+  left: 0;
+}
+
+.or::after {
+  content: "";
+  display: block;
+  width: 45%;
+  height: 1px;
+  background-color: #928e8e;
+  position: absolute;
+  top: 50%;
+  right: 0;
+}
+
+.socialLogin {
+  margin: 1.5rem 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .signup {
   text-align: center;
   margin-top: 1rem;
