@@ -48,3 +48,17 @@
   width: 100%;
   height: auto;
 }
+
+.newReleases {
+  width: 100%;
+  font-family: var(--font);
+  padding: 2rem;
+}
+
+.musicGrid {
+  padding: 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
