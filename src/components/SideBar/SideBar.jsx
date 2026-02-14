@@ -8,33 +8,30 @@ import {
   Upload,
 } from "lucide-react";
 import styles from "./SideBar.module.css";
+import { NavLink } from "react-router-dom";
+
+const Links = [
+  { name: "Home", icon: HomeIcon, path: "/" },
+  { name: "Play", icon: Disc3Icon, path: "/play" },
+  { name: "Music", icon: Music, path: "/music" },
+  { name: "Radio", icon: Radio, path: "/radio" },
+  { name: "Mic", icon: Mic, path: "/mic" },
+  { name: "Upload", icon: Upload, path: "/upload" },
+  { name: "Profile", icon: CircleUserRound, path: "/profile" },
+];
 
 const SideBar = () => {
   return (
     <div className={styles.sidebar}>
-      <ul>
-        <li>
-          <HomeIcon className={styles.icon} />
-        </li>
-        <li>
-          <Disc3Icon className={styles.icon} />
-        </li>
-        <li>
-          <Music className={styles.icon} />
-        </li>
-        <li>
-          <Radio className={styles.icon} />
-        </li>
-        <li>
-          <Mic className={styles.icon} />
-        </li>
-        <li>
-          <Upload className={styles.icon} />
-        </li>
-        <li>
-          <CircleUserRound className={styles.icon} />
-        </li>
-      </ul>
+      <div>
+        {Links.map((link) => (
+          <li key={link.name}>
+            <NavLink to={link.path}>
+              <link.icon className={styles.icon} />
+            </NavLink>
+          </li>
+        ))}
+      </div>
     </div>
   );
 };
