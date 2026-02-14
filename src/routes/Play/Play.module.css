@@ -55,7 +55,8 @@
   flex-direction: column;
   gap: 2rem;
   padding: 2rem;
-  border: 1px solid green;
+  background: #000;
+  border-radius: 8px;
 }
 
 .featuredArtists {
