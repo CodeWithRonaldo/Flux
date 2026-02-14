@@ -4,6 +4,8 @@ import Form from "../../components/Form/Form";
 import styles from "./LoginPage.module.css";
 import Button from "../../components/Button/Button";
 import { Link } from "react-router-dom";
+import { Wallet } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 
 const LoginPage = () => {
   const handleSubmit = (e) => {
@@ -28,9 +30,18 @@ const LoginPage = () => {
             <label>Remember me</label>
           </div>
           <div className={styles.loginButton}>
-            <Button variant="primary">Login</Button>
+            <Button variant="btn-primary">Login</Button>
           </div>
           <p className={styles.forgotPassword}>Forgot Password? </p>
+          <p className={styles.or}>Or</p>
+          <div className={styles.socialLogin}>
+            <Button variant="btn-ghost" icon={<FcGoogle />}>
+              Sign in with Google
+            </Button>
+            <Button variant="btn-ghost" icon={<Wallet />}>
+              Connect Wallet
+            </Button>
+          </div>
           <p className={styles.signup}>
             Don't have an account? <Link to="/signup">Sign Up</Link>
           </p>

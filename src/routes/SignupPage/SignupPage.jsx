@@ -4,6 +4,8 @@ import Form from "../../components/Form/Form";
 import styles from "./SignupPage.module.css";
 import Button from "../../components/Button/Button";
 import { Link } from "react-router-dom";
+import { FcGoogle } from "react-icons/fc";
+import { Wallet, Wallet2 } from "lucide-react";
 
 const SignupPage = () => {
   const handleSubmit = (e) => {
@@ -34,7 +36,16 @@ const SignupPage = () => {
             <label>I agree to the Terms and Conditions</label>
           </div>
           <div className={styles.signupButton}>
-            <Button variant="primary">Sign Up</Button>
+            <Button variant="btn-primary">Sign Up</Button>
+          </div>
+          <p className={styles.or}>Or</p>
+          <div className={styles.socialLogin}>
+            <Button variant="btn-ghost" icon={<FcGoogle />}>
+              Sign in with Google
+            </Button>
+            <Button variant="btn-ghost" icon={<Wallet />}>
+              Connect Wallet
+            </Button>
           </div>
           <p className={styles.login}>
             Already have an account? <Link to="/login">Login</Link>
