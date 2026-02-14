@@ -1,5 +1,5 @@
 import React from "react";
-import GlassCard from "../../components/GlassCard/GlassCard";
+import { GlassCard } from "../../components/GlassCard/GlassCard";
 import Form from "../../components/Form/Form";
 import styles from "./SignupPage.module.css";
 import Button from "../../components/Button/Button";
