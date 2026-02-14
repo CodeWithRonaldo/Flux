@@ -12,6 +12,7 @@ import { Ellipsis, Heart, Menu, Plus } from "lucide-react";
 import Music1 from "../../assets/fakelove.jpg";
 import Music2 from "../../assets/money-album.jpg";
 import Music3 from "../../assets/my_heart.jpeg";
+import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 
 const artists = [
   {
@@ -107,8 +108,8 @@ const songs = [
 
 const Play = () => {
   return (
-    <div className={styles.playContainer}>
-      <div className={styles.leftContainer}>
+    <MusicWrapper songs={songs}>
+
         <div className={styles.nowPlaying}>
           <div className={styles.nowPlayingDetails}>
             <h4 className={styles.nowPlayingTitle}>Now Playing</h4>
@@ -134,11 +135,8 @@ const Play = () => {
             ))}
           </div>
         </section>
-      </div>
-      <div className={styles.rightContainer}>
-        <TrackList title="Top 100 Global Songs"  songs={songs} />
-      </div>
-    </div>
+    </MusicWrapper>
+     
   );
 };
 
