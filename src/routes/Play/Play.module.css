@@ -1,8 +1,9 @@
 .playContainer {
   display: flex;
   flex-direction: row;
-  height: 100vh;
-  border: 1px solid red;
+  /* height: 100vh; */
+
+  gap: 10px;
 }
 
 .leftContainer {
@@ -10,7 +11,42 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  border: 1px solid blue;
+}
+
+.nowPlaying {
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  justify-content: center;
+  height: 400px;
+  gap: 1rem;
+  padding: 2rem;
+  background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.5) 20%,
+      rgba(0, 0, 0, 0.7) 50%,
+      rgba(0, 0, 0, 0.9) 80%
+    ),
+    url("../../assets/money-album.jpg") center/cover no-repeat;
+  color: white;
+  backdrop-filter: blur(5px);
+  font-family: var(--font);
+}
+
+.nowPlayingActions {
+  display: flex;
+  margin-top: 0.75rem;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nowPlayingActions .icons {
+  color: #afb6b2;
+}
+.nowPlayingActions .icons:hover {
+  color: white;
+  cursor: pointer;
 }
 
 .rightContainer {
