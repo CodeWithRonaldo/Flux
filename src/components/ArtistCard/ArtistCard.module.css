@@ -1,0 +1,39 @@
+.artistCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.imageContainer {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border-radius: 99px;
+  border: 3px solid #c76020;
+  padding: 5px;
+}
+
+.imageContainer img {
+  width: 100%;
+  height: 100%;
+  border-radius: 99px;
+  object-fit: cover;
+}
+
+.infoContainer {
+  margin-top: 12px;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoContainer h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.infoContainer p {
+  font-size: 0.9rem;
+  color: #afb6b2;
+}
