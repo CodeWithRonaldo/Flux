@@ -8,7 +8,9 @@ function App() {
     <div className={styles.mainContainer}>
       <Header />
       <SideBar />
-      <Outlet />
+      <div className={styles.contentContainer}>
+        <Outlet />
+      </div>
     </div>
   );
 }
