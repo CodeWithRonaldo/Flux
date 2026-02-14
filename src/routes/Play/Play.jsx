@@ -5,6 +5,7 @@ import Artist2 from "../../assets/artist12.png";
 import Artist3 from "../../assets/artist13.png";
 import Artist4 from "../../assets/artist14.png";
 import ArtistCard from "../../components/ArtistCard/ArtistCard";
+import Player from "../../assets/player.png";
 import Button from "../../components/Button/Button";
 import { Ellipsis, Heart, Menu, Plus } from "lucide-react";
 
@@ -45,16 +46,20 @@ const Play = () => {
     <div className={styles.playContainer}>
       <div className={styles.leftContainer}>
         <div className={styles.nowPlaying}>
-          <h4 className={styles.nowPlayingTitle}>Now Playing</h4>
-
-          <div>
-            <h1 className={styles.nowPlayingTrack}>The girl in lemonade</h1>
-            <p className={styles.nowPlayingArtist}>Freed ft AbdulKuduz</p>
+          <div className={styles.nowPlayingDetails}>
+            <h4 className={styles.nowPlayingTitle}>Now Playing</h4>
+            <div>
+              <h1 className={styles.nowPlayingTrack}>The girl in lemonade</h1>
+              <p className={styles.nowPlayingArtist}>Freed ft AbdulKuduz</p>
+            </div>
+            <div className={styles.nowPlayingActions}>
+              <Ellipsis size={30} className={styles.icons} />
+              <Heart size={30} className={styles.icons} />
+              <Plus size={30} className={styles.icons} />
+            </div>
           </div>
-          <div className={styles.nowPlayingActions}>
-            <Ellipsis size={30} className={styles.icons} />
-            <Heart size={30} className={styles.icons} />
-            <Plus size={30} className={styles.icons} />
+          <div className={styles.nowPlayingPlayer}>
+            <img src={Player} alt="player" />
           </div>
         </div>
         <section className={styles.featuredArtists}>
@@ -66,7 +71,9 @@ const Play = () => {
           </div>
         </section>
       </div>
-      <div className={styles.rightContainer}></div>
+      <div className={styles.rightContainer}>
+        <div>dsds</div>
+      </div>
     </div>
   );
 };

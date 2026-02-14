@@ -1,9 +1,8 @@
 .playContainer {
   display: flex;
   flex-direction: row;
-  /* height: 100vh; */
-
-  gap: 10px;
+  gap: 16px;
+  position: relative;
 }
 
 .leftContainer {
@@ -11,13 +10,15 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  /* overflow-y: auto; */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .nowPlaying {
   display: flex;
-  flex-direction: column;
-  /* align-items: center; */
-  justify-content: center;
+  align-items: center;
+  border-radius: 8px 0 0 8px;
   height: 400px;
   gap: 1rem;
   padding: 2rem;
@@ -34,28 +35,34 @@
   font-family: var(--font);
 }
 
+.nowPlayingDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 1.5rem;
+}
+
+.nowPlayingPlayer {
+  flex: 1;
+}
+
+.nowPlayingPlayer img {
+  width: 90%;
+}
+
 .nowPlayingActions {
   display: flex;
-  margin-top: 0.75rem;
   gap: 2rem;
   align-items: center;
 }
 
 .nowPlayingActions .icons {
-  color: #afb6b2;
+  color: #dbe9e1;
 }
 .nowPlayingActions .icons:hover {
   color: white;
   cursor: pointer;
-}
-
-.rightContainer {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  padding: 2rem;
-  border: 1px solid green;
 }
 
 .featuredArtists {
@@ -75,4 +82,23 @@
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
+}
+
+.rightContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  border: 1px solid green;
+  position: sticky;
+  top: 0;
+  max-height: 85vh;
+  /* overflow-y: auto; */
+}
+
+.rightContainer div {
+  border: 1px solid red;
+  height: 100%;
+  width: 100%;
 }
