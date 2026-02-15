@@ -1,6 +1,10 @@
 import Music1 from "../assets/fakelove.jpg";
 import Music2 from "../assets/money-album.jpg";
 import Music3 from "../assets/my_heart.jpeg";
+import Artist1 from "../assets/artist11.png";
+import Artist2 from "../assets/artist12.png";
+import Artist3 from "../assets/artist13.png";
+import Artist4 from "../assets/artist14.png";
 
 export const songs = [
   {
@@ -58,5 +62,38 @@ export const songs = [
     artist: "Another Artist",
     albumArt: Music3,
     duration: "5:10",
+  },
+];
+
+export const artists = [
+  {
+    name: "Freed",
+    genre: "Afrobeat",
+    image: Artist1,
+  },
+  {
+    name: "AbdulKuduz",
+    genre: "Hip-hop",
+    image: Artist2,
+  },
+  {
+    name: "Oracle",
+    genre: "Takawaka",
+    image: Artist3,
+  },
+  {
+    name: "John Doe",
+    genre: "Electronic",
+    image: Artist4,
+  },
+  {
+    name: "AbdulKuduz",
+    genre: "Hip-hop",
+    image: Artist2,
+  },
+  {
+    name: "Oracle",
+    genre: "Takawaka",
+    image: Artist3,
   },
 ];

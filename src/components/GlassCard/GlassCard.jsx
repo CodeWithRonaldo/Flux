@@ -6,8 +6,14 @@ export const GlassCard = ({ children, className }) => {
   );
 };
 
-export const plainCard = ({ children, className }) => {
+export const PlainCard = ({ children, className }) => {
   return (
     <div className={`${styles.plainCard} ${className || ""}`}>{children}</div>
+  );
+};
+
+export const BlackCard = ({ children, className }) => {
+  return (
+    <div className={`${styles.blackCard} ${className || ""}`}>{children}</div>
   );
 };
