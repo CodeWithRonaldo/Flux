@@ -27,6 +27,10 @@
   max-width: 90%;
 }
 
+.searchBar {
+  width: 400px;
+}
+
 .right {
   flex: 1;
   display: flex;

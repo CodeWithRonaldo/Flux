@@ -2,14 +2,13 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow: hidden;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* margin-bottom: 16px; */
-  padding: 0 16px;
 }
 
 .title {
@@ -19,49 +18,13 @@
   margin: 0;
 }
 
-.badges {
-  display: flex;
-  gap: 8px;
-}
-
-.badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.badge:first-child {
-  background: #1ed760;
-  color: black;
-}
-
-.badge:last-child {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
 .songList {
   display: flex;
   flex-direction: column;
-}
-
-.expandButton {
-  width: 100%;
-  padding: 12px;
-  margin-top: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.expandButton:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  height: 100%;
 }
 
 .searchBar {

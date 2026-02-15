@@ -13,7 +13,7 @@ import { BlackCard } from "../../components/GlassCard/GlassCard";
 const Play = () => {
   const recentSongs = songs.slice(0, 3);
   return (
-    <MusicWrapper songs={songs}>
+    <MusicWrapper songs={songs} playlist={true}>
       <div className={styles.nowPlaying}>
         <div className={styles.nowPlayingDetails}>
           <h4 className={styles.nowPlayingTitle}>Now Playing</h4>

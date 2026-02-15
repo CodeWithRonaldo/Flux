@@ -1,6 +1,9 @@
 .mainContainer {
   position: relative;
-  padding: 100px 150px;
+  display: flex;
+  flex-direction: column;
+  width: 85%;
+  margin: 0 auto;
 }
 
 .contentContainer {

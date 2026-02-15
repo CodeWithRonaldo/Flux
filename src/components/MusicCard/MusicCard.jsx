@@ -5,7 +5,7 @@ const MusicCard = ({ track }) => {
     <div to={`/${track.id}`} className={styles.musicCard}>
       <div className={styles.imageContainer}>
         <img
-          src={track.music_art}
+          src={track.albumArt}
           alt={track.title}
           className={styles.musicImg}
         />

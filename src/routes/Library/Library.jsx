@@ -8,15 +8,12 @@ import { BlackCard } from "../../components/GlassCard/GlassCard";
 const Library = () => {
   return (
     <MusicWrapper songs={songs}>
-      <BlackCard className={styles.libraryCard}>
-        <TrackList
-          title="Your Library"
-          songs={songs}
-          initialShow={10}
-          hasSearch={true}
-        />
-      </BlackCard>
-      {/* </div> */}
+      <TrackList
+        title="Your Library"
+        songs={songs}
+        initialShow={10}
+        hasSearch={true}
+      />
     </MusicWrapper>
   );
 };

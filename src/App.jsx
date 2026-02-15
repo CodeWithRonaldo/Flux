@@ -7,10 +7,10 @@ function App() {
   return (
     <div className={styles.mainContainer}>
       <Header />
-      <SideBar />
       <div className={styles.contentContainer}>
         <Outlet />
       </div>
+      <SideBar />
     </div>
   );
 }

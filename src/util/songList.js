@@ -12,6 +12,7 @@ export const songs = [
     title: "The girl in lemonade",
     artist: "Freed ft AbdulKuduz",
     albumArt: Music1,
+    type: "premium",
     duration: "3:45",
   },
   {
@@ -19,6 +20,7 @@ export const songs = [
     title: "Another Song",
     artist: "Artist Name",
     albumArt: Music2,
+    type: "standard",
     duration: "4:20",
   },
   {
@@ -26,6 +28,7 @@ export const songs = [
     title: "Yet Another Song",
     artist: "Another Artist",
     albumArt: Music3,
+    type: "premium",
     duration: "5:10",
   },
   {
@@ -33,6 +36,7 @@ export const songs = [
     title: "The girl in lemonade",
     artist: "Freed ft AbdulKuduz",
     albumArt: Music1,
+    type: "standard",
     duration: "3:45",
   },
   {
@@ -40,6 +44,7 @@ export const songs = [
     title: "Another Song",
     artist: "Artist Name",
     albumArt: Music2,
+    type: "standard",
     duration: "4:20",
   },
   {
@@ -47,6 +52,7 @@ export const songs = [
     title: "Yet Another Song",
     artist: "Another Artist",
     albumArt: Music3,
+    type: "standard",
     duration: "5:10",
   },
   {
@@ -54,6 +60,7 @@ export const songs = [
     title: "Another Song",
     artist: "Artist Name",
     albumArt: Music2,
+    type: "premium",
     duration: "4:20",
   },
   {
@@ -61,6 +68,31 @@ export const songs = [
     title: "Yet Another Song",
     artist: "Another Artist",
     albumArt: Music3,
+    type: "standard",
+    duration: "5:10",
+  },
+  {
+    id: 9,
+    title: "Yet Another Song",
+    artist: "Another Artist",
+    albumArt: Music3,
+    type: "standard",
+    duration: "5:10",
+  },
+  {
+    id: 10,
+    title: "Another Song",
+    artist: "Artist Name",
+    albumArt: Music2,
+    type: "premium",
+    duration: "4:20",
+  },
+  {
+    id: 11,
+    title: "Yet Another Song",
+    artist: "Another Artist",
+    albumArt: Music3,
+    type: "standard",
     duration: "5:10",
   },
 ];

@@ -1,7 +1,8 @@
-/* .libraryCard {
-  background: black;
-  padding: 20px;
-} */
+.libraryCard {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 
 .libraryTitle {
   font-size: 24px;
