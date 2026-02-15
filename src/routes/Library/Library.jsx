@@ -1,9 +1,20 @@
-import React from 'react'
+import React from "react";
+import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
+import styles from "./Library.module.css";
+import TrackList from "../../components/TrackList/TrackList";
+import { songs } from "../../util/songList";
+
 
 const Library = () => {
   return (
-    <div>Library</div>
-  )
-}
+    <MusicWrapper songs={songs}>
+      <div className={styles.libraryContainer}>
+        <TrackList title="Your Library" songs={songs} initialShow={10} hasSearch={true}/>
+      </div>
+      
 
-export default Library
+    </MusicWrapper>
+  );
+};
+
+export default Library;

@@ -1,9 +1,16 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  /* margin-bottom: 16px; */
   padding: 0 16px;
 }
 
@@ -57,4 +64,9 @@
 .expandButton:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
+}
+
+.searchBar{
+    margin-bottom: 16px;
+    width: 100%;
 }

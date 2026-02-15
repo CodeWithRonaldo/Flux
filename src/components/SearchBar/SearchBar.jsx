@@ -6,7 +6,7 @@ const SearchBar = ({ placeholder = "Search for music ..." }) => {
   return (
     <div className={styles.searchBarContainer}>
       <input type="text" placeholder={placeholder} />
-      <MdLibraryMusic size={20} />
+      <MdLibraryMusic size={20} color="white"  />
     </div>
   );
 };

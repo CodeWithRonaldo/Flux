@@ -4,6 +4,7 @@ import Home from "./routes/Home/Home";
 import LoginPage from "./routes/LoginPage/LoginPage";
 import SignupPage from "./routes/SignupPage/SignupPage";
 import Play from "./routes/Play/Play";
+import Library from "./routes/Library/Library";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ export const router = createBrowserRouter([
       {
         path: "play",
         element: <Play />,
+      },
+      {
+        path: "library",
+        element: <Library />,
       },
     ],
   },

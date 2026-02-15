@@ -13,7 +13,7 @@ import { NavLink } from "react-router-dom";
 const Links = [
   { name: "Home", icon: HomeIcon, path: "/" },
   { name: "Play", icon: Disc3Icon, path: "/play" },
-  { name: "Music", icon: Music, path: "/music" },
+  { name: "Music", icon: Music, path: "/library" },
   { name: "Radio", icon: Radio, path: "/radio" },
   { name: "Mic", icon: Mic, path: "/mic" },
   { name: "Upload", icon: Upload, path: "/upload" },

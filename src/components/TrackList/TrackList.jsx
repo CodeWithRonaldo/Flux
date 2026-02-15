@@ -2,11 +2,12 @@
 import { useState } from 'react';
 import styles from './TrackList.module.css';
 import TrackItem from '../TrackItem/TrackItem';
+import SearchBar from '../SearchBar/SearchBar';
 
-const TrackList = ({ title, badge, songs, initialShow = 5 }) => {
+const TrackList = ({ title, badge, songs, initialShow = 5, hasSearch=false }) => {
   const [showAll, setShowAll] = useState(false);
   
-  const displayedSongs = showAll ? songs : songs.slice(0, initialShow);
+  const displayedSongs = showAll ? songs : songs?.slice(0, initialShow);
 
   const handleLike = (songId) => {
     console.log('Liked song:', songId);
@@ -19,7 +20,7 @@ const TrackList = ({ title, badge, songs, initialShow = 5 }) => {
   };
 
   return (
-    <>
+    <div className={styles.container}>
       <div className={styles.header}>
         <h2 className={styles.title}>{title}</h2>
         {badge && (
@@ -33,8 +34,14 @@ const TrackList = ({ title, badge, songs, initialShow = 5 }) => {
         )}
       </div>
 
+      {
+        hasSearch && (
+          <SearchBar className={styles.searchBar}/>
+        )
+      }
+
       <div className={styles.songList}>
-        {displayedSongs.map((song, index) => (
+        {displayedSongs?.map((song, index) => (
           <TrackItem
             key={song.id}
             rank={index + 1}
@@ -48,7 +55,7 @@ const TrackList = ({ title, badge, songs, initialShow = 5 }) => {
         ))}
       </div>
 
-      {songs.length > initialShow && (
+      {songs?.length > initialShow && (
         <button 
           onClick={() => setShowAll(!showAll)}
           className={styles.expandButton}
@@ -56,7 +63,7 @@ const TrackList = ({ title, badge, songs, initialShow = 5 }) => {
           {showAll ? 'Show Less ˄' : 'Expand ˅'}
         </button>
       )}
-    </>
+    </div>
   );
 }
 
