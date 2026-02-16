@@ -5,6 +5,7 @@ import LoginPage from "./routes/LoginPage/LoginPage";
 import SignupPage from "./routes/SignupPage/SignupPage";
 import Play from "./routes/Play/Play";
 import Library from "./routes/Library/Library";
+import Upload from "./routes/Upload/Upload";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
       {
         path: "library",
         element: <Library />,
+      },
+      {
+        path: "upload",
+        element: <Upload />,
       },
     ],
   },
