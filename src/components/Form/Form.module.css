@@ -3,10 +3,14 @@
   flex-direction: column;
   width: 100%;
   font-family: var(--font);
+  gap: 1.5rem;
 }
 
 .formHeader {
-  margin-bottom: 0.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .title {
