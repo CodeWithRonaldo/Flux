@@ -4,6 +4,7 @@ import Form from "../../components/Form/Form";
 import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
 import { Check, Music, UploadIcon, User } from "lucide-react";
+import Image1 from "../../assets/fakelove.jpg";
 
 const Upload = () => {
   const [title, setTitle] = useState("");
@@ -47,7 +48,9 @@ const Upload = () => {
           {steps.map((step) => (
             <div
               key={step.id}
-              className={`${styles.stepItem} ${activeStep === step.id ? styles.active : ""} ${activeStep > step.id ? styles.completed : ""}`}
+              className={`${styles.stepItem} ${
+                activeStep === step.id ? styles.active : ""
+              } ${activeStep > step.id ? styles.completed : ""}`}
               onClick={() => activeStep > step.id && setActiveStep(step.id)}
             >
               <div className={styles.stepIcon}>{step.icon}</div>
@@ -236,8 +239,30 @@ const Upload = () => {
               )}
 
               {activeStep === 4 && (
-                <div>
-                  <h1>Review</h1>
+                <div className={styles.review}>
+                  <div className={styles.reviewImage}>
+                    <img src={Image1} alt="cover art" />
+                  </div>
+                  <div className={styles.reviewDetails}>
+                    <p>
+                      TITLE <span>The girl in Lemonade dress</span>
+                    </p>
+                    <p>
+                      DESCPRITION
+                      <span>The girl in Lemonade dress is my baby</span>
+                    </p>
+                    <p>
+                      GENRE
+                      <span className={styles.genre}>Takawaka</span>
+                    </p>
+                    <p>
+                      PRICE
+                      <span>2 IOTA</span>
+                    </p>
+                    <div>
+                      <p>REVENUE SPLITTING</p>
+                    </div>
+                  </div>
                 </div>
               )}
 
