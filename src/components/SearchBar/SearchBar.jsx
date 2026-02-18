@@ -2,10 +2,20 @@ import React from "react";
 import { MdLibraryMusic } from "react-icons/md";
 import styles from "./SearchBar.module.css";
 
-const SearchBar = ({ placeholder = "Search for music ...", className }) => {
+const SearchBar = ({
+  placeholder = "Search for music ...",
+  className,
+  value,
+  onChange,
+}) => {
   return (
     <div className={`${styles.searchBarContainer} ${className}`}>
-      <input type="text" placeholder={placeholder} />
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+      />
       <MdLibraryMusic size={20} color="white" />
     </div>
   );

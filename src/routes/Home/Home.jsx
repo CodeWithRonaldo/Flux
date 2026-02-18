@@ -1,11 +1,13 @@
-import React from "react";
 import styles from "./Home.module.css";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import Player from "../../assets/player.png";
 import MusicCard from "../../components/MusicCard/MusicCard";
-import { songs } from "../../util/songList";
+import ArtistCard from "../../components/ArtistCard/ArtistCard";
+import { songs, artists } from "../../util/songList";
+import Player from "../../components/Player/Player";
+import { useAudio } from "../../hooks/useAudio";
 
 const Home = () => {
+  const { currentTrack } = useAudio();
   return (
     <div className={styles.homeContainer}>
       <section className={styles.heroContainer}>
@@ -25,20 +27,29 @@ const Home = () => {
         </div>
         <div className={styles.right}>
           <div className={styles.music}>
-            <p className={styles.title}>The girl in lemonade dress</p>
-            <p className={styles.artist}>Freed ft AbdulKuduz</p>
+            <p className={styles.title}>{currentTrack?.title}</p>
+            <p className={styles.artist}>{currentTrack?.artist}</p>
           </div>
-          <div className={styles.player}>
-            <img src={Player} alt="Music Player" />
+          <div className={styles.playerContainer}>
+            <Player />
           </div>
         </div>
       </section>
 
-      <section className={styles.newReleases}>
+      <section className={styles.section}>
         <h2 className={styles.sectionTitle}>New Releases</h2>
         <div className={styles.musicGrid}>
           {songs.map((track) => (
             <MusicCard key={track.id} track={track} />
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Top Artists</h2>
+        <div className={styles.artistList}>
+          {artists.slice(0, 4).map((artist, index) => (
+            <ArtistCard key={index} artist={artist} />
           ))}
         </div>
       </section>

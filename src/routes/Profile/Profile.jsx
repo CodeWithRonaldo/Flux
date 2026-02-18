@@ -1,16 +1,43 @@
-import React from "react";
 import styles from "./Profile.module.css";
 import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 import { songs } from "../../util/songList";
 import Button from "../../components/Button/Button";
-import { BlackCard, GlassCard } from "../../components/GlassCard/GlassCard";
-import { Copy, Upload, User2, Wallet } from "lucide-react";
+import { BlackCard } from "../../components/GlassCard/GlassCard";
+import { Copy, User2, Wallet, Music, Play, Users, Coins } from "lucide-react";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
-import { useNavigate } from "react-router-dom";
+import MusicCard from "../../components/MusicCard/MusicCard";
 
+const WALLET_ADDRESS = "0x1234...5678";
+
+const stats = [
+  {
+    icon: <Wallet size={18} absoluteStrokeWidth />,
+    label: "Account Balance",
+    value: "2.45 IOTA",
+  },
+  {
+    icon: <Coins size={18} absoluteStrokeWidth />,
+    label: "Flux Balance",
+    value: "1,240 FLX",
+  },
+  {
+    icon: <Music size={18} absoluteStrokeWidth />,
+    label: "Tracks",
+    value: songs.length,
+  },
+  {
+    icon: <Play size={18} absoluteStrokeWidth />,
+    label: "Total Streams",
+    value: "48.2K",
+  },
+  {
+    icon: <Users size={18} absoluteStrokeWidth />,
+    label: "Followers",
+    value: "3.1K",
+  },
+];
 
 const Profile = () => {
-    const navigate = useNavigate();
   return (
     <MusicWrapper songs={songs}>
       <BlackCard className={styles.profileCard}>
@@ -19,23 +46,22 @@ const Profile = () => {
             <div className={styles.profileInfoContainer}>
               <Jazzicon
                 diameter={100}
-                seed={jsNumberForAddress("0x1234...5678")}
+                seed={jsNumberForAddress(WALLET_ADDRESS)}
               />
               <div className={styles.profileInfo}>
                 <h1 className={styles.profileName}>John Doe</h1>
                 <p>
-                  <User2 size={24} absoluteStrokeWidth />
+                  <User2 size={16} absoluteStrokeWidth />
                   Artist
                 </p>
-                <p>
-                  <Wallet size={24} absoluteStrokeWidth />
-                  0x1234...5678
+                <p className={styles.walletRow}>
+                  <Wallet size={16} absoluteStrokeWidth />
+                  <span className={styles.walletAddress}>{WALLET_ADDRESS}</span>
                   <Copy
-                    size={18}
+                    size={14}
                     absoluteStrokeWidth
                     className={styles.copyIcon}
                   />
-                  <p>Move Balance: 10</p>
                 </p>
               </div>
             </div>
@@ -45,52 +71,37 @@ const Profile = () => {
               <Button variant="btn-ghost">Edit Profile</Button>
             </div>
           </div>
-          <div className={styles.uploadBtnContainer}>
-            <Button onClick={() => navigate("/upload")}>
-              <Upload size={24} /> Upload Track
-            </Button>
+
+          <div className={styles.bio}>
+            <p>
+              Electronic music producer and multi-instrumentalist. Blending
+              synthesized textures with organic rhythms to create immersive
+              soundscapes. Available for collaborations and licensing.
+            </p>
+          </div>
+
+          <div className={styles.statsRow}>
+            {stats.map((stat) => (
+              <div key={stat.label} className={styles.statItem}>
+                <div className={styles.statIcon}>{stat.icon}</div>
+                <div className={styles.statValue}>{stat.value}</div>
+                <div className={styles.statLabel}>{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </BlackCard>
 
-      <BlackCard>
-        <div className={styles.tracksContainer}>
-          <h2 className={styles.sectionTitle}>Your Tracks</h2>
-          <p className={styles.noTracks}>
-            You haven't uploaded any tracks yet.
-          </p>
-        </div>
-        {/* {isArtist ? (
-          <div>
-            <h3>Tracks</h3>
-            <h3>Likes</h3>
+      <section className={styles.section}>
+        <h2>Your Tracks</h2>
+        {songs.length > 0 && (
+          <div className={styles.musicGrid}>
+            {songs.map((track) => (
+              <MusicCard key={track.id} track={track} />
+            ))}
           </div>
-        ) : (
-          <div>
-            <h3>Liked Tracks</h3>
-          </div>
-        )} */}
-      </BlackCard>
-
-      {songs.length > 0 && (
-        <BlackCard className={styles.tracksContainer}>
-          <h2 className={styles.sectionTitle}>Your Tracks</h2>
-          {songs.map((song, index) => (
-            <div key={index} className={styles.trackCard}>
-              <div className={styles.trackInfo}>
-                <div>
-                  {index + 1}
-                  <img src={song.albumArt} alt={song.title} />
-                </div>
-              </div>
-              <div>
-                <h3>{song.title}</h3>
-                <h3>{song.artist}</h3>
-              </div>
-            </div>
-          ))}
-        </BlackCard>
-      )}
+        )}
+      </section>
     </MusicWrapper>
   );
 };

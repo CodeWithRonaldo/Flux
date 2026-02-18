@@ -12,6 +12,38 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
+.trackItem.active {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.active .title {
+  color: var(--color-primary);
+}
+
+.active .rank {
+  color: var(--color-primary);
+}
+
+.playingIcon {
+  color: var(--color-primary);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+}
+
 .rank {
   color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
