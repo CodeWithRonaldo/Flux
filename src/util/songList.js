@@ -14,6 +14,8 @@ export const songs = [
     albumArt: Music1,
     type: "premium",
     duration: "3:45",
+    price: "0.05",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
   },
   {
     id: 2,
@@ -22,6 +24,8 @@ export const songs = [
     albumArt: Music2,
     type: "standard",
     duration: "4:20",
+    price: "0.02",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   },
   {
     id: 3,
@@ -30,6 +34,8 @@ export const songs = [
     albumArt: Music3,
     type: "premium",
     duration: "5:10",
+    price: "0.08",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
   },
   {
     id: 4,
@@ -38,6 +44,8 @@ export const songs = [
     albumArt: Music1,
     type: "standard",
     duration: "3:45",
+    price: "0.05",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
   },
   {
     id: 5,
@@ -46,6 +54,8 @@ export const songs = [
     albumArt: Music2,
     type: "standard",
     duration: "4:20",
+    price: "0.02",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   },
   {
     id: 6,
@@ -54,6 +64,8 @@ export const songs = [
     albumArt: Music3,
     type: "standard",
     duration: "5:10",
+    price: "0.08",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
   },
   {
     id: 7,
@@ -62,6 +74,8 @@ export const songs = [
     albumArt: Music2,
     type: "premium",
     duration: "4:20",
+    price: "0.02",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
   },
   {
     id: 8,
@@ -70,6 +84,8 @@ export const songs = [
     albumArt: Music3,
     type: "standard",
     duration: "5:10",
+    price: "0.08",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   },
   {
     id: 9,
@@ -78,6 +94,8 @@ export const songs = [
     albumArt: Music3,
     type: "standard",
     duration: "5:10",
+    price: "0.08",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
   },
   {
     id: 10,
@@ -86,6 +104,8 @@ export const songs = [
     albumArt: Music2,
     type: "premium",
     duration: "4:20",
+    price: "0.02",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
   },
   {
     id: 11,
@@ -94,6 +114,8 @@ export const songs = [
     albumArt: Music3,
     type: "standard",
     duration: "5:10",
+    price: "0.08",
+    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   },
 ];
 

@@ -25,7 +25,7 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "play",
+        path: "play/:id",
         element: <Play />,
       },
       {

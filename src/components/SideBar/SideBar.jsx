@@ -1,6 +1,5 @@
 import {
   CircleUserRound,
-  Disc3Icon,
   HomeIcon,
   Mic,
   Music,
@@ -12,7 +11,6 @@ import { NavLink } from "react-router-dom";
 
 const Links = [
   { name: "Home", icon: HomeIcon, path: "/" },
-  { name: "Play", icon: Disc3Icon, path: "/play" },
   { name: "Music", icon: Music, path: "/library" },
   { name: "Radio", icon: Radio, path: "/radio" },
   { name: "Mic", icon: Mic, path: "/mic" },
@@ -26,7 +24,10 @@ const SideBar = () => {
       <div>
         {Links.map((link) => (
           <li key={link.name}>
-            <NavLink to={link.path}>
+            <NavLink
+              to={link.path}
+              className={({ isActive }) => (isActive ? styles.active : "")}
+            >
               <link.icon className={styles.icon} />
             </NavLink>
           </li>

@@ -1,70 +1,126 @@
 .profileContainer {
   display: flex;
   flex-direction: column;
-  align-items: left;
-  padding: 20px;
   color: white;
+  gap: 2rem;
 }
 
 .profileHeader {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 20px;
   justify-content: space-between;
 }
 
-
-.profileInfo{
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
+.profileInfo p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.profileName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
 
 .profileInfoContainer {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
-.profileActions{
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.sectionTitle{
-    color: white;
-    font-size: 18px;
-    font-weight: 600;
+.walletRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.noTracks{
-    color: white;
-    font-size: 14px;
-    font-style: italic;
-}
-.trackCard{
-    display: flex;
-    /* flex-direction: column; */
-    justify-content: left;
-    color: white;
-    gap: 12px;
-    padding: 12px ;
-}
-.trackInfo{
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.trackCard img{
-    width: 50px;
-    height: auto;
-    border-radius: 8px;
+.walletAddress {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: monospace;
 }
 
-.tracksContainer{
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+.copyIcon {
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.2s ease;
+}
+
+.copyIcon:hover {
+  color: var(--color-primary);
+}
+
+.profileActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bio {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+.statsRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.statItem {
+  flex: 1;
+  min-width: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.statIcon {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+}
+
+.statValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #fff;
+}
+
+.musicGrid {
+  padding: 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 1rem;
+  width: 100%;
 }
