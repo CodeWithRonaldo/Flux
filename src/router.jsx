@@ -6,6 +6,7 @@ import SignupPage from "./routes/SignupPage/SignupPage";
 import Play from "./routes/Play/Play";
 import Library from "./routes/Library/Library";
 import Upload from "./routes/Upload/Upload";
+import Profile from "./routes/Profile/Profile";
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         path: "upload",
         element: <Upload />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
       },
     ],
   },
