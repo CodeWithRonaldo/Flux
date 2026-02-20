@@ -1,0 +1,88 @@
+.content {
+  padding: 2rem;
+  text-align: center;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  font-family: var(--font);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-family: var(--font);
+}
+
+.roleCards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.roleCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.roleCard:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--color-primary);
+  transform: translateY(-4px);
+}
+
+.iconWrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.roleTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+  font-family: var(--font);
+}
+
+.roleDescription {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+  margin: 0;
+  flex: 1;
+  font-family: var(--font);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .roleCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+}

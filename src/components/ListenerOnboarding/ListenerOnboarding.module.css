@@ -1,0 +1,94 @@
+.content {
+  padding: 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  font-family: var(--font);
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  font-family: var(--font);
+}
+
+.genreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.genreButton {
+  position: relative;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font);
+}
+
+.genreButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.genreButton.selected {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  border-color: transparent;
+}
+
+.checkIcon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.skipButton {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+  font-family: var(--font);
+}
+
+.skipButton:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .genreGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+}

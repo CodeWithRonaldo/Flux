@@ -28,7 +28,7 @@ const TrackItem = ({ song, rank }) => {
       </div>
 
       <div className={styles.actions}>
-        <div className={styles.duration}>{song.duration}</div>
+        {/* <div className={styles.duration}>{song.duration}</div> */}
         <button className={styles.iconButton}>
           <Heart />
         </button>

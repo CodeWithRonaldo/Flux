@@ -42,7 +42,7 @@ const Library = () => {
       <div className={styles.libraryContainer}>
         <section className={styles.topSection}>
           <div className={styles.header}>
-            <h1 className={styles.libraryTitle}>Your Library</h1>
+            <h1 className={styles.libraryTitle}>Explore</h1>
             <SearchBar
               className={styles.searchBar}
               value={searchQuery}

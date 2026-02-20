@@ -1,0 +1,336 @@
+.content {
+  padding: 2rem;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Progress Indicator */
+.progressContainer {
+  margin-bottom: 2.5rem;
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+}
+
+.stepCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.stepCircle.active {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  border-color: transparent;
+  color: white;
+}
+
+.stepCircle.completed {
+  background: var(--color-primary);
+  border-color: transparent;
+  color: white;
+}
+
+.stepLine {
+  width: 60px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stepLine.completed {
+  background: var(--color-primary);
+}
+
+/* Step Content */
+.stepContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stepIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.stepTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  font-family: var(--font);
+}
+
+.stepSubtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 2rem 0;
+  font-family: var(--font);
+}
+
+/* Form Elements */
+.formGroup {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.label {
+  display: block;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-family: var(--font);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.95rem;
+  font-family: var(--font);
+  transition: all 0.2s ease;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.charCount {
+  display: block;
+  text-align: right;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.25rem;
+}
+
+/* Upload */
+.uploadContainer {
+  width: 100%;
+  max-width: 400px;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadBox {
+  display: block;
+  width: 100%;
+  min-height: 200px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.uploadBox:hover {
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.uploadPrompt,
+.uploadSuccess {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.uploadSuccess {
+  color: var(--color-primary);
+}
+
+.uploadPrompt p,
+.uploadSuccess p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.uploadPrompt span {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Genres */
+.genreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.genreButton {
+  position: relative;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font);
+}
+
+.genreButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.genreButton.selected {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  border-color: transparent;
+}
+
+.checkIcon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+/* Wallet */
+.walletContainer {
+  width: 100%;
+  max-width: 400px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.walletPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.walletPrompt p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+}
+
+.helperText {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.helperText a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.helperText a:hover {
+  text-decoration: underline;
+}
+
+.walletConnected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.successIcon {
+  color: var(--color-primary);
+}
+
+.walletConnected p {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+}
+
+.walletAddress {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+/* Navigation */
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .stepLine {
+    width: 40px;
+  }
+  
+  .stepCircle {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .stepTitle {
+    font-size: 1.5rem;
+  }
+  
+  .genreGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
