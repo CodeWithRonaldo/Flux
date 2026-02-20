@@ -39,7 +39,11 @@ const stats = [
 
 const Profile = () => {
   return (
-    <MusicWrapper songs={songs}>
+    <MusicWrapper
+      songs={songs}
+      showTrackList={false}
+      showPlaylistSelector={true}
+    >
       <BlackCard className={styles.profileCard}>
         <div className={styles.profileContainer}>
           <div className={styles.profileHeader}>

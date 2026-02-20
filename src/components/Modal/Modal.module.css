@@ -13,9 +13,25 @@
 }
 
 .modal {
-  max-width: 500px;
   width: 90%;
   position: relative;
+}
+
+/* Size variants */
+.small {
+  max-width: 400px;
+}
+
+.medium {
+  max-width: 500px;
+}
+
+.large {
+  max-width: 800px;
+}
+
+.xlarge {
+  max-width: 1000px;
 }
 
 .closeButton {

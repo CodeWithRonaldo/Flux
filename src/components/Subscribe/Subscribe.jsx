@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BlackCard } from "../GlassCard/GlassCard";
 import Modal from "../Modal/Modal";
-import { AudioWaveform, Music, Sparkles, Star } from "lucide-react";
+import { AudioWaveform, Music, Sparkles, Star, CheckCircle, Loader2 } from "lucide-react";
 import Button from "../Button/Button";
 import styles from "./Subscribe.module.css";
 
@@ -10,8 +10,11 @@ const Subscribe = ({ isOpen, OnClose }) => {
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = () => {
-    setIsLoading(false);
-    setSuccess(true);
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setSuccess(true);
+    }, 1500);
   };
 
   const handleClose = () => {
@@ -37,10 +40,14 @@ const Subscribe = ({ isOpen, OnClose }) => {
     },
   ];
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal isOpen={isOpen} onClose={handleClose} size="medium">
       {success ? (
         <div className={styles.successContainer}>
-          <h2 className={styles.successTitle}>""</h2>{" "}
+          <CheckCircle size={80} color="var(--color-primary)" />
+          <h2 className={styles.successTitle}>Welcome to Premium!</h2>
+          <p className={styles.description}>
+            You now have access to all premium features. Enjoy unlimited ad-free music!
+          </p>
         </div>
       ) : (
         <div className={styles.container}>
@@ -59,13 +66,15 @@ const Subscribe = ({ isOpen, OnClose }) => {
             {perks.map((perk, index) => (
               <li key={index} className={styles.perkItem}>
                 {perk.icon}
-                <h3 className={styles.perkTitle}>{perk.title}</h3>
-                <p className={styles.perkDescription}>{perk.description}</p>
+                <div>
+                  <h3 className={styles.perkTitle}>{perk.title}</h3>
+                  <p className={styles.perkDescription}>{perk.description}</p>
+                </div>
               </li>
             ))}
           </ul>
-          <Button onClick={handleSubmit} className={styles.subscribeButton}>
-            {isLoading ? <LoaderCircle /> : "Subscribe Now"}
+          <Button onClick={handleSubmit} className={styles.subscribeButton} disabled={isLoading}>
+            {isLoading ? <Loader2 className={styles.spinner} size={20} /> : "Subscribe Now"}
           </Button>
         </div>
       )}

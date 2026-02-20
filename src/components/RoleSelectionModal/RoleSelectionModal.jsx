@@ -6,11 +6,11 @@ import Button from "../Button/Button";
 
 const RoleSelectionModal = ({ isOpen, onSelectRole}) => {
   return (
-    <Modal isOpen={isOpen} onClose={() => onSelectRole(null)}>
+    <Modal isOpen={isOpen} onClose={() => onSelectRole(null)} size="large">
       <div className={styles.content}>
         <div className={styles.header}>
           <h1 className={styles.title}>Welcome to Flux</h1>
-          <p className={styles.subtitle}>How will you use Flux today</p>
+          <p className={styles.subtitle}>How will you use Flux today?</p>
         </div>
         <div className={styles.roleCards}>
           <div
@@ -21,7 +21,7 @@ const RoleSelectionModal = ({ isOpen, onSelectRole}) => {
               <Headphones size={48} />
             </div>
             <h2 className={styles.roleTitle}>I want to listen</h2>
-            <p>
+            <p className={styles.roleDescription}>
               Discover and enjoy music from artists around the world. Purchase
               tracks and build your collection.
             </p>
@@ -35,11 +35,11 @@ const RoleSelectionModal = ({ isOpen, onSelectRole}) => {
               <Music size={48} />
             </div>
             <h2 className={styles.roleTitle}>I want to create</h2>
-            <p>
+            <p className={styles.roleDescription}>
               Upload your music, set your prices, and earn from your art.
               Connect with fans worldwide.
             </p>
-            <Button variant="secondary">Continue as Artist</Button>
+            <Button>Continue as Artist</Button>
           </div>
         </div>
       </div>
