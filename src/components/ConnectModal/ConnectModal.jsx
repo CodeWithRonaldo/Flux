@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { Wallet } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 
-const ConnectModal = ({ isOpen, onClose }) => {
+const ConnectModal = ({ isOpen, onClose, onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("submitted");
@@ -39,13 +39,13 @@ const ConnectModal = ({ isOpen, onClose }) => {
           <Button variant="btn-ghost" icon={<FcGoogle />}>
             Sign in with Google
           </Button>
-          <Button variant="btn-ghost" icon={<Wallet />}>
-            Connect Wallet
+          <Button variant="btn-ghost" icon={<Wallet />} onClick={onSubmit}>
+            Iota Wallet
           </Button>
         </div>
-        <p className={styles.signup}>
+        {/* <p className={styles.signup}>
           Don't have an account? <Link to="/signup">Sign Up</Link>
-        </p>
+        </p> */}
       </Form>
     </Modal>
   );

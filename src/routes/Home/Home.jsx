@@ -12,44 +12,11 @@ import ArtistOnboarding from "../../components/ArtistOnboarding/ArtistOnboarding
 import Subscribe from "../../components/Subscribe/Subscribe";
 
 const Home = () => {
-  const [showRoleModal, setShowRoleModal] = useState(true);
-  const [ShowlistenerOnboarding, setShowListenerOnboarding] = useState(false);
-  const [showArtistOnboarding, setShowArtistOnboarding] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const handleRoleSelect = (role) => {
-    console.log("User selected: ", role);
-    setShowRoleModal(false);
-
-    if (role === "listener") {
-      setShowListenerOnboarding(true);
-    } else if (role === "artist") {
-      setShowArtistOnboarding(true);
-    }
-  };
-
-  const handleCloseListenerOnboardingComplete = () => {
-    setShowListenerOnboarding(false);
-  };
-  const handleArtistOnboardingComplete = (data) => {
-    console.log("Artist onboarding complete:", data);
-    setShowArtistOnboarding(false);
-  };
 
   const { currentTrack } = useAudio();
   return (
     <div className={styles.homeContainer}>
-      <RoleSelectionModal
-        isOpen={showRoleModal}
-        onSelectRole={handleRoleSelect}
-      />
-      <ListenerOnboarding
-        isOpen={ShowlistenerOnboarding}
-        onComplete={handleCloseListenerOnboardingComplete}
-      />
-      <ArtistOnboarding
-        isOpen={showArtistOnboarding}
-        onComplete={handleArtistOnboardingComplete}
-      />
       <Subscribe isOpen={isOpen} OnClose={() => setIsOpen(false)} />
 
       <section className={styles.heroContainer}>

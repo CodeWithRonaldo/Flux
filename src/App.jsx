@@ -6,14 +6,23 @@ import BottomPlayer from "./components/BottomPlayer/BottomPlayer";
 import { useAudio } from "./hooks/useAudio";
 import ConnectModal from "./components/ConnectModal/ConnectModal";
 import { useState } from "react";
+import RoleSelectionModal from "./components/RoleSelectionModal/RoleSelectionModal";
 
 function App() {
   const location = useLocation();
   const { currentTrack, isBottomPlayerVisible } = useAudio();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   const handleConnectClick = () => {
     setIsConnectModalOpen(true);
+  };
+
+  const handleConnect = () => {
+    setTimeout(() => {
+      setIsConnectModalOpen(false);
+      setIsConnected(true);
+    }, 1000);
   };
 
   const isHome = location.pathname === "/";
@@ -33,6 +42,11 @@ function App() {
       <ConnectModal
         isOpen={isConnectModalOpen}
         onClose={() => setIsConnectModalOpen(false)}
+        onSubmit={handleConnect}
+      />
+      <RoleSelectionModal
+        isOpen={isConnected}
+        onClose={() => setIsConnected(false)}
       />
     </div>
   );
