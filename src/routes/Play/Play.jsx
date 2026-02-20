@@ -10,17 +10,23 @@ import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 import { songs, artists } from "../../util/songList";
 import MusicCard from "../../components/MusicCard/MusicCard";
 import PurchaseModal from "../../components/PurchaseModal/PurchaseModal";
+import AddToPlaylistModal from "../../components/AddToPlaylistModal/AddToPlaylistModal";
+import PlayListModal from "../../components/PlayListModal/PlayListModal";
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useAudio } from "../../hooks/useAudio";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
+import { usePlaylist } from "../../hooks/usePlaylist";
 
 const Play = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentTrack, playTrack } = useAudio();
+  const { createPlaylist, setCurrentPlaylist } = usePlaylist();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAddToPlaylistOpen, setIsAddToPlaylistOpen] = useState(false);
+  const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
 
   // Sync context with URL param on mount or URL change
   useEffect(() => {
@@ -44,6 +50,22 @@ const Play = () => {
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);
+
+  const handleOpenAddToPlaylist = () => {
+    setIsAddToPlaylistOpen(true);
+  };
+
+  const handleCreatePlaylistFromModal = () => {
+    setIsAddToPlaylistOpen(false);
+    setIsCreatePlaylistOpen(true);
+  };
+
+  const handleCreatePlaylist = (name) => {
+    const newPlaylistId = createPlaylist(name);
+    setCurrentPlaylist(newPlaylistId);
+    setIsCreatePlaylistOpen(false);
+    setIsAddToPlaylistOpen(true);
+  };
 
   return (
     <MusicWrapper songs={songs} playlist={true}>
@@ -82,7 +104,11 @@ const Play = () => {
             </div>
 
             <div className={styles.tooltipWrapper}>
-              <Plus size={30} className={styles.icons} />
+              <Plus
+                size={30}
+                className={styles.icons}
+                onClick={handleOpenAddToPlaylist}
+              />
               <span className={styles.tooltip}>Add to playlist</span>
             </div>
 
@@ -138,6 +164,19 @@ const Play = () => {
         track={songToShow}
         isOpen={isPurchaseModalOpen}
         onClose={handleClosePurchaseModal}
+      />
+
+      <AddToPlaylistModal
+        isOpen={isAddToPlaylistOpen}
+        onClose={() => setIsAddToPlaylistOpen(false)}
+        song={songToShow}
+        onCreatePlaylist={handleCreatePlaylistFromModal}
+      />
+
+      <PlayListModal
+        isOpen={isCreatePlaylistOpen}
+        onClose={() => setIsCreatePlaylistOpen(false)}
+        onCreate={handleCreatePlaylist}
       />
     </MusicWrapper>
   );

@@ -67,6 +67,12 @@
   font-size: 0.85rem;
 }
 
+.playlistWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .playlistItem {
   display: flex;
   align-items: center;
@@ -120,6 +126,19 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+.actionButtons {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.playlistItem:hover .actionButtons {
+  opacity: 1;
+}
+
+.expandButton,
+.editButton,
 .deleteButton {
   background: none;
   border: none;
@@ -129,12 +148,25 @@
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
-  opacity: 0;
   border-radius: 6px;
 }
 
-.playlistItem:hover .deleteButton {
+.expandButton {
   opacity: 1;
+}
+
+.expandButton:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.chevronExpanded {
+  transform: rotate(180deg);
+}
+
+.editButton:hover {
+  color: var(--color-primary);
+  background: rgba(124, 58, 237, 0.1);
 }
 
 .deleteButton:hover {
@@ -182,4 +214,80 @@
 
 .playlistList::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* Expanded Content */
+.expandedContent {
+  padding: 0.5rem 1rem 1rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  margin-top: -8px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.emptyPlaylist {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.emptyPlaylist p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.songsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.songItemWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.songItemWrapper > :first-child {
+  flex: 1;
+}
+
+.removeSongButton {
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  opacity: 0;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.songItemWrapper:hover .removeSongButton {
+  opacity: 1;
+}
+
+.removeSongButton:hover {
+  background: rgba(255, 68, 68, 0.2);
+  border-color: rgba(255, 68, 68, 0.4);
+  transform: scale(1.05);
 }

@@ -1,7 +1,10 @@
+import { useState } from "react";
 import styles from "./PlayListSelector.module.css";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit3, ChevronDown, X } from "lucide-react";
 import { usePlaylist } from "../../hooks/usePlaylist";
 import { BlackCard } from "../GlassCard/GlassCard";
+import RenamePlaylistModal from "../RenamePlaylistModal/RenamePlaylistModal";
+import TrackItem from "../TrackItem/TrackItem";
 
 const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
   const {
@@ -9,10 +12,21 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
     currentPlaylist,
     setCurrentPlaylist,
     deletePlaylist,
+    renamePlaylist,
+    removeSongFromPlaylist,
   } = usePlaylist();
+
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [playlistToRename, setPlaylistToRename] = useState(null);
+  const [expandedPlaylist, setExpandedPlaylist] = useState(null);
 
   const handleSelect = (playlistId) => {
     setCurrentPlaylist(playlistId);
+  };
+
+  const handleToggleExpand = (e, playlistId) => {
+    e.stopPropagation();
+    setExpandedPlaylist(expandedPlaylist === playlistId ? null : playlistId);
   };
 
   const handleDelete = (e, playlistId) => {
@@ -20,6 +34,24 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
     if (window.confirm("Are you sure you want to delete this playlist?")) {
       deletePlaylist(playlistId);
     }
+  };
+
+  const handleRenameClick = (e, playlist) => {
+    e.stopPropagation();
+    setPlaylistToRename(playlist);
+    setRenameModalOpen(true);
+  };
+
+  const handleRename = (newName) => {
+    if (playlistToRename) {
+      renamePlaylist(playlistToRename.id, newName);
+      setPlaylistToRename(null);
+    }
+  };
+
+  const handleRemoveSong = (e, playlistId, songId) => {
+    e.stopPropagation();
+    removeSongFromPlaylist(playlistId, songId);
   };
 
   return (
@@ -42,29 +74,79 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
             <span>Create your first playlist to get started</span>
           </div>
         ) : (
-          playlists.map((playlist) => (
-            <div
-              key={playlist.id}
-              className={`${styles.playlistItem} ${
-                currentPlaylist === playlist.id ? styles.active : ""
-              }`}
-              onClick={() => handleSelect(playlist.id)}
-            >
-              <div className={styles.playlistInfo}>
-                <span className={styles.playlistName}>{playlist.name}</span>
-                <span className={styles.songCount}>
-                  {playlist.songs.length} songs
-                </span>
+          playlists.map((playlist) => {
+            const isExpanded = expandedPlaylist === playlist.id;
+            return (
+              <div key={playlist.id} className={styles.playlistWrapper}>
+                <div
+                  className={`${styles.playlistItem} ${
+                    currentPlaylist === playlist.id ? styles.active : ""
+                  }`}
+                  onClick={() => handleSelect(playlist.id)}
+                >
+                  <div className={styles.playlistInfo}>
+                    <span className={styles.playlistName}>{playlist.name}</span>
+                    <span className={styles.songCount}>
+                      {playlist.songs.length} songs
+                    </span>
+                  </div>
+                  <div className={styles.actionButtons}>
+                    <button
+                      className={styles.expandButton}
+                      onClick={(e) => handleToggleExpand(e, playlist.id)}
+                      title={isExpanded ? "Collapse" : "Expand"}
+                    >
+                      <ChevronDown
+                        size={16}
+                        className={isExpanded ? styles.chevronExpanded : ""}
+                      />
+                    </button>
+                    <button
+                      className={styles.editButton}
+                      onClick={(e) => handleRenameClick(e, playlist)}
+                      title="Rename playlist"
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                    <button
+                      className={styles.deleteButton}
+                      onClick={(e) => handleDelete(e, playlist.id)}
+                      title="Delete playlist"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div className={styles.expandedContent}>
+                    {playlist.songs.length === 0 ? (
+                      <div className={styles.emptyPlaylist}>
+                        <p>No songs in this playlist yet</p>
+                      </div>
+                    ) : (
+                      <div className={styles.songsList}>
+                        {playlist.songs.map((song, index) => (
+                          <div key={song.id} className={styles.songItemWrapper}>
+                            <TrackItem song={song} rank={index + 1} />
+                            <button
+                              className={styles.removeSongButton}
+                              onClick={(e) =>
+                                handleRemoveSong(e, playlist.id, song.id)
+                              }
+                              title="Remove from playlist"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-              <button
-                className={styles.deleteButton}
-                onClick={(e) => handleDelete(e, playlist.id)}
-                title="Delete playlist"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -72,6 +154,16 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
         <Plus size={18} />
         <span>Create New Playlist</span>
       </button>
+
+      <RenamePlaylistModal
+        isOpen={renameModalOpen}
+        onClose={() => {
+          setRenameModalOpen(false);
+          setPlaylistToRename(null);
+        }}
+        onRename={handleRename}
+        currentName={playlistToRename?.name || ""}
+      />
     </BlackCard>
   );
 };
