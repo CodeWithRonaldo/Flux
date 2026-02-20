@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GlassCard } from "../../components/GlassCard/GlassCard";
+import { BlackCard } from "../../components/GlassCard/GlassCard";
 import Form from "../../components/Form/Form";
 import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
@@ -34,7 +34,7 @@ const Upload = () => {
 
   return (
     <div className={styles.UploadContainer}>
-      <GlassCard className={styles.uploadHeader}>
+      <BlackCard className={styles.uploadHeader}>
         <div className={styles.headerContent}>
           <div>Creator Studio</div>
           <h1>Release New Music</h1>
@@ -59,10 +59,10 @@ const Upload = () => {
             </div>
           ))}
         </div>
-      </GlassCard>
+      </BlackCard>
       <div className={styles.formContainer}>
         <div className={styles.uploadForm}>
-          <GlassCard className={styles.formCard}>
+          <BlackCard className={styles.formCard}>
             <Form
               title={"Media Asset"}
               subtitle={"Upload your high-quality audio and cover art."}
@@ -215,7 +215,7 @@ const Upload = () => {
                       onChange={(e) => setPrice(e.target.value)}
                     />
                   </div>
-                  <GlassCard className={styles.revenueDistribution}>
+                  <BlackCard className={styles.revenueDistribution}>
                     <div className={styles.header}>
                       <h4>Revenue Distribution</h4>
                       <span>0% Left</span>
@@ -234,7 +234,7 @@ const Upload = () => {
                         Add Collaborator
                       </Button>
                     </div>
-                  </GlassCard>
+                  </BlackCard>
                 </>
               )}
 
@@ -261,6 +261,13 @@ const Upload = () => {
                     </p>
                     <div>
                       <p>REVENUE SPLITTING</p>
+                      <div className={styles.tinySplitsList}>
+                        <div className={styles.tinySplit}>
+                          <strong>Artist</strong>
+                          <code>0x123456...abcdef</code>
+                          <span>100%</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -298,26 +305,26 @@ const Upload = () => {
                 )}
               </div>
             </Form>
-          </GlassCard>
+          </BlackCard>
         </div>
 
         <div className={styles.uploadFormAside}>
-          <GlassCard className={styles.aside}>
+          <BlackCard className={styles.aside}>
             <h3>Gas Estimates</h3>
             <p>
               You need approx. 0.1 IOTA for transaction fees on the network.
             </p>
             <Button variant="btn-secondary">Get Testnet Token</Button>
-          </GlassCard>
+          </BlackCard>
 
-          <GlassCard className={styles.aside}>
+          <BlackCard className={styles.aside}>
             <h3>Quick Guidelines</h3>
             <ul>
               <li>Use high-quality WAV or FLAC for premium audio.</li>
               <li>Artwork should be at least 1500x1500px for best results.</li>
               <li>Ensure your revenue splits add up to exactly 100%.</li>
             </ul>
-          </GlassCard>
+          </BlackCard>
         </div>
       </div>
     </div>

@@ -407,6 +407,41 @@
   width: fit-content;
 }
 
+.tinySplitsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.tinySplit {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.tinySplit strong {
+  font-size: 13px;
+  width: 100px;
+  color: white;
+}
+
+.tinySplit code {
+  flex: 1;
+  font-size: 12px;
+  color: white;
+}
+
+.tinySplit span {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-secondary);
+}
+
 .buttonContainer {
   width: 100%;
   display: flex;

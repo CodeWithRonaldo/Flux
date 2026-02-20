@@ -4,7 +4,7 @@ import ArtistCard from "../../components/ArtistCard/ArtistCard";
 import Button from "../../components/Button/Button";
 import Player from "../../components/Player/Player";
 import TrackList from "../../components/TrackList/TrackList";
-import { Ellipsis, Heart, Menu, Plus } from "lucide-react";
+import { BanknoteArrowUp, Ellipsis, Heart, Menu, Plus } from "lucide-react";
 
 import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 import { songs, artists } from "../../util/songList";
@@ -13,12 +13,14 @@ import PurchaseModal from "../../components/PurchaseModal/PurchaseModal";
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useAudio } from "../../hooks/useAudio";
+import { BlackCard } from "../../components/GlassCard/GlassCard";
 
 const Play = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentTrack, playTrack } = useAudio();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Sync context with URL param on mount or URL change
   useEffect(() => {
@@ -65,10 +67,40 @@ const Play = () => {
             <p className={styles.nowPlayingArtist}>{songToShow.artist}</p>
           </div>
           <div className={styles.nowPlayingActions}>
-            <Ellipsis size={30} className={styles.icons} />
-            <Heart size={30} className={styles.icons} />
-            <Plus size={30} className={styles.icons} />
+            <div className={styles.tooltipWrapper}>
+              <Ellipsis
+                size={30}
+                className={styles.icons}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              />
+              <span className={styles.tooltip}>More options</span>
+            </div>
+
+            <div className={styles.tooltipWrapper}>
+              <Heart size={30} className={styles.icons} />
+              <span className={styles.tooltip}>Like track</span>
+            </div>
+
+            <div className={styles.tooltipWrapper}>
+              <Plus size={30} className={styles.icons} />
+              <span className={styles.tooltip}>Add to playlist</span>
+            </div>
+
+            <div className={styles.tooltipWrapper}>
+              <BanknoteArrowUp size={30} className={styles.icons} />
+              <span className={styles.tooltip}>Boost music</span>
+            </div>
           </div>
+          {isMenuOpen && (
+            <BlackCard className={styles.menuCard}>
+              <ul>
+                <li>Edit Track</li>
+                <li>Remove From Sale</li>
+                <li>Boost Music</li>
+                <li>Delete Track</li>
+              </ul>
+            </BlackCard>
+          )}
           <div className={styles.purchaseContainer}>
             <div className={styles.priceTag}>
               <span className={styles.priceLabel}>Price</span>
