@@ -21,7 +21,7 @@ const PlayListModal = ({ isOpen, onClose, onCreate }) => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleCreate();
     }
@@ -54,10 +54,7 @@ const PlayListModal = ({ isOpen, onClose, onCreate }) => {
           </div>
 
           <div className={styles.actions}>
-            <Button
-              variant="secondary"
-              onClick={handleClose}
-            >
+            <Button variant="btn-ghost" onClick={handleClose}>
               Cancel
             </Button>
             <Button onClick={handleCreate} disabled={!playlistName.trim()}>

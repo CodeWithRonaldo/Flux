@@ -13,6 +13,7 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  gap: 0.5rem;
   transition: background-color 0.3s ease;
 }
 
@@ -26,7 +27,6 @@
 }
 
 .icon {
-  margin-right: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;

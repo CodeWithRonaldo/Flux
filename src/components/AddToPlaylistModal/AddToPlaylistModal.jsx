@@ -3,6 +3,7 @@ import Modal from "../Modal/Modal";
 import styles from "./AddToPlaylistModal.module.css";
 import { ListPlus, Check, Plus } from "lucide-react";
 import { usePlaylist } from "../../hooks/usePlaylist";
+import Button from "../Button/Button";
 
 const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
   const { playlists, addSongToPlaylist } = usePlaylist();
@@ -10,11 +11,10 @@ const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
 
   const handleAddToPlaylist = (playlistId) => {
     addSongToPlaylist(playlistId, song);
-    setAddedPlaylists(prev => new Set([...prev, playlistId]));
+    setAddedPlaylists((prev) => new Set([...prev, playlistId]));
 
-    // Remove from added set after animation
     setTimeout(() => {
-      setAddedPlaylists(prev => {
+      setAddedPlaylists((prev) => {
         const newSet = new Set(prev);
         newSet.delete(playlistId);
         return newSet;
@@ -23,7 +23,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
   };
 
   const isSongInPlaylist = (playlist) => {
-    return playlist.songs.some(s => s.id === song?.id);
+    return playlist.songs.some((s) => s.id === song?.id);
   };
 
   const handleClose = () => {
@@ -34,13 +34,15 @@ const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="medium">
       <div className={styles.container}>
-        <div className={styles.iconWrapper}>
-          <ListPlus size={40} />
+        <div className={styles.playlistHeader}>
+          <div className={styles.iconWrapper}>
+            <ListPlus size={40} />
+          </div>
+          <h2 className={styles.title}>Add to Playlist</h2>
+          <p className={styles.subtitle}>
+            Choose a playlist to add "{song?.title}"
+          </p>
         </div>
-        <h2 className={styles.title}>Add to Playlist</h2>
-        <p className={styles.subtitle}>
-          Choose a playlist to add "{song?.title}"
-        </p>
 
         <div className={styles.playlistList}>
           {playlists.length === 0 ? (
@@ -59,7 +61,9 @@ const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
                   className={`${styles.playlistItem} ${
                     isInPlaylist ? styles.inPlaylist : ""
                   } ${justAdded ? styles.justAdded : ""}`}
-                  onClick={() => !isInPlaylist && handleAddToPlaylist(playlist.id)}
+                  onClick={() =>
+                    !isInPlaylist && handleAddToPlaylist(playlist.id)
+                  }
                 >
                   <div className={styles.playlistInfo}>
                     <span className={styles.playlistName}>{playlist.name}</span>
@@ -89,10 +93,14 @@ const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
           )}
         </div>
 
-        <button className={styles.createButton} onClick={onCreatePlaylist}>
-          <Plus size={18} />
-          <span>Create New Playlist</span>
-        </button>
+        <Button
+          className={styles.createButton}
+          variant="btn-ghost"
+          onClick={onCreatePlaylist}
+          icon={<Plus size={18} />}
+        >
+          Create New Playlist
+        </Button>
       </div>
     </Modal>
   );

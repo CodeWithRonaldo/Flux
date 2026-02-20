@@ -27,7 +27,7 @@ const RenamePlaylistModal = ({ isOpen, onClose, onRename, currentName }) => {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleRename();
     }
@@ -40,9 +40,7 @@ const RenamePlaylistModal = ({ isOpen, onClose, onRename, currentName }) => {
           <Edit3 size={40} />
         </div>
         <h2 className={styles.title}>Rename Playlist</h2>
-        <p className={styles.subtitle}>
-          Update the name of your playlist
-        </p>
+        <p className={styles.subtitle}>Update the name of your playlist</p>
 
         <div className={styles.form}>
           <div className={styles.inputGroup}>
@@ -60,13 +58,15 @@ const RenamePlaylistModal = ({ isOpen, onClose, onRename, currentName }) => {
           </div>
 
           <div className={styles.actions}>
-            <Button
-              variant="secondary"
-              onClick={handleClose}
-            >
+            <Button variant="btn-ghost" onClick={handleClose}>
               Cancel
             </Button>
-            <Button onClick={handleRename} disabled={!playlistName.trim() || playlistName.trim() === currentName}>
+            <Button
+              onClick={handleRename}
+              disabled={
+                !playlistName.trim() || playlistName.trim() === currentName
+              }
+            >
               Rename
             </Button>
           </div>

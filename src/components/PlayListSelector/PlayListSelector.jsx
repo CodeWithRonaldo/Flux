@@ -5,6 +5,7 @@ import { usePlaylist } from "../../hooks/usePlaylist";
 import { BlackCard } from "../GlassCard/GlassCard";
 import RenamePlaylistModal from "../RenamePlaylistModal/RenamePlaylistModal";
 import TrackItem from "../TrackItem/TrackItem";
+import Button from "../Button/Button";
 
 const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
   const {
@@ -138,6 +139,7 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
                             >
                               <X size={16} />
                             </button>
+                            rgba(124, 58, 237, 0.2);
                           </div>
                         ))}
                       </div>
@@ -150,10 +152,10 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
         )}
       </div>
 
-      <button className={styles.createButton} onClick={onCreateClick}>
+      <Button variant="btn-ghost" onClick={onCreateClick}>
         <Plus size={18} />
         <span>Create New Playlist</span>
-      </button>
+      </Button>
 
       <RenamePlaylistModal
         isOpen={renameModalOpen}

@@ -21,10 +21,10 @@
 }
 
 .addButton {
-  background: rgba(124, 58, 237, 0.1);
-  border: 1px solid rgba(124, 58, 237, 0.3);
+  background: transparent;
+  border: 1px solid white;
   border-radius: 8px;
-  color: var(--color-primary);
+  color: white;
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
@@ -36,8 +36,9 @@
 }
 
 .addButton:hover {
-  background: rgba(124, 58, 237, 0.2);
-  border-color: rgba(124, 58, 237, 0.5);
+  background: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
   transform: scale(1.05);
 }
 
@@ -98,7 +99,7 @@
 }
 
 .playlistItem.active::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
