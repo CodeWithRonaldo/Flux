@@ -1,0 +1,135 @@
+loginCard {
+  width: 480px;
+  height: fit-content;
+  padding: 5rem 20px 20px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid white;
+  border-radius: 8px;
+  background: transparent;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.inputGroup input::placeholder {
+  color: white;
+}
+
+.inputGroup input:focus {
+  background: transparent;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.remember input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.remember label {
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.loginButton {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.loginButton button {
+  width: 100%;
+}
+
+.forgotPassword {
+  text-align: center;
+  margin-top: 1rem;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.forgotPassword:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.or {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #928e8e;
+  font-size: 0.9rem;
+  position: relative;
+}
+
+.or::before {
+  content: "";
+  display: block;
+  width: 45%;
+  height: 1px;
+  background-color: #928e8e;
+  position: absolute;
+  top: 50%;
+  left: 0;
+}
+
+.or::after {
+  content: "";
+  display: block;
+  width: 45%;
+  height: 1px;
+  background-color: #928e8e;
+  position: absolute;
+  top: 50%;
+  right: 0;
+}
+
+.socialLogin {
+  margin: 1.5rem 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signup {
+  text-align: center;
+  margin-top: 1rem;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.signup a {
+  text-decoration: none;
+  font-weight: 500;
+  color: white;
+  transition: color 0.3s ease;
+}
+
+.signup a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}

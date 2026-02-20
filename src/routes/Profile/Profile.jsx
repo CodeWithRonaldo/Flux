@@ -3,7 +3,16 @@ import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 import { songs } from "../../util/songList";
 import Button from "../../components/Button/Button";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
-import { Copy, User2, Wallet, Music, Play, Users, Coins } from "lucide-react";
+import {
+  Copy,
+  User2,
+  Wallet,
+  Music,
+  Play,
+  Users,
+  Coins,
+  Plus,
+} from "lucide-react";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import MusicCard from "../../components/MusicCard/MusicCard";
 
@@ -86,6 +95,9 @@ const Profile = () => {
                 <div className={styles.statIcon}>{stat.icon}</div>
                 <div className={styles.statValue}>{stat.value}</div>
                 <div className={styles.statLabel}>{stat.label}</div>
+                {stat.label.includes("Flux") && (
+                  <Plus size={18} className={styles.addStatIcon} />
+                )}
               </div>
             ))}
           </div>
