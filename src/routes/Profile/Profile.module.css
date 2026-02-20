@@ -100,7 +100,7 @@
 
 .addStatIcon {
   position: absolute;
-  bottom: 8px;
+  top: 40px;
   right: 8px;
   color: #dbe9e1;
   transition: color 0.2s ease;

@@ -75,7 +75,7 @@
   position: absolute;
   top: 60%;
   left: 0;
-  border: 1px solid rgba(231, 225, 225, 0.6);
+  border: 1px solid rgba(225, 225, 225, 0.1);
 }
 
 .menuCard ul {
@@ -99,7 +99,7 @@
 
 .menuCard ul li:last-child {
   color: rgba(255, 59, 59, 0.8);
-  border-top: 1px solid rgba(126, 124, 124, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1rem;
 }
 .menuCard ul li:last-child:hover {

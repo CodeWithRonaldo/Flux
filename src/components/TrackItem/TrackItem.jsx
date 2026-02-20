@@ -8,10 +8,7 @@ const TrackItem = ({ song, rank }) => {
   const isActuallyPlaying = isCurrent && isPlaying;
 
   return (
-    <div
-      className={`${styles.trackItem} ${isCurrent ? styles.active : ""}`}
-      onClick={() => playTrack(song)}
-    >
+    <div className={`${styles.trackItem} ${isCurrent ? styles.active : ""}`}>
       <div className={styles.rank}>
         {isActuallyPlaying ? (
           <Volume2 className={styles.playingIcon} size={16} />
@@ -19,7 +16,7 @@ const TrackItem = ({ song, rank }) => {
           rank
         )}
       </div>
-      <div className={styles.songInfo}>
+      <div className={styles.songInfo} onClick={() => playTrack(song)}>
         <img src={song.albumArt} alt={song.title} className={styles.albumArt} />
         <div className={styles.songDetails}>
           <div className={styles.title}>{song.title}</div>

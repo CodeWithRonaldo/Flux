@@ -5,10 +5,8 @@ import Button from "../../components/Button/Button";
 import Player from "../../components/Player/Player";
 import TrackList from "../../components/TrackList/TrackList";
 import { BanknoteArrowUp, Ellipsis, Heart, Menu, Plus } from "lucide-react";
-
 import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 import { songs, artists } from "../../util/songList";
-import MusicCard from "../../components/MusicCard/MusicCard";
 import PurchaseModal from "../../components/PurchaseModal/PurchaseModal";
 import AddToPlaylistModal from "../../components/AddToPlaylistModal/AddToPlaylistModal";
 import PlayListModal from "../../components/PlayListModal/PlayListModal";
@@ -17,6 +15,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAudio } from "../../hooks/useAudio";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
 import { usePlaylist } from "../../hooks/usePlaylist";
+import TipModal from "../../components/TipModal/TipModal";
+import BoostModal from "../../components/BoostModal/BoostModal";
 
 const Play = () => {
   const { id } = useParams();
@@ -27,6 +27,8 @@ const Play = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddToPlaylistOpen, setIsAddToPlaylistOpen] = useState(false);
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
+  const [isTipModalOpen, setIsTipModalOpen] = useState(false);
+  const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
 
   // Sync context with URL param on mount or URL change
   useEffect(() => {
@@ -36,16 +38,18 @@ const Play = () => {
         playTrack(songToPlay);
       }
     }
-  }, [id]);
+  }, []);
+  // }, [id]);
 
   // Sync URL with context change (e.g. via Next/Prev buttons)
   useEffect(() => {
     if (currentTrack && id && currentTrack.id !== parseInt(id)) {
       navigate(`/play/${currentTrack.id}`, { replace: true });
     }
-  }, [currentTrack, id, navigate]);
+  }, [currentTrack, id]);
 
   const recentSongs = songs.slice(0, 3);
+  const moreSongs = songs.slice(0, 4);
   const songToShow = currentTrack || songs[0];
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
@@ -68,7 +72,11 @@ const Play = () => {
   };
 
   return (
-    <MusicWrapper songs={songs} playlist={true}>
+    <MusicWrapper
+      songs={moreSongs}
+      playlist={true}
+      trackListTitle={"More From Artist"}
+    >
       <section
         className={styles.nowPlaying}
         style={{
@@ -112,9 +120,12 @@ const Play = () => {
               <span className={styles.tooltip}>Add to playlist</span>
             </div>
 
-            <div className={styles.tooltipWrapper}>
+            <div
+              className={styles.tooltipWrapper}
+              onClick={() => setIsTipModalOpen(true)}
+            >
               <BanknoteArrowUp size={30} className={styles.icons} />
-              <span className={styles.tooltip}>Boost music</span>
+              <span className={styles.tooltip}>Tip Artist</span>
             </div>
           </div>
           {isMenuOpen && (
@@ -122,7 +133,7 @@ const Play = () => {
               <ul>
                 <li>Edit Track</li>
                 <li>Remove From Sale</li>
-                <li>Boost Music</li>
+                <li onClick={() => setIsBoostModalOpen(true)}>Boost Music</li>
                 <li>Delete Track</li>
               </ul>
             </BlackCard>
@@ -151,15 +162,14 @@ const Play = () => {
           ))}
         </div>
       </section>
-      <section className={styles.section}>
-        <h2>More from Artist</h2>
-        <div className={styles.musicGrid}>
-          {songs.map((track) => (
-            <MusicCard key={track.id} track={track} />
-          ))}
-        </div>
-      </section>
-
+      <BoostModal
+        isOpen={isBoostModalOpen}
+        onClose={() => setIsBoostModalOpen(false)}
+      />
+      <TipModal
+        isOpen={isTipModalOpen}
+        onClose={() => setIsTipModalOpen(false)}
+      />
       <PurchaseModal
         track={songToShow}
         isOpen={isPurchaseModalOpen}

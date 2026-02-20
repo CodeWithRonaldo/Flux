@@ -139,7 +139,6 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
                             >
                               <X size={16} />
                             </button>
-                            rgba(124, 58, 237, 0.2);
                           </div>
                         ))}
                       </div>
@@ -152,10 +151,10 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
         )}
       </div>
 
-      <Button variant="btn-ghost" onClick={onCreateClick}>
+      {/* <Button variant="btn-ghost" onClick={onCreateClick}>
         <Plus size={18} />
         <span>Create New Playlist</span>
-      </Button>
+      </Button> */}
 
       <RenamePlaylistModal
         isOpen={renameModalOpen}
