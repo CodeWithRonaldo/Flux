@@ -15,7 +15,7 @@ const Home = () => {
   const [showRoleModal, setShowRoleModal] = useState(true);
   const [ShowlistenerOnboarding, setShowListenerOnboarding] = useState(false);
   const [showArtistOnboarding, setShowArtistOnboarding] = useState(false);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const handleRoleSelect = (role) => {
     console.log("User selected: ", role);
     setShowRoleModal(false);
@@ -32,71 +32,71 @@ const Home = () => {
   };
   const handleArtistOnboardingComplete = (data) => {
     console.log("Artist onboarding complete:", data);
-    setShowArtistOnboarding(false);}
-
-    const { currentTrack } = useAudio();
-    return (
-      <div className={styles.homeContainer}>
-        <RoleSelectionModal
-          isOpen={showRoleModal}
-          onSelectRole={handleRoleSelect}
-        />
-        <ListenerOnboarding
-          isOpen={ShowlistenerOnboarding}
-          onComplete={handleCloseListenerOnboardingComplete}
-        />
-        <ArtistOnboarding
-          isOpen={showArtistOnboarding}
-          onComplete={handleArtistOnboardingComplete}
-        />
-        <Subscribe isOpen={isOpen} OnClose={() => setIsOpen(false)} />
-
-        <section className={styles.heroContainer}>
-          <div className={styles.left}>
-            <h1 className={styles.title}>
-              THE MULTI-UNIVERSAL <br /> MUSIC PLAYLIST
-            </h1>
-            <p className={styles.desc}>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Iusto eum
-              laudantium unde. Placeat delectus, aliquid eius repellendus, animi
-              eum ducimus veritatis voluptatem dolorum, et odit! Inventore
-              assumenda aut quaerat eligendi accusantium, maiores impedit eos
-              sed. Velit veritatis asperiores aperiam quae temporibus, nihil
-              voluptatum rerum alias illum, corporis, doloremque.
-            </p>
-            <SearchBar className={styles.searchBar} />
-          </div>
-          <div className={styles.right}>
-            <div className={styles.music}>
-              <p className={styles.title}>{currentTrack?.title}</p>
-              <p className={styles.artist}>{currentTrack?.artist}</p>
-            </div>
-            <div className={styles.playerContainer}>
-              <Player />
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>New Releases</h2>
-          <div className={styles.musicGrid}>
-            {songs.map((track) => (
-              <MusicCard key={track.id} track={track} />
-            ))}
-          </div>
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Top Artists</h2>
-          <div className={styles.artistList}>
-            {artists.slice(0, 4).map((artist, index) => (
-              <ArtistCard key={index} artist={artist} />
-            ))}
-          </div>
-        </section>
-      </div>
-    );
+    setShowArtistOnboarding(false);
   };
 
+  const { currentTrack } = useAudio();
+  return (
+    <div className={styles.homeContainer}>
+      <RoleSelectionModal
+        isOpen={showRoleModal}
+        onSelectRole={handleRoleSelect}
+      />
+      <ListenerOnboarding
+        isOpen={ShowlistenerOnboarding}
+        onComplete={handleCloseListenerOnboardingComplete}
+      />
+      <ArtistOnboarding
+        isOpen={showArtistOnboarding}
+        onComplete={handleArtistOnboardingComplete}
+      />
+      <Subscribe isOpen={isOpen} OnClose={() => setIsOpen(false)} />
+
+      <section className={styles.heroContainer}>
+        <div className={styles.left}>
+          <h1 className={styles.title}>
+            THE MULTI-UNIVERSAL <br /> MUSIC PLAYLIST
+          </h1>
+          <p className={styles.desc}>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Iusto eum
+            laudantium unde. Placeat delectus, aliquid eius repellendus, animi
+            eum ducimus veritatis voluptatem dolorum, et odit! Inventore
+            assumenda aut quaerat eligendi accusantium, maiores impedit eos sed.
+            Velit veritatis asperiores aperiam quae temporibus, nihil voluptatum
+            rerum alias illum, corporis, doloremque.
+          </p>
+          <SearchBar className={styles.searchBar} />
+        </div>
+        <div className={styles.right}>
+          <div className={styles.music}>
+            <p className={styles.title}>{currentTrack?.title}</p>
+            <p className={styles.artist}>{currentTrack?.artist}</p>
+          </div>
+          <div className={styles.playerContainer}>
+            <Player />
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>New Releases</h2>
+        <div className={styles.musicGrid}>
+          {songs.map((track) => (
+            <MusicCard key={track.id} track={track} />
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Top Artists</h2>
+        <div className={styles.artistList}>
+          {artists.slice(0, 4).map((artist, index) => (
+            <ArtistCard key={index} artist={artist} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
 
 export default Home;

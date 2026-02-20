@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { BlackCard } from "../GlassCard/GlassCard";
 import Modal from "../Modal/Modal";
-import { AudioWaveform, Music, Sparkles, Star, CheckCircle, Loader2 } from "lucide-react";
+import {
+  AudioWaveform,
+  Music,
+  Sparkles,
+  Star,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import Button from "../Button/Button";
 import styles from "./Subscribe.module.css";
 
@@ -16,10 +23,6 @@ const Subscribe = ({ isOpen, OnClose }) => {
       setSuccess(true);
     }, 1500);
   };
-
-  const handleClose = () => {
-    OnClose();
-  } 
 
   const perks = [
     {
@@ -40,13 +43,14 @@ const Subscribe = ({ isOpen, OnClose }) => {
     },
   ];
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="medium">
+    <Modal isOpen={isOpen} onClose={OnClose} size="medium">
       {success ? (
         <div className={styles.successContainer}>
           <CheckCircle size={80} color="var(--color-primary)" />
           <h2 className={styles.successTitle}>Welcome to Premium!</h2>
           <p className={styles.description}>
-            You now have access to all premium features. Enjoy unlimited ad-free music!
+            You now have access to all premium features. Enjoy unlimited ad-free
+            music!
           </p>
         </div>
       ) : (
@@ -73,13 +77,19 @@ const Subscribe = ({ isOpen, OnClose }) => {
               </li>
             ))}
           </ul>
-          <Button onClick={handleSubmit} className={styles.subscribeButton} disabled={isLoading}>
-            {isLoading ? <Loader2 className={styles.spinner} size={20} /> : "Subscribe Now"}
+          <Button
+            onClick={handleSubmit}
+            className={styles.subscribeButton}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className={styles.spinner} size={20} />
+            ) : (
+              "Subscribe Now"
+            )}
           </Button>
         </div>
       )}
-
-      
     </Modal>
   );
 };

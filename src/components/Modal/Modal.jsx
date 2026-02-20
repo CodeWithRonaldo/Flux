@@ -8,7 +8,7 @@ const Modal = ({ isOpen, onClose, children, size = "medium" }) => {
   const modalClass = `${styles.modal} ${styles[size]}`;
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay}>
       <BlackCard className={modalClass} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>
           <X size={24} />
