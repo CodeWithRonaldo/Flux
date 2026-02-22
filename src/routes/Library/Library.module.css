@@ -118,3 +118,48 @@
   flex-direction: column;
   gap: 1.5rem;
 }
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .searchBar {
+    max-width: 100%;
+  }
+
+  .featuredBanner {
+    height: 300px;
+    padding: 1.5rem;
+  }
+
+  .bannerTitle {
+    font-size: 1.75rem;
+  }
+
+  .bannerArtist {
+    font-size: 0.95rem;
+  }
+
+  .bannerActions {
+    max-width: 100%;
+  }
+
+  .filterBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .filters {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .musicGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+}

@@ -13,3 +13,13 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
+@media (max-width: 768px) {
+  .mainContainer {
+    width: 95%;
+  }
+
+  .contentContainer {
+    padding-bottom: 9rem;
+  }
+}

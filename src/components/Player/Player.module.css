@@ -99,3 +99,22 @@
   transform: scale(1.05);
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
 }
+
+@media (max-width: 768px) {
+  .playerContainer {
+    gap: 1rem;
+  }
+
+  .visualizer {
+    height: 100px;
+  }
+
+  .controls {
+    gap: 1rem;
+  }
+
+  .playBtn {
+    width: 56px;
+    height: 56px;
+  }
+}

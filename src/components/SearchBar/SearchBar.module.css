@@ -25,3 +25,14 @@
 .searchBarContainer input:focus {
   background: transparent;
 }
+
+@media (max-width: 768px) {
+  .searchBarContainer {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .searchBarContainer input {
+    width: 100%;
+  }
+}

@@ -159,3 +159,32 @@
   gap: 1rem;
   width: 100%;
 }
+
+@media (max-width: 768px) {
+  .nowPlaying {
+    flex-direction: column;
+    height: auto;
+    padding: 1.5rem;
+  }
+
+  .nowPlayingPlayer {
+    width: 100%;
+  }
+
+  .nowPlayingPlayer img {
+    width: 100%;
+  }
+
+  .nowPlayingActions {
+    gap: 1rem;
+  }
+
+  .artistList {
+    gap: 1rem;
+  }
+
+  .musicGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+}

@@ -121,3 +121,37 @@
   background: rgba(255, 255, 255, 0.2);
   color: white;
 }
+
+@media (max-width: 768px) {
+  .bottomPlayer {
+    bottom: 60px;
+    width: 95%;
+    padding: 0 1rem;
+    height: 65px;
+  }
+
+  .left {
+    gap: 0.75rem;
+  }
+
+  .albumArt {
+    width: 40px;
+    height: 40px;
+  }
+
+  .title {
+    font-size: 13px;
+  }
+
+  .artist {
+    font-size: 11px;
+  }
+
+  .center {
+    gap: 1rem;
+  }
+
+  .right {
+    flex: 0;
+  }
+}

@@ -68,3 +68,15 @@
   gap: 1rem;
   color: white;
 }
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .rightContainer {
+    position: static;
+    max-height: none;
+  }
+}
