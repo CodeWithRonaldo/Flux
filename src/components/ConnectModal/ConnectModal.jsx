@@ -15,7 +15,7 @@ const ConnectModal = ({ isOpen, onClose, onSubmit }) => {
   };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <Form
+      {/* <Form
         title="Welcome Back"
         subtitle="Glad you're back!"
         onSubmit={handleSubmit}
@@ -34,19 +34,16 @@ const ConnectModal = ({ isOpen, onClose, onSubmit }) => {
           <Button variant="btn-primary">Login</Button>
         </div>
         <p className={styles.forgotPassword}>Forgot Password? </p>
-        <p className={styles.or}>Or</p>
-        <div className={styles.socialLogin}>
-          <Button variant="btn-ghost" icon={<FcGoogle />}>
-            Sign in with Google
-          </Button>
-          <Button variant="btn-ghost" icon={<Wallet />} onClick={onSubmit}>
-            Iota Wallet
-          </Button>
-        </div>
-        {/* <p className={styles.signup}>
-          Don't have an account? <Link to="/signup">Sign Up</Link>
-        </p> */}
-      </Form>
+        <p className={styles.or}>Or</p> */}
+      <div className={styles.socialLogin}>
+        <Button variant="btn-ghost" icon={<FcGoogle />}>
+          Sign in with Google
+        </Button>
+        <Button variant="btn-ghost" icon={<Wallet />} onClick={onSubmit}>
+          Iota Wallet
+        </Button>
+      </div>
+      {/* </Form> */}
     </Modal>
   );
 };

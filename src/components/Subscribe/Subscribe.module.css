@@ -215,15 +215,19 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .container {
+    gap: 1rem;
+    padding: 1rem;
+  }
   .title {
     font-size: 1.75rem;
   }
 
   .currentPrice {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
   .container {
-    padding: 1.5rem 1rem;
+    padding: 1rem 1rem;
   }
 }
