@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BlackCard } from "../../components/GlassCard/GlassCard";
+import { BlackCard, GlassCard } from "../../components/GlassCard/GlassCard";
 import Form from "../../components/Form/Form";
 import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
@@ -215,7 +215,7 @@ const Upload = () => {
                       onChange={(e) => setPrice(e.target.value)}
                     />
                   </div>
-                  <BlackCard className={styles.revenueDistribution}>
+                  <div className={styles.revenueDistribution}>
                     <div className={styles.header}>
                       <h4>Revenue Distribution</h4>
                       <span>0% Left</span>
@@ -234,7 +234,7 @@ const Upload = () => {
                         Add Collaborator
                       </Button>
                     </div>
-                  </BlackCard>
+                  </div>
                 </>
               )}
 

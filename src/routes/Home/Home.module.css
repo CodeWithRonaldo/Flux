@@ -14,7 +14,6 @@
   justify-content: space-between;
   gap: 2rem;
   flex-wrap: wrap-reverse;
-  padding-block: 100px;
 }
 
 .left {
@@ -80,9 +79,19 @@
 }
 
 @media (max-width: 768px) {
-  .heroContainer {
+  /* .heroContainer {
     padding-block: 2rem;
     flex-direction: column;
+  } */
+
+  .left {
+    text-align: center;
+    display: flex;
+    align-items: center;
+  }
+
+  .left p {
+    max-width: 100%;
   }
 
   .searchBar {
@@ -100,6 +109,6 @@
   }
 
   .artistList {
-    gap: 1rem;
+    gap: 1rem 0.5rem;
   }
 }

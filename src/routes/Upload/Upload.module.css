@@ -351,6 +351,7 @@
 .review {
   display: flex;
   gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .reviewImage {
@@ -479,7 +480,7 @@
   .uploadHeader {
     width: 100%;
     flex-direction: column;
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
     gap: 1.5rem;
   }
 
@@ -507,7 +508,19 @@
     gap: 1rem;
   }
 
+  .formCard {
+    padding: 1.5rem 1rem;
+  }
+
+  .musicQuality {
+    text-align: center;
+  }
+
+  .reviewImage {
+    width: 100%;
+  }
+
   .uploadFormAside .aside {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
   }
 }

@@ -35,6 +35,7 @@
   height: 400px;
   border-radius: 12px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding: 2.5rem;
@@ -131,8 +132,13 @@
   }
 
   .featuredBanner {
-    height: 300px;
+    height: fit-content;
     padding: 1.5rem;
+  }
+
+  .bannerContent {
+    align-items: center;
+    width: 100%;
   }
 
   .bannerTitle {
