@@ -79,10 +79,9 @@
 }
 
 @media (max-width: 768px) {
-  /* .heroContainer {
-    padding-block: 2rem;
+  .heroContainer {
     flex-direction: column;
-  } */
+  }
 
   .left {
     text-align: center;

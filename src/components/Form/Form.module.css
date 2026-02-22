@@ -23,3 +23,9 @@
   font-size: 1rem;
   color: white;
 }
+
+@media (max-width: 768px) {
+  .form {
+    gap: 1rem;
+  }
+}

@@ -10,7 +10,11 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,4 +88,10 @@
 
 .actions button {
   flex: 1;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
 }
