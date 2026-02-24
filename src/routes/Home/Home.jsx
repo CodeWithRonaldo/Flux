@@ -12,7 +12,7 @@ import ArtistOnboarding from "../../components/ArtistOnboarding/ArtistOnboarding
 import Subscribe from "../../components/Subscribe/Subscribe";
 
 const Home = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { currentTrack } = useAudio();
   return (
