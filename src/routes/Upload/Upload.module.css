@@ -160,7 +160,8 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
-.inputGroup select {
+.inputGroup select,
+.distributionInput select {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid white;
@@ -172,7 +173,8 @@
   outline: none;
 }
 
-.inputGroup select:focus {
+.inputGroup select:focus,
+.distributionInput select:focus {
   background: rgba(255, 255, 255, 0.12);
 }
 
@@ -336,16 +338,12 @@
   gap: 1rem;
 }
 
-.distributionInput input:nth-child(1) {
+.distributionInput input {
   flex: 1;
 }
 
-.distributionInput input:nth-child(2) {
+.distributionInput select {
   flex: 4;
-}
-
-.distributionInput input:nth-child(3) {
-  flex: 1;
 }
 
 .review {

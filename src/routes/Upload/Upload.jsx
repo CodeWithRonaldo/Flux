@@ -27,6 +27,19 @@ const Upload = () => {
     { id: 4, label: "Review", icon: <Check size={18} /> },
   ];
 
+  const userAddress = [
+    "0x1234567890123456789012345678901234567890",
+    "0x1234567890123456789012345678901234567891",
+    "0x1234567890123456789012345678901234567892",
+    "0x1234567890123456789012345678901234567893",
+    "0x1234567890123456789012345678901234567894",
+    "0x1234567890123456789012345678901234567895",
+    "0x1234567890123456789012345678901234567896",
+    "0x1234567890123456789012345678901234567897",
+    "0x1234567890123456789012345678901234567898",
+    "0x1234567890123456789012345678901234567899",
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -223,7 +236,22 @@ const Upload = () => {
                     <div className={styles.distributionGrid}>
                       <div className={styles.distributionInput}>
                         <input type="text" placeholder="Role" />
-                        <input type="text" placeholder="Wallet Address" />
+                        <select
+                          name="address"
+                          id="address"
+                          className={styles["form-select"]}
+                          required
+                        >
+                          <option selected value="" disabled>
+                            Select User
+                          </option>
+                          {userAddress.map((address) => (
+                            <option key={address} value={address}>
+                              {address}
+                            </option>
+                          ))}
+                        </select>
+
                         <input type="number" placeholder="0" />
                       </div>
                       <Button

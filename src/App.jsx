@@ -12,16 +12,12 @@ function App() {
   const location = useLocation();
   const { currentTrack, isBottomPlayerVisible } = useAudio();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-
-  const handleConnectClick = () => {
-    setIsConnectModalOpen(true);
-  };
+  const [tisConnected, setTisConnected] = useState(false);
 
   const handleConnect = () => {
     setTimeout(() => {
       setIsConnectModalOpen(false);
-      setIsConnected(true);
+      setTisConnected(true);
     }, 1000);
   };
 
@@ -33,7 +29,7 @@ function App() {
 
   return (
     <div className={styles.mainContainer}>
-      <Header onConnectClick={handleConnectClick} />
+      <Header />
       <div className={styles.contentContainer}>
         <Outlet />
       </div>
@@ -45,8 +41,8 @@ function App() {
         onSubmit={handleConnect}
       />
       <RoleSelectionModal
-        isOpen={isConnected}
-        onClose={() => setIsConnected(false)}
+        isOpen={tisConnected}
+        onClose={() => setTisConnected(false)}
       />
     </div>
   );
