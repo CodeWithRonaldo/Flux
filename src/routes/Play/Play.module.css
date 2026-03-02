@@ -167,6 +167,12 @@
     padding: 1.5rem;
   }
 
+  .nowPlayingDetails {
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
   .nowPlayingPlayer {
     width: 100%;
   }
@@ -180,7 +186,7 @@
   }
 
   .artistList {
-    gap: 1rem;
+    gap: 1rem 0.5rem;
   }
 
   .musicGrid {

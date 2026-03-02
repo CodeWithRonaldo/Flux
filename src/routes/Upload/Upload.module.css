@@ -160,7 +160,8 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
-.inputGroup select {
+.inputGroup select,
+.distributionInput select {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid white;
@@ -172,7 +173,8 @@
   outline: none;
 }
 
-.inputGroup select:focus {
+.inputGroup select:focus,
+.distributionInput select:focus {
   background: rgba(255, 255, 255, 0.12);
 }
 
@@ -336,21 +338,18 @@
   gap: 1rem;
 }
 
-.distributionInput input:nth-child(1) {
+.distributionInput input {
   flex: 1;
 }
 
-.distributionInput input:nth-child(2) {
+.distributionInput select {
   flex: 4;
-}
-
-.distributionInput input:nth-child(3) {
-  flex: 1;
 }
 
 .review {
   display: flex;
   gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .reviewImage {
@@ -479,7 +478,7 @@
   .uploadHeader {
     width: 100%;
     flex-direction: column;
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
     gap: 1.5rem;
   }
 
@@ -507,7 +506,19 @@
     gap: 1rem;
   }
 
+  .formCard {
+    padding: 1.5rem 1rem;
+  }
+
+  .musicQuality {
+    text-align: center;
+  }
+
+  .reviewImage {
+    width: 100%;
+  }
+
   .uploadFormAside .aside {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
   }
 }
