@@ -1,34 +1,4 @@
-/*
-    ====== VIBE TOKEN =====
 
-    VIBE is the native platform token of VibeTrax.
-    Total fixed supply: 10,000,000,000 VIBE (10 billion), minted once at deploy.
-    No new VIBE can ever be created — the supply cap is enforced on-chain by
-    the IOTA CoinManager standard, not just by convention.
-
-    TOKEN ECONOMY:
-    ──────────────
-    - Earn:  Subscribers earn VIBE by streaming music (stream-to-earn, daily cap).
-    - Spend: Tip artists (peer-to-peer), boost music (burned permanently).
-    - Trade: List on a DEX for price discovery and exit liquidity.
-
-    WHY CoinManager:
-    ────────────────
-    The IOTA CoinManager standard wraps TreasuryCap and CoinMetadata into a single
-    shared object with extra verifiability for mainnet users and DEX integrators:
-      - Max supply enforced on-chain via enforce_maximum_supply() — one-time, irrevocable.
-      - Total supply, max supply, and remaining supply can be queried by anyone.
-      - Supply and metadata ownership are separate caps — can be renounced independently.
-      - renounce_treasury_ownership() can permanently prove no future minting is possible.
-
-    OBJECT LAYOUT AFTER DEPLOY:
-    ────────────────────────────
-    - CoinManager<VIBE_TOKEN>           — shared, public, queryable by anyone
-    - VibeTreasury                      — shared, accessed only by vibetrax.move functions
-        .treasury_cap                   — needed to call burn() via CoinManager
-        .reward_pool                    — Balance holding all 10B VIBE at launch
-    - CoinManagerMetadataCap<VIBE_TOKEN>— transferred to deployer (update icon URL etc.)
-*/
 module vibetrax::vibe_token {
     use iota::coin_manager::{Self, CoinManager, CoinManagerTreasuryCap};
     use iota::balance::{Self, Balance};
@@ -143,5 +113,11 @@ module vibetrax::vibe_token {
     // When this hits 0, streaming rewards stop.
     public fun reward_pool_balance(treasury: &VibeTreasury): u64 {
         balance::value(&treasury.reward_pool)
+    }
+
+    // === Test Functions ===
+    #[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) {
+        init(VIBE_TOKEN {}, ctx);
     }
 }

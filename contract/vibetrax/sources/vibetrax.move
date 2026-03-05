@@ -1,59 +1,4 @@
-/*
-    ====== VIBETRAX =====
-    VibeTrax is a decentralized music platform built on the 'Iota blockchain',
-    1. Enabling upcoming artists to release music 'without upfront capital', 
-    2. Collaborate transparently, and earn fair, on-chain revenue. 
-    3. Fans can stream, own, and even resell music—creating an ecosystem where everyone is rewarded based on the value they contribute.
 
-    Scenario
-    1. Initial upload: Artist set collaborators and their split percentages (e.g {producer: 20%, writer: 20%, marketer: 20%}), The remaining 40% is the artist percentage.
-    2. On Resale: Same splitting ({producer: 20%, writer: 20%, marketer: 20%, Artist: 40%}) of the royalty set [say 20%]
-
-    If Royalty = 20%
-    If Initial song value = $10
-
-    Initial sale: [{producer: $2, writer: $2, marketer: $2, artist: $4}]
-
-    After song value increases [e.g to $100]
-    New Song value = $100
-
-    Royalty value = (20% of $100) = $20
-    Resale with collaborator royalty: [{producer: $4, writer: $4, marketer: $4, artist: $8, currentOwner: $80}]
-    Resale without collaborator royalty: [{artist: $20, currentOwner: $80}]
-
-    song value increases based on user interactions (Streams and likes)
-    Every stream or every like can increase the value of the song by minute quantity (e.g 0.00001)
-    And we decide the calculation (Say 20 streams + 50 Likes will cause that increment). And we can make them increase the value independently
-
-    FEATURES:
-    1.(DONE) Upload Music (title, description, genre, image, previewAudio, fullAudio, collaborators[{name, role, address, percentage, hasRoyalty}], initialPrice)
-    2. (DONE) Purchase Music (Transferring ownership to purchaser, music is considered SOLD, distribution split)
-    3. (DONE) Subscription (30 days subscription with IOTA, that allows unlimited streams of fullAudio of all music, earn platform tokens)
-    4. (PARTIALY_DONE) Stream(review for non-premium, fullAudio for premium, one stream per account per music, only subscribed users earn token for streaming, value of music increase)
-    5. (DONE) Like (one per account, increases value of music)
-    6. (DONE) Tip (Just platform Tokens sent to artist)
-    7. (DONE) Boost (Artist decide to boost their music with platform tokens. Boost requires you to buy a plan. Every plan has their unique price)
-    8. (DONE) Update [add/remove from market, update music details], Delete
-    9. Withdraw (smart contract / Frontend)
-    10. (DONE) Platform Fee: 1%
-    11. Update platform fee (Admin)
-
-    // Security
-    1. (DONE) A collaborator cannot be added twice to a song
-    2. (DONE) One Stream per account per music (Frontend will call the stream method after 1 minute of listening)
-    3. (DONE) One Like per account per music
-
-    // REVENUE
-    1. On every claim (balance withdrawal, token withdrawal)
-    2. From Subscription
-
-    // Future Plans
-    1. Stream-To-Earn (x402) -> Pay as you go. Users pay for streaming themselves (PROPOSED: x402)
-    2. Governance ->  Vote on platform decisions (Platform Fee)
-    3. Collaborator update will need multisig approval from all collaborators (PROPOSED: Multisig)
-    4. Music update will need multisig approval from all collaborators (PROPOSED: Multisig)
-    5. Listing VIBE on DEXes (PROPOSED: Listing)
-*/
 module vibetrax::vibetrax {
     use std::ascii::String;
     use std::string; // needed for Display field template strings
@@ -773,9 +718,27 @@ module vibetrax::vibetrax {
 
     // === Public-View Functions ===
 
+    public fun is_for_sale(music: &Music): bool { music.for_sale }
+    public fun price(music: &Music): u64 { music.price }
+    public fun likes(music: &Music): u64 { music.likes }
+    public fun boost_expiry(music: &Music): u64 { music.boost_expiry_ms }
+    public fun streaming_count(music: &Music): u64 { music.streaming_count }
+    public fun subscription_expiry(sub: &Subscription): u64 { sub.expiry_ms }
+
     // === Admin Functions ===
 
     // === Public-Package Functions ===
+
+    // Construct a User value. Useful for frontends and tests.
+    public fun new_user(
+        name: std::ascii::String,
+        user_address: address,
+        role: Option<std::ascii::String>,
+        split: Option<u64>,
+        has_royalty: Option<bool>
+    ): User {
+        User { name, user_address, role, split, has_royalty }
+    }
 
     // === Private Functions ===
 
@@ -790,6 +753,10 @@ module vibetrax::vibetrax {
     }
 
     // === Test Functions ===
+    #[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) {
+        init(VIBETRAX {}, ctx);
+    }
 }
 
 // For Move coding conventions, see
