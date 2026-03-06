@@ -19,10 +19,12 @@ import { useEffect } from "react";
 import { useIota } from "../../hooks/useIota";
 import { formatAddress } from "../../util/helper";
 import { useWeb3AuthDisconnect } from "@web3auth/modal/react";
+import { useOutletContext } from "react-router-dom";
 
 const Profile = () => {
   const { balance, address } = useIota();
   const { disconnect } = useWeb3AuthDisconnect();
+  const registeredUser = useOutletContext();
 
   const stats = [
     {
@@ -52,6 +54,15 @@ const Profile = () => {
     },
   ];
 
+  const handleCopy = () => {
+    if (!address) return;
+    try {
+      navigator.clipboard.writeText(address);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
   return (
     <MusicWrapper
       songs={songs}
@@ -64,10 +75,12 @@ const Profile = () => {
             <div className={styles.profileInfoContainer}>
               <Jazzicon diameter={100} seed={jsNumberForAddress(address)} />
               <div className={styles.profileInfo}>
-                <h1 className={styles.profileName}>John Doe</h1>
+                <h1 className={styles.profileName}>
+                  {registeredUser[0]?.username || "Vibe User"}
+                </h1>
                 <p>
                   <User2 size={16} absoluteStrokeWidth />
-                  Artist
+                  {registeredUser[0]?.role}
                 </p>
                 <p className={styles.walletRow}>
                   <Wallet size={16} absoluteStrokeWidth />
@@ -78,6 +91,7 @@ const Profile = () => {
                     size={14}
                     absoluteStrokeWidth
                     className={styles.copyIcon}
+                    onClick={handleCopy}
                   />
                 </p>
               </div>
@@ -90,11 +104,7 @@ const Profile = () => {
           </div>
 
           <div className={styles.bio}>
-            <p>
-              Electronic music producer and multi-instrumentalist. Blending
-              synthesized textures with organic rhythms to create immersive
-              soundscapes. Available for collaborations and licensing.
-            </p>
+            <p>{registeredUser[0]?.bio}</p>
           </div>
 
           <div className={styles.statsRow}>

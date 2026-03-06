@@ -43,7 +43,7 @@ function App() {
     <div className={styles.mainContainer}>
       <Header />
       <div className={styles.contentContainer}>
-        <Outlet />
+        <Outlet context={registeredUser} />
       </div>
       <SideBar registeredUser={registeredUser} />
       {shouldShowBottomPlayer && <BottomPlayer />}
