@@ -6,7 +6,7 @@ module vibetrax::vibetrax_tests {
     use iota::clock;
     use iota::coin_manager::CoinManager;
     use vibetrax::vibe_token::{Self, VibeTreasury, VIBE_TOKEN};
-    use vibetrax::vibetrax::{Self, Music, Subscription};
+    use vibetrax::vibetrax::{Self, Music, Subscription, UserProfile};
     use std::ascii;
 
     // ── Test Addresses ────────────────────────────────────────────────────────
@@ -910,6 +910,127 @@ module vibetrax::vibetrax_tests {
         };
 
         clock::destroy_for_testing(clock);
+        ts::end(scenario);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // USER PROFILE TESTS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    #[test]
+    fun test_register_user_artist() {
+        let mut scenario = ts::begin(ADMIN);
+        setup(&mut scenario);
+
+        ts::next_tx(&mut scenario, ARTIST);
+        vibetrax::register_user(
+            ascii::string(b"artist"),
+            option::some(ascii::string(b"ArtistOne")),
+            option::some(ascii::string(b"Music producer from Lagos")),
+            option::some(vector[ascii::string(b"Afrobeat"), ascii::string(b"Hip-hop")]),
+            ts::ctx(&mut scenario)
+        );
+
+        ts::next_tx(&mut scenario, ARTIST);
+        {
+            let profile = ts::take_from_sender<UserProfile>(&scenario);
+            assert!(vibetrax::profile_role(&profile) == ascii::string(b"artist"), 0);
+            assert!(vibetrax::profile_owner(&profile) == ARTIST, 1);
+            assert!(vibetrax::profile_username(&profile) == option::some(ascii::string(b"ArtistOne")), 2);
+            assert!(vibetrax::profile_genres(&profile).length() == 2, 3);
+            ts::return_to_sender(&scenario, profile);
+        };
+
+        ts::end(scenario);
+    }
+
+    #[test]
+    fun test_register_user_listener() {
+        let mut scenario = ts::begin(ADMIN);
+        setup(&mut scenario);
+
+        ts::next_tx(&mut scenario, SUBSCRIBER);
+        vibetrax::register_user(
+            ascii::string(b"listener"),
+            option::none(),
+            option::none(),
+            option::some(vector[ascii::string(b"Jazz")]),
+            ts::ctx(&mut scenario)
+        );
+
+        ts::next_tx(&mut scenario, SUBSCRIBER);
+        {
+            let profile = ts::take_from_sender<UserProfile>(&scenario);
+            assert!(vibetrax::profile_role(&profile) == ascii::string(b"listener"), 0);
+            assert!(vibetrax::profile_username(&profile) == option::none(), 1);
+            assert!(vibetrax::profile_bio(&profile) == option::none(), 2);
+            ts::return_to_sender(&scenario, profile);
+        };
+
+        ts::end(scenario);
+    }
+
+    #[test]
+    fun test_update_profile() {
+        let mut scenario = ts::begin(ADMIN);
+        setup(&mut scenario);
+
+        ts::next_tx(&mut scenario, ARTIST);
+        vibetrax::register_user(
+            ascii::string(b"artist"),
+            option::none(),
+            option::none(),
+            option::none(),
+            ts::ctx(&mut scenario)
+        );
+
+        ts::next_tx(&mut scenario, ARTIST);
+        {
+            let mut profile = ts::take_from_sender<UserProfile>(&scenario);
+            vibetrax::update_profile(
+                &mut profile,
+                option::some(ascii::string(b"Updated Name")),
+                option::some(ascii::string(b"New bio")),
+                option::some(vector[ascii::string(b"Rock")]),
+                ts::ctx(&mut scenario)
+            );
+            assert!(vibetrax::profile_username(&profile) == option::some(ascii::string(b"Updated Name")), 0);
+            assert!(vibetrax::profile_bio(&profile) == option::some(ascii::string(b"New bio")), 1);
+            assert!(vibetrax::profile_genres(&profile).length() == 1, 2);
+            ts::return_to_sender(&scenario, profile);
+        };
+
+        ts::end(scenario);
+    }
+
+    #[test, expected_failure(abort_code = 17)]
+    fun test_update_profile_unauthorized_fails() {
+        let mut scenario = ts::begin(ADMIN);
+        setup(&mut scenario);
+
+        ts::next_tx(&mut scenario, ARTIST);
+        vibetrax::register_user(
+            ascii::string(b"artist"),
+            option::none(),
+            option::none(),
+            option::none(),
+            ts::ctx(&mut scenario)
+        );
+
+        // BUYER (sender) takes ARTIST's profile and tries to update it — must abort
+        ts::next_tx(&mut scenario, BUYER);
+        {
+            let mut profile = ts::take_from_address<UserProfile>(&scenario, ARTIST);
+            vibetrax::update_profile(
+                &mut profile,
+                option::some(ascii::string(b"Hacked")),
+                option::none(),
+                option::none(),
+                ts::ctx(&mut scenario)
+            );
+            ts::return_to_address(ARTIST, profile);
+        };
+
         ts::end(scenario);
     }
 

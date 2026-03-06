@@ -33,6 +33,7 @@ module vibetrax::vibetrax {
     const ESUBSCRIPTION_EXPIRED: u64 = 14;
     const ESUBSCRIPTION_MISMATCH: u64 = 15;
     const EINVALID_BOOST_PLAN: u64 = 16;
+    const EUNAUTHORIZED: u64 = 17;
 
     // === Constants ===
     const BASIS_POINTS: u64 = 10_000; // For percentage calculations
@@ -98,6 +99,18 @@ module vibetrax::vibetrax {
         expiry_ms: u64,
         daily_vibe_earned: u64, // VIBE base units earned in the current calendar day
         last_earn_day: u64      // floor(timestamp_ms / MS_PER_DAY) — resets daily counter
+    }
+
+    // ── UserProfile ──────────────────────────────────────────────────────────
+    // Owned object created once per user during onboarding.
+    // Stored in the user's wallet; emitted as an event so indexers can track it.
+    public struct UserProfile has key {
+        id: UID,
+        owner: address,
+        role: String,             // "artist" | "listener"
+        username: Option<String>,
+        bio: Option<String>,
+        genres: Option<vector<String>>,
     }
 
     // === Events ===
@@ -204,6 +217,24 @@ module vibetrax::vibetrax {
         recipient: address,
         sender: address,
         amount: u64
+    }
+
+    public struct UserRegistered has copy, drop {
+        profile_id: ID,
+        owner: address,
+        role: String,
+        username: Option<String>,
+        bio: Option<String>,
+        genres: vector<String>,
+    }
+
+    public struct UserProfileUpdated has copy, drop {
+        profile_id: ID,
+        owner: address,
+        role: String,
+        username: Option<String>,
+        bio: Option<String>,
+        genres: vector<String>,
     }
 
     // === Method Aliases ===
@@ -623,6 +654,54 @@ module vibetrax::vibetrax {
     }
 
 
+    // ── Register User ────────────────────────────────────────────────────────
+    // Called once during onboarding. Creates a UserProfile owned by the caller.
+    // role must be "artist" or "listener". username, bio, and genres are optional.
+    public fun register_user(
+        role: String,
+        username: Option<String>,
+        bio: Option<String>,
+        genres: Option<vector<String>>,
+        ctx: &mut TxContext
+    ) {
+        let owner = ctx.sender();
+        let profile_uid = object::new(ctx);
+        let profile_id = profile_uid.to_inner();
+        let genres_vec = option::destroy_with_default(genres, vector::empty());
+
+        event::emit(UserRegistered { profile_id, owner, role, username, bio, genres: genres_vec  });
+
+        transfer::transfer(
+            UserProfile { id: profile_uid, owner, role, username, bio, genres: option::some(genres_vec) },
+            owner
+        );
+    }
+
+    // ── Update User Profile ──────────────────────────────────────────────────
+    // Owner can update any subset of fields. Pass option::none() to leave a field unchanged.
+    public fun update_profile(
+        profile: &mut UserProfile,
+        username: Option<String>,
+        bio: Option<String>,
+        genres: Option<vector<String>>,
+        ctx: &mut TxContext
+    ) {
+        assert!(profile.owner == ctx.sender(), EUNAUTHORIZED);
+        if (username.is_some()) { profile.username = username };
+        if (bio.is_some()) { profile.bio = bio };
+        if (genres.is_some()) { profile.genres = genres };
+
+        let genres_vec = if (profile.genres.is_some()) { *profile.genres.borrow() } else { vector::empty() };
+        event::emit(UserProfileUpdated {
+            profile_id: profile.id.to_inner(),
+            owner: profile.owner,
+            role: profile.role,
+            username: profile.username,
+            bio: profile.bio,
+            genres: genres_vec,
+        });
+    }
+
     public fun subscribe(
         subscriber: User,
         payment: Coin<IOTA>,
@@ -724,6 +803,14 @@ module vibetrax::vibetrax {
     public fun boost_expiry(music: &Music): u64 { music.boost_expiry_ms }
     public fun streaming_count(music: &Music): u64 { music.streaming_count }
     public fun subscription_expiry(sub: &Subscription): u64 { sub.expiry_ms }
+
+    public fun profile_role(profile: &UserProfile): String { profile.role }
+    public fun profile_owner(profile: &UserProfile): address { profile.owner }
+    public fun profile_username(profile: &UserProfile): Option<String> { profile.username }
+    public fun profile_bio(profile: &UserProfile): Option<String> { profile.bio }
+    public fun profile_genres(profile: &UserProfile): vector<String> {
+        if (profile.genres.is_some()) { *profile.genres.borrow() } else { vector::empty() }
+    }
 
     // === Admin Functions ===
 
