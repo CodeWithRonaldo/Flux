@@ -18,20 +18,27 @@ const Links = [
   { name: "Profile", icon: CircleUserRound, path: "/profile" },
 ];
 
-const SideBar = () => {
+const SideBar = ({ registeredUser }) => {
+  const hasRegisteredUser = registeredUser?.length > 0;
+  const canUpload = hasRegisteredUser && registeredUser[0]?.role === "artist";
+
   return (
     <div className={styles.sidebar}>
       <div>
-        {Links.map((link) => (
-          <li key={link.name}>
-            <NavLink
-              to={link.path}
-              className={({ isActive }) => (isActive ? styles.active : "")}
-            >
-              <link.icon className={styles.icon} />
-            </NavLink>
-          </li>
-        ))}
+        {Links.map((link) => {
+          if (link.name === "Upload" && !canUpload) return null;
+          if (link.name === "Profile" && !hasRegisteredUser) return null;
+          return (
+            <li key={link.name}>
+              <NavLink
+                to={link.path}
+                className={({ isActive }) => (isActive ? styles.active : "")}
+              >
+                <link.icon className={styles.icon} />
+              </NavLink>
+            </li>
+          );
+        })}
       </div>
     </div>
   );
