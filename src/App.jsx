@@ -11,15 +11,7 @@ import RoleSelectionModal from "./components/RoleSelectionModal/RoleSelectionMod
 function App() {
   const location = useLocation();
   const { currentTrack, isBottomPlayerVisible } = useAudio();
-  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
-  const [tisConnected, setTisConnected] = useState(false);
-
-  const handleConnect = () => {
-    setTimeout(() => {
-      setIsConnectModalOpen(false);
-      setTisConnected(true);
-    }, 1000);
-  };
+  const [tisConnected, setTisConnected] = useState(true);
 
   const isHome = location.pathname === "/";
   const isPlay = location.pathname.startsWith("/play");
@@ -35,11 +27,7 @@ function App() {
       </div>
       <SideBar />
       {shouldShowBottomPlayer && <BottomPlayer />}
-      <ConnectModal
-        isOpen={isConnectModalOpen}
-        onClose={() => setIsConnectModalOpen(false)}
-        onSubmit={handleConnect}
-      />
+
       <RoleSelectionModal
         isOpen={tisConnected}
         onClose={() => setTisConnected(false)}

@@ -15,38 +15,43 @@ import {
 } from "lucide-react";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import MusicCard from "../../components/MusicCard/MusicCard";
-
-const WALLET_ADDRESS = "0x1234...5678";
-
-const stats = [
-  {
-    icon: <Wallet size={18} absoluteStrokeWidth />,
-    label: "Account Balance",
-    value: "2.45 IOTA",
-  },
-  {
-    icon: <Coins size={18} absoluteStrokeWidth />,
-    label: "Flux Balance",
-    value: "1,240 FLX",
-  },
-  {
-    icon: <Music size={18} absoluteStrokeWidth />,
-    label: "Tracks",
-    value: songs.length,
-  },
-  {
-    icon: <Play size={18} absoluteStrokeWidth />,
-    label: "Total Streams",
-    value: "48.2K",
-  },
-  {
-    icon: <Users size={18} absoluteStrokeWidth />,
-    label: "Followers",
-    value: "3.1K",
-  },
-];
+import { useEffect } from "react";
+import { useIota } from "../../hooks/useIota";
+import { formatAddress } from "../../util/helper";
+import { useWeb3AuthDisconnect } from "@web3auth/modal/react";
 
 const Profile = () => {
+  const { balance, address } = useIota();
+  const { disconnect } = useWeb3AuthDisconnect();
+
+  const stats = [
+    {
+      icon: <Wallet size={18} absoluteStrokeWidth />,
+      label: "Account Balance",
+      value: `${balance} IOTA`,
+    },
+    {
+      icon: <Coins size={18} absoluteStrokeWidth />,
+      label: "Flux Balance",
+      value: "1,240 FLX",
+    },
+    {
+      icon: <Music size={18} absoluteStrokeWidth />,
+      label: "Tracks",
+      value: songs.length,
+    },
+    {
+      icon: <Play size={18} absoluteStrokeWidth />,
+      label: "Total Streams",
+      value: "48.2K",
+    },
+    {
+      icon: <Users size={18} absoluteStrokeWidth />,
+      label: "Followers",
+      value: "3.1K",
+    },
+  ];
+
   return (
     <MusicWrapper
       songs={songs}
@@ -57,10 +62,7 @@ const Profile = () => {
         <div className={styles.profileContainer}>
           <div className={styles.profileHeader}>
             <div className={styles.profileInfoContainer}>
-              <Jazzicon
-                diameter={100}
-                seed={jsNumberForAddress(WALLET_ADDRESS)}
-              />
+              <Jazzicon diameter={100} seed={jsNumberForAddress(address)} />
               <div className={styles.profileInfo}>
                 <h1 className={styles.profileName}>John Doe</h1>
                 <p>
@@ -69,7 +71,9 @@ const Profile = () => {
                 </p>
                 <p className={styles.walletRow}>
                   <Wallet size={16} absoluteStrokeWidth />
-                  <span className={styles.walletAddress}>{WALLET_ADDRESS}</span>
+                  <span className={styles.walletAddress}>
+                    {formatAddress(address)}
+                  </span>
                   <Copy
                     size={14}
                     absoluteStrokeWidth
@@ -80,7 +84,7 @@ const Profile = () => {
             </div>
 
             <div className={styles.profileActions}>
-              <Button>Connect Wallet</Button>
+              <Button onClick={disconnect}>Disconnect Wallet</Button>
               <Button variant="btn-ghost">Edit Profile</Button>
             </div>
           </div>

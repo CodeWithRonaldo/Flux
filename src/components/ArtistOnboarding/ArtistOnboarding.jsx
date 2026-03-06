@@ -22,12 +22,10 @@ const ArtistOnboarding = () => {
   const [formData, setFormData] = useState({
     artistName: "",
     bio: "",
-    profilePicture: null,
     genres: [],
-    walletConnected: false,
   });
 
-  const totalSteps = 4;
+  const totalSteps = 2;
 
   // Validation for each step
   const canProceed = () => {
@@ -35,11 +33,7 @@ const ArtistOnboarding = () => {
       case 1:
         return formData.artistName.trim().length > 0;
       case 2:
-        return formData.profilePicture !== null;
-      case 3:
         return formData.genres.length > 0;
-      case 4:
-        return formData.walletConnected;
       default:
         return false;
     }
@@ -49,7 +43,6 @@ const ArtistOnboarding = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final step - complete onboarding
       onComplete(formData);
     }
   };
@@ -69,33 +62,20 @@ const ArtistOnboarding = () => {
     }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, profilePicture: file }));
-    }
-  };
-
-  const handleConnectWallet = () => {
-    // Placeholder - you'll replace this with your IOTA wallet connection
-    console.log("Connect wallet clicked - integrate IOTA here");
-    setFormData((prev) => ({ ...prev, walletConnected: true }));
-  };
-
   return (
     <div className={styles.content}>
       {/* Progress Indicator */}
       <div className={styles.progressContainer}>
         <div className={styles.steps}>
-          {[1, 2, 3, 4].map((step) => (
+          {[1, 2].map((step) => (
             <div key={step} className={styles.stepItem}>
               <div
                 className={`${styles.stepCircle} ${
                   step < currentStep
                     ? styles.completed
                     : step === currentStep
-                    ? styles.active
-                    : ""
+                      ? styles.active
+                      : ""
                 }`}
               >
                 {step < currentStep ? <Check size={16} /> : step}
@@ -163,43 +143,8 @@ const ArtistOnboarding = () => {
           </div>
         )}
 
-        {/* Step 2: Profile Picture */}
+        {/* Step 2: Genres */}
         {currentStep === 2 && (
-          <div className={styles.step}>
-            <div className={styles.stepIcon}>
-              <Upload size={40} />
-            </div>
-            <h2 className={styles.stepTitle}>Upload your profile picture</h2>
-            <p className={styles.stepSubtitle}>Make your profile stand out</p>
-
-            <div className={styles.uploadContainer}>
-              <input
-                type="file"
-                id="profilePic"
-                accept="image/*"
-                className={styles.fileInput}
-                onChange={handleFileChange}
-              />
-              <label htmlFor="profilePic" className={styles.uploadBox}>
-                {formData.profilePicture ? (
-                  <div className={styles.uploadSuccess}>
-                    <Check size={48} />
-                    <p>{formData.profilePicture.name}</p>
-                  </div>
-                ) : (
-                  <div className={styles.uploadPrompt}>
-                    <Upload size={48} />
-                    <p>Click to upload image</p>
-                    <span>Max size: 5MB</span>
-                  </div>
-                )}
-              </label>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Genres */}
-        {currentStep === 3 && (
           <div className={styles.step}>
             <div className={styles.stepIcon}>
               <MusicIcon size={40} />
@@ -225,48 +170,19 @@ const ArtistOnboarding = () => {
             </div>
           </div>
         )}
-
-        {/* Step 4: Wallet Connection */}
-        {currentStep === 4 && (
-          <div className={styles.step}>
-            <div className={styles.stepIcon}>
-              <Wallet size={40} />
-            </div>
-            <h2 className={styles.stepTitle}>Connect your wallet</h2>
-            <p className={styles.stepSubtitle}>
-              Required to receive payments for your music
-            </p>
-
-            <div className={styles.walletContainer}>
-              {formData.walletConnected ? (
-                <div className={styles.walletConnected}>
-                  <Check size={48} className={styles.successIcon} />
-                  <p>Wallet Connected!</p>
-                  <span className={styles.walletAddress}>0x1234...5678</span>
-                </div>
-              ) : (
-                <div className={styles.walletPrompt}>
-                  <p>Connect your IOTA wallet to start earning</p>
-                  <Button onClick={handleConnectWallet}>Connect Wallet</Button>
-                  <span className={styles.helperText}>
-                    Don't have a wallet? <a href="#">Get one here</a>
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Navigation */}
       <div className={styles.navigation}>
-        <Button
-          variant="ghost"
-          onClick={handleBack}
-          disabled={currentStep === 1}
-        >
-          Back
-        </Button>
+        {currentStep > 1 && (
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            disabled={currentStep === 1}
+          >
+            Back
+          </Button>
+        )}
         <Button onClick={handleNext} disabled={!canProceed()}>
           {currentStep === totalSteps ? "Finish" : "Next"}
         </Button>
