@@ -4,20 +4,13 @@ import { useIota } from "./useIota";
 import { useState } from "react";
 import { useNetworkVariables } from "../config/networkConfig";
 
-const userData = {
-  role: "artist",
-  artistName: "oracle",
-  bio: "A music composer, number one winning 2021 grammy award",
-  genre: ["Pop", "Rock"],
-};
 export const useVibetraxHook = () => {
   const [loading, setLoading] = useState(false);
   const client = useIotaClient();
   const { keypair } = useIota();
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
 
-  const registerUser = async (e) => {
-    e.preventDefault();
+  const registerUser = async (userData) => {
     if (!keypair) {
       console.log("Wallet not connected");
       return;

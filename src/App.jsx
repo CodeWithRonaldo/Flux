@@ -4,7 +4,7 @@ import Header from "./components/Header/Header";
 import SideBar from "./components/SideBar/SideBar";
 import BottomPlayer from "./components/BottomPlayer/BottomPlayer";
 import { useAudio } from "./hooks/useAudio";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RoleSelectionModal from "./components/RoleSelectionModal/RoleSelectionModal";
 import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useNetworkVariables } from "./config/networkConfig";
@@ -13,7 +13,7 @@ import { useIota } from "./hooks/useIota";
 function App() {
   const location = useLocation();
   const { currentTrack, isBottomPlayerVisible } = useAudio();
-  const [tisConnected, setTisConnected] = useState(true);
+  const [isSelectRole, setIsSelectRole] = useState(false);
 
   const isHome = location.pathname === "/";
   const isPlay = location.pathname.startsWith("/play");
@@ -24,7 +24,7 @@ function App() {
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const { address } = useIota();
 
-  const { data: registeredUser } = useIotaClientQuery(
+  const { data: registeredUser, isLoading } = useIotaClientQuery(
     "queryEvents",
     {
       query: {
@@ -38,7 +38,19 @@ function App() {
           .filter((y) => y.owner === address),
     },
   );
-  console.log("registeredUser", registeredUser[0].role);
+
+  useEffect(() => {
+    if (address && !isLoading) {
+      if (registeredUser && registeredUser.length > 0) {
+        setIsSelectRole(false);
+      } else {
+        setIsSelectRole(true);
+      }
+    } else if (!address) {
+      setIsSelectRole(false);
+    }
+  }, [address, registeredUser, isLoading]);
+
   return (
     <div className={styles.mainContainer}>
       <Header />
@@ -49,8 +61,8 @@ function App() {
       {shouldShowBottomPlayer && <BottomPlayer />}
 
       <RoleSelectionModal
-        isOpen={tisConnected}
-        onClose={() => setTisConnected(false)}
+        isOpen={isSelectRole}
+        onClose={() => setIsSelectRole(false)}
       />
     </div>
   );

@@ -17,7 +17,7 @@ const genres = [
   "Country",
 ];
 
-const ArtistOnboarding = () => {
+const ArtistOnboarding = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     artistName: "",

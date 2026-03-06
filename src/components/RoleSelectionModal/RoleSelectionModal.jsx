@@ -1,19 +1,34 @@
 import React, { useState } from "react";
 import Modal from "../Modal/Modal";
 import styles from "./RoleSelectionModal.module.css";
-import { Headphones, Music } from "lucide-react";
+import { Headphones, Music, Loader2 } from "lucide-react";
 import Button from "../Button/Button";
 import ListenerOnboarding from "../ListenerOnboarding/ListenerOnboarding";
 import ArtistOnboarding from "../ArtistOnboarding/ArtistOnboarding";
+import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 
 const RoleSelectionModal = ({ isOpen, onClose }) => {
   const [role, setRole] = useState("");
+  const { registerUser, loading } = useVibetraxHook();
+
   const onListener = () => {
     setRole("listener");
   };
   const onArtist = () => {
     setRole("artist");
   };
+
+  const handleComplete = async (data) => {
+    const userData = {
+      role,
+      artistName: data.artistName || "",
+      bio: data.bio || "",
+      genre: data.genres || [],
+    };
+
+    await registerUser(userData);
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="large">
       {role === "" && (
@@ -50,8 +65,12 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       )}
-      {role === "listener" && <ListenerOnboarding />}
-      {role === "artist" && <ArtistOnboarding />}
+      {role === "listener" && !loading && (
+        <ListenerOnboarding onComplete={handleComplete} />
+      )}
+      {role === "artist" && !loading && (
+        <ArtistOnboarding onComplete={handleComplete} />
+      )}
     </Modal>
   );
 };

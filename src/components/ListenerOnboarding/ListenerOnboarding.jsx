@@ -22,16 +22,16 @@ const ListenerOnboarding = ({ onComplete }) => {
 
   const toggleGenre = (genre) => {
     setSelectedGenres((prev) =>
-      prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
+      prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre],
     );
   };
 
   const handleContinue = () => {
-    onComplete({ preferences: { genres: selectedGenres } });
+    onComplete({ genres: selectedGenres });
   };
 
   const handleSkip = () => {
-    onComplete({ preferences: { genres: [] } });
+    onComplete({ genres: [] });
   };
 
   return (
