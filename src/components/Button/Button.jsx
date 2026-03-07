@@ -6,10 +6,13 @@ const Button = ({
   icon,
   onClick,
   disabled,
+  type = "button",
+  className = "",
 }) => {
   return (
     <button
-      className={`${styles.btn} ${styles[variant]}`}
+      type={type}
+      className={`${styles.btn} ${styles[variant]} ${className}`.trim()}
       onClick={onClick}
       disabled={disabled}
     >

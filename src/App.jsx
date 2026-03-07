@@ -40,12 +40,12 @@ function App() {
   const isUserRegistered = registeredUser?.filter(
     (user) => user.owner === address,
   );
-  console.log(isUserRegistered)
-console.log(registeredUser)
+  console.log(isUserRegistered);
+  console.log(registeredUser);
 
   useEffect(() => {
     if (address && !isLoading) {
-      if (isUserRegistered > 0) {
+      if (isUserRegistered && isUserRegistered.length > 0) {
         setIsSelectRole(false);
       } else {
         setIsSelectRole(true);
