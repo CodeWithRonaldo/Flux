@@ -71,6 +71,13 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
       {role === "artist" && !loading && (
         <ArtistOnboarding onComplete={handleComplete} />
       )}
+
+      {loading && (
+        <div className={styles.loading}>
+          <Loader2 size={48} />
+          <p>Registering {role}...</p>
+        </div>
+      )}
     </Modal>
   );
 };

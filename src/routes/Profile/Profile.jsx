@@ -23,7 +23,7 @@ import { useOutletContext } from "react-router-dom";
 
 const Profile = () => {
   const { balance, address } = useIota();
-  const { disconnect } = useWeb3AuthDisconnect();
+  const { disconnect, loading: isDisconnecting } = useWeb3AuthDisconnect();
   const registeredUser = useOutletContext();
 
   const stats = [
@@ -80,7 +80,7 @@ const Profile = () => {
                 </h1>
                 <p>
                   <User2 size={16} absoluteStrokeWidth />
-                  {registeredUser[0]?.role}
+                  {registeredUser[0]?.role || ""}
                 </p>
                 <p className={styles.walletRow}>
                   <Wallet size={16} absoluteStrokeWidth />
@@ -98,7 +98,9 @@ const Profile = () => {
             </div>
 
             <div className={styles.profileActions}>
-              <Button onClick={disconnect}>Disconnect Wallet</Button>
+              <Button onClick={disconnect} disabled={isDisconnecting}>
+                {isDisconnecting ? "Disconnecting..." : "Disconnect Wallet"}
+              </Button>
               <Button variant="btn-ghost">Edit Profile</Button>
             </div>
           </div>

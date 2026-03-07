@@ -18,9 +18,9 @@ const Links = [
   { name: "Profile", icon: CircleUserRound, path: "/profile" },
 ];
 
-const SideBar = ({ registeredUser }) => {
-  const hasRegisteredUser = registeredUser?.length > 0;
-  const canUpload = hasRegisteredUser && registeredUser[0]?.role === "artist";
+const SideBar = ({ isUserRegistered }) => {
+  const hasRegisteredUser = isUserRegistered?.length > 0;
+  const canUpload = hasRegisteredUser && isUserRegistered[0]?.role === "artist";
 
   return (
     <div className={styles.sidebar}>

@@ -5,6 +5,7 @@ import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
 import { Check, Music, UploadIcon, User } from "lucide-react";
 import Image1 from "../../assets/fakelove.jpg";
+import { useOutletContext } from "react-router-dom";
 
 const Upload = () => {
   const [title, setTitle] = useState("");
@@ -27,18 +28,7 @@ const Upload = () => {
     { id: 4, label: "Review", icon: <Check size={18} /> },
   ];
 
-  const userAddress = [
-    "0x1234567890123456789012345678901234567890",
-    "0x1234567890123456789012345678901234567891",
-    "0x1234567890123456789012345678901234567892",
-    "0x1234567890123456789012345678901234567893",
-    "0x1234567890123456789012345678901234567894",
-    "0x1234567890123456789012345678901234567895",
-    "0x1234567890123456789012345678901234567896",
-    "0x1234567890123456789012345678901234567897",
-    "0x1234567890123456789012345678901234567898",
-    "0x1234567890123456789012345678901234567899",
-  ];
+  const registeredUser = useOutletContext();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -245,9 +235,9 @@ const Upload = () => {
                           <option selected value="" disabled>
                             Select User
                           </option>
-                          {userAddress.map((address) => (
-                            <option key={address} value={address}>
-                              {address}
+                          {registeredUser?.map((user) => (
+                            <option key={user.owner} value={user.owner}>
+                              {user.owner}
                             </option>
                           ))}
                         </select>

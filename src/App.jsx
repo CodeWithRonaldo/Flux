@@ -32,16 +32,18 @@ function App() {
       },
     },
     {
-      select: (data) =>
-        data.data
-          .flatMap((x) => x.parsedJson)
-          .filter((y) => y.owner === address),
+      select: (data) => data.data.flatMap((x) => x.parsedJson),
+      // .filter((y) => y.owner === address),
     },
+  );
+
+  const isUserRegistered = registeredUser?.filter(
+    (user) => user.owner === address,
   );
 
   useEffect(() => {
     if (address && !isLoading) {
-      if (registeredUser && registeredUser.length > 0) {
+      if (isUserRegistered) {
         setIsSelectRole(false);
       } else {
         setIsSelectRole(true);
@@ -49,7 +51,7 @@ function App() {
     } else if (!address) {
       setIsSelectRole(false);
     }
-  }, [address, registeredUser, isLoading]);
+  }, [address, isUserRegistered, isLoading]);
 
   return (
     <div className={styles.mainContainer}>
@@ -57,7 +59,7 @@ function App() {
       <div className={styles.contentContainer}>
         <Outlet context={registeredUser} />
       </div>
-      <SideBar registeredUser={registeredUser} />
+      <SideBar isUserRegistered={isUserRegistered} />
       {shouldShowBottomPlayer && <BottomPlayer />}
 
       <RoleSelectionModal

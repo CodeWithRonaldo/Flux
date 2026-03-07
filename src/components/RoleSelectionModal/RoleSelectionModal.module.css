@@ -130,6 +130,19 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  color: var(--color-primary);
+  font-size: 2rem;
+  font-family: var(--font);
+  font-weight: 700;
+  gap: 1rem;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .roleCards {
