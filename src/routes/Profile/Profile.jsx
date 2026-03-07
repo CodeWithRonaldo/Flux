@@ -76,11 +76,11 @@ const Profile = () => {
               <Jazzicon diameter={100} seed={jsNumberForAddress(address)} />
               <div className={styles.profileInfo}>
                 <h1 className={styles.profileName}>
-                  {registeredUser[0]?.username || "Vibe User"}
+                  {registeredUser?.[0]?.username || "Vibe User"}
                 </h1>
                 <p>
                   <User2 size={16} absoluteStrokeWidth />
-                  {registeredUser[0]?.role || ""}
+                  {registeredUser?.[0]?.role || ""}
                 </p>
                 <p className={styles.walletRow}>
                   <Wallet size={16} absoluteStrokeWidth />
@@ -106,7 +106,7 @@ const Profile = () => {
           </div>
 
           <div className={styles.bio}>
-            <p>{registeredUser[0]?.bio}</p>
+            <p>{registeredUser?.[0]?.bio || ""}</p>
           </div>
 
           <div className={styles.statsRow}>

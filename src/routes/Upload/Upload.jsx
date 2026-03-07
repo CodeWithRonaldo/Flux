@@ -3,9 +3,10 @@ import { BlackCard, GlassCard } from "../../components/GlassCard/GlassCard";
 import Form from "../../components/Form/Form";
 import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
-import { Check, Music, UploadIcon, User } from "lucide-react";
-import Image1 from "../../assets/fakelove.jpg";
+import { Check, Music, UploadIcon, User, X, CheckCircle2 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
+import { useIota } from "../../hooks/useIota";
+import { uploadToPinata } from "../../util/helper";
 
 const Upload = () => {
   const [title, setTitle] = useState("");
@@ -17,7 +18,9 @@ const Upload = () => {
   const [highQualityFile, setHighQualityFile] = useState(null);
   const [lowQualityFile, setLowQualityFile] = useState(null);
   const [forSale, setForSale] = useState(null);
+  const [artistPercentage, setArtistPercentage] = useState(100);
   const [contributors, setContributors] = useState([]);
+  const [newCollaborator, setNewCollaborator] = useState({ role: "", address: "", percentage: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
 
@@ -29,9 +32,37 @@ const Upload = () => {
   ];
 
   const registeredUser = useOutletContext();
+  const { address } = useIota();
 
-  const handleSubmit = (e) => {
+  const collaboratorTotal = contributors.reduce((sum, c) => sum + c.percentage, 0);
+  const totalUsed = artistPercentage + collaboratorTotal;
+  const remaining = 100 - totalUsed;
+
+  const canProceed = () => {
+    switch (activeStep) {
+      case 1: return title.trim() !== "" && description.trim() !== "" && genre !== "";
+      case 2: return lowQualityFile !== null && imageFile !== null;
+      case 3: return Number(price) > 0 && remaining === 0;
+      default: return true;
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const musicData = {
+      title,
+      description,
+      genre,
+      price: Number(price),
+      imageFile: await uploadToPinata(imageFile),
+      lowQualityFile: await uploadToPinata(lowQualityFile),
+      highQualityFile: await uploadToPinata(highQualityFile),
+      contributors: [
+        { role: "Artist", address, percentage: artistPercentage },
+        ...contributors,
+      ],
+    };
+    console.log("Music data to submit:", musicData);
     setIsSubmitting(true);
   };
 
@@ -101,7 +132,7 @@ const Upload = () => {
                         required
                       />
                       <div className={styles.charCount}>
-                        <span>{description.length}/10</span>
+                        <span>{description.length}/500</span>
                       </div>
                     </div>
                   </div>
@@ -137,70 +168,73 @@ const Upload = () => {
                   <div className={styles.musicQuality}>
                     <label
                       htmlFor="LowQualityFile"
-                      className={styles.mediaLabel}
+                      className={`${styles.mediaLabel} ${lowQualityFile ? styles.mediaLabelSelected : ""}`}
                     >
-                      <UploadIcon size={48} />
+                      {lowQualityFile
+                        ? <CheckCircle2 size={48} className={styles.mediaSelectedIcon} />
+                        : <UploadIcon size={48} />}
                       Standard Quality Track
-                      <span>(mp3, aac up to 20mb)</span>
+                      <span>{lowQualityFile ? lowQualityFile.name : "(mp3, aac up to 20mb)"}</span>
                       <input
                         type="file"
-                        value={lowQualityFile}
                         id="LowQualityFile"
                         accept="audio/*, .mp3, .aac, .ogg, .wav, .flac, .m4a"
                         onChange={(e) => {
-                          if (e.target.files[0]) {
-                            setLowQualityFile(e.target.files[0]);
-                          }
+                          if (e.target.files[0]) setLowQualityFile(e.target.files[0]);
                         }}
                       />
                     </label>
 
                     <label
                       htmlFor="highQualityFIle"
-                      className={styles.mediaLabel}
+                      className={`${styles.mediaLabel} ${highQualityFile ? styles.mediaLabelSelected : ""}`}
                     >
-                      <UploadIcon size={48} />
+                      {highQualityFile
+                        ? <CheckCircle2 size={48} className={styles.mediaSelectedIcon} />
+                        : <UploadIcon size={48} />}
                       Premium Quality Track
-                      <span>(wav, flac up to 50mb)</span>
+                      <span>{highQualityFile ? highQualityFile.name : "(mp3, aac, flac up to 50mb)"}</span>
                       <input
                         type="file"
-                        value={highQualityFile}
                         id="highQualityFIle"
                         accept="audio/* .mp3, .aac, .ogg, .wav, .flac, .m4a"
                         onChange={(e) => {
-                          if (e.target.files[0]) {
-                            setHighQualityFile(e.target.files[0]);
-                          }
+                          if (e.target.files[0]) setHighQualityFile(e.target.files[0]);
                         }}
                       />
                     </label>
                   </div>
 
-                  <label htmlFor="imageFile" className={styles.mediaLabel}>
-                    <UploadIcon size={48} />
-                    Music ArtWork
-                    <span>(jpg, jpeg, png, gif up to 5mb)</span>
+                  <label
+                    htmlFor="imageFile"
+                    className={`${styles.mediaLabel} ${imageFile ? styles.mediaLabelSelected : ""}`}
+                    style={imageFile ? { backgroundImage: `url(${URL.createObjectURL(imageFile)})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}
+                  >
+                    {!imageFile && <UploadIcon size={48} />}
+                    {!imageFile && "Music Artwork"}
+                    {!imageFile && <span>(jpg, jpeg, png, gif up to 5mb)</span>}
+                    {imageFile && (
+                      <div className={styles.imageOverlay}>
+                        <CheckCircle2 size={32} className={styles.mediaSelectedIcon} />
+                        <span>{imageFile.name}</span>
+                        <button
+                          type="button"
+                          className={styles.removeButton}
+                          onClick={(e) => { e.preventDefault(); setImageFile(null); }}
+                        >
+                          <X size={14} /> Remove
+                        </button>
+                      </div>
+                    )}
                     <input
                       type="file"
-                      // value={imageFile}
                       id="imageFile"
                       accept="image/* .jpg, .jpeg, .png, .gif"
                       onChange={(e) => {
-                        if (e.target.files[0]) {
-                          setImageFile(e.target.files[0]);
-                        }
+                        if (e.target.files[0]) setImageFile(e.target.files[0]);
                       }}
                     />
                   </label>
-                  {imageFile && (
-                    <button
-                      type="button"
-                      onClick={() => setImageFile(null)}
-                      className={styles.removeButton}
-                    >
-                      X
-                    </button>
-                  )}
                 </div>
               )}
 
@@ -221,33 +255,92 @@ const Upload = () => {
                   <div className={styles.revenueDistribution}>
                     <div className={styles.header}>
                       <h4>Revenue Distribution</h4>
-                      <span>0% Left</span>
+                      <span className={remaining < 0 ? styles.overLimit : remaining === 0 ? styles.fullLimit : ""}>
+                        {Math.max(0, remaining)}% Left
+                      </span>
                     </div>
+
+                    {/* Artist row — fixed role & address, editable percentage */}
+                    <div className={styles.collaboratorList}>
+                      <div className={styles.collaboratorItem}>
+                        <span className={styles.collaboratorRole}>Artist</span>
+                        <code className={styles.collaboratorAddress}>
+                          {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "—"}
+                        </code>
+                        <input
+                          type="number"
+                          className={styles.collaboratorPctInput}
+                          min="0"
+                          max={100 - collaboratorTotal}
+                          value={artistPercentage}
+                          onChange={(e) => {
+                            const val = Math.min(Number(e.target.value), 100 - collaboratorTotal);
+                            setArtistPercentage(Math.max(0, val));
+                          }}
+                        />
+                        <span className={styles.collaboratorPctLabel}>%</span>
+                      </div>
+
+                      {contributors.map((c, i) => (
+                        <div key={i} className={styles.collaboratorItem}>
+                          <span className={styles.collaboratorRole}>{c.role}</span>
+                          <code className={styles.collaboratorAddress}>{c.address.slice(0, 6)}...{c.address.slice(-4)}</code>
+                          <span className={styles.collaboratorPct}>{c.percentage}%</span>
+                          <button
+                            type="button"
+                            className={styles.removeCollaborator}
+                            onClick={() => setContributors((prev) => prev.filter((_, idx) => idx !== i))}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add collaborator form */}
                     <div className={styles.distributionGrid}>
                       <div className={styles.distributionInput}>
-                        <input type="text" placeholder="Role" />
+                        <input
+                          type="text"
+                          placeholder="Role"
+                          value={newCollaborator.role}
+                          onChange={(e) => setNewCollaborator((prev) => ({ ...prev, role: e.target.value }))}
+                        />
                         <select
                           name="address"
                           id="address"
                           className={styles["form-select"]}
-                          required
+                          value={newCollaborator.address}
+                          onChange={(e) => setNewCollaborator((prev) => ({ ...prev, address: e.target.value }))}
                         >
-                          <option selected value="" disabled>
-                            Select User
-                          </option>
+                          <option value="" disabled>Select User</option>
                           {registeredUser?.map((user) => (
-                            <option key={user.owner} value={user.owner}>
-                              {user.owner}
-                            </option>
+                            <option key={user.owner} value={user.owner}>{user.owner}</option>
                           ))}
                         </select>
-
-                        <input type="number" placeholder="0" />
+                        <input
+                          type="number"
+                          placeholder="0"
+                          min="0"
+                          max={remaining}
+                          value={newCollaborator.percentage}
+                          onChange={(e) => {
+                            const val = Math.min(Number(e.target.value), remaining);
+                            setNewCollaborator((prev) => ({ ...prev, percentage: Math.max(0, val) }));
+                          }}
+                        />
                       </div>
                       <Button
                         type="button"
                         variant="btn-ghost"
                         className={styles.submitButton}
+                        disabled={remaining <= 0}
+                        onClick={() => {
+                          const { role, address: addr, percentage } = newCollaborator;
+                          if (!role || !addr || !percentage) return;
+                          setContributors((prev) => [...prev, { role, address: addr, percentage: Number(percentage) }]);
+                          setNewCollaborator({ role: "", address: "", percentage: "" });
+                        }}
                       >
                         Add Collaborator
                       </Button>
@@ -259,32 +352,36 @@ const Upload = () => {
               {activeStep === 4 && (
                 <div className={styles.review}>
                   <div className={styles.reviewImage}>
-                    <img src={Image1} alt="cover art" />
+                    {imageFile && <img src={URL.createObjectURL(imageFile)} alt="cover art" />}
                   </div>
                   <div className={styles.reviewDetails}>
+                    <p>TITLE <span>{title}</span></p>
+                    <p>DESCRIPTION <span>{description}</span></p>
+                    <p>GENRE <span className={styles.genre}>{genre}</span></p>
+                    <p>PRICE <span>{price} IOTA</span></p>
                     <p>
-                      TITLE <span>The girl in Lemonade dress</span>
+                      STANDARD TRACK
+                      <span>{lowQualityFile?.name || "—"}</span>
                     </p>
                     <p>
-                      DESCPRITION
-                      <span>The girl in Lemonade dress is my baby</span>
-                    </p>
-                    <p>
-                      GENRE
-                      <span className={styles.genre}>Takawaka</span>
-                    </p>
-                    <p>
-                      PRICE
-                      <span>2 IOTA</span>
+                      PREMIUM TRACK
+                      <span>{highQualityFile?.name || "Not provided"}</span>
                     </p>
                     <div>
                       <p>REVENUE SPLITTING</p>
                       <div className={styles.tinySplitsList}>
                         <div className={styles.tinySplit}>
                           <strong>Artist</strong>
-                          <code>0x123456...abcdef</code>
-                          <span>100%</span>
+                          <code>{address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "—"}</code>
+                          <span>{artistPercentage}%</span>
                         </div>
+                        {contributors.map((c, i) => (
+                          <div key={i} className={styles.tinySplit}>
+                            <strong>{c.role}</strong>
+                            <code>{c.address.slice(0, 6)}...{c.address.slice(-4)}</code>
+                            <span>{c.percentage}%</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -308,13 +405,14 @@ const Upload = () => {
                     onClick={() => setActiveStep(activeStep + 1)}
                     variant="btn-primary"
                     className={styles.submitButton}
+                    disabled={!canProceed()}
                   >
                     Continue
                   </Button>
                 ) : (
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || remaining !== 0}
                     variant="btn-primary"
                     className={styles.submitButton}
                   >

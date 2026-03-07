@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Modal from "../Modal/Modal";
 import styles from "./RoleSelectionModal.module.css";
-import { Headphones, Music, Loader2 } from "lucide-react";
+import { Headphones, Music, CheckCircle } from "lucide-react";
 import Button from "../Button/Button";
 import ListenerOnboarding from "../ListenerOnboarding/ListenerOnboarding";
 import ArtistOnboarding from "../ArtistOnboarding/ArtistOnboarding";
@@ -9,14 +9,11 @@ import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 
 const RoleSelectionModal = ({ isOpen, onClose }) => {
   const [role, setRole] = useState("");
+  const [done, setDone] = useState(false);
   const { registerUser, loading } = useVibetraxHook();
 
-  const onListener = () => {
-    setRole("listener");
-  };
-  const onArtist = () => {
-    setRole("artist");
-  };
+  const onListener = () => setRole("listener");
+  const onArtist = () => setRole("artist");
 
   const handleComplete = async (data) => {
     const userData = {
@@ -26,7 +23,10 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
       genre: data.genres || [],
     };
 
-    await registerUser(userData);
+    const result = await registerUser(userData);
+    if (!result?.digest) return;
+    setDone(true);
+    setTimeout(() => onClose(), 1800);
   };
 
   return (
@@ -65,17 +65,37 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       )}
-      {role === "listener" && !loading && (
-        <ListenerOnboarding onComplete={handleComplete} />
-      )}
-      {role === "artist" && !loading && (
-        <ArtistOnboarding onComplete={handleComplete} />
+
+      {role !== "" && !loading && !done && (
+        role === "listener"
+          ? <ListenerOnboarding onComplete={handleComplete} />
+          : <ArtistOnboarding onComplete={handleComplete} />
       )}
 
       {loading && (
-        <div className={styles.loading}>
-          <Loader2 size={48} />
-          <p>Registering {role}...</p>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingOrb}>
+            <div className={styles.orbRing} />
+            <div className={styles.orbRing} />
+            <div className={styles.orbRing} />
+            <div className={styles.orbIcon}>
+              {role === "listener" ? <Headphones size={32} /> : <Music size={32} />}
+            </div>
+          </div>
+          <h2 className={styles.loadingTitle}>Setting up your profile</h2>
+          <p className={styles.loadingSubtitle}>Confirming on IOTA blockchain<span className={styles.dots} /></p>
+        </div>
+      )}
+
+      {done && (
+        <div className={styles.successContainer}>
+          <div className={styles.successIcon}>
+            <CheckCircle size={56} />
+          </div>
+          <h2 className={styles.successTitle}>You&apos;re all set!</h2>
+          <p className={styles.successSubtitle}>
+            Welcome to Flux as a{role === "artist" ? "n" : ""} <strong>{role}</strong>
+          </p>
         </div>
       )}
     </Modal>

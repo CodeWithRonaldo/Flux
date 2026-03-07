@@ -31,11 +31,20 @@ export const useVibetraxHook = () => {
       const result = await client.signAndExecuteTransaction({
         transaction: tx,
         signer: keypair,
+        options: { showEffects: true },
       });
 
       console.log("Transaction result", result);
+
+      if (result.effects?.status?.status !== "success") {
+        console.log("Transaction failed:", result.effects?.status);
+        return null;
+      }
+
+      return result;
     } catch (e) {
       console.log("Error:", e);
+      return null;
     } finally {
       setLoading(false);
     }
