@@ -38,37 +38,6 @@ module vibetrax::vibetrax_tests {
         vibetrax::init_for_testing(ts::ctx(scenario));
     }
 
-    // ── User factories ────────────────────────────────────────────────────────
-    fun artist_user(): vibetrax::User {
-        vibetrax::new_user(
-            ascii::string(b"Artist One"), ARTIST,
-            option::none(), option::none(), option::none()
-        )
-    }
-
-    fun buyer_user(): vibetrax::User {
-        vibetrax::new_user(
-            ascii::string(b"Buyer One"), BUYER,
-            option::none(), option::none(), option::none()
-        )
-    }
-
-    fun collab_user(split: u64, has_royalty: bool): vibetrax::User {
-        vibetrax::new_user(
-            ascii::string(b"Collaborator"), COLLAB,
-            option::some(ascii::string(b"Producer")),
-            option::some(split),
-            option::some(has_royalty)
-        )
-    }
-
-    fun subscriber_user(): vibetrax::User {
-        vibetrax::new_user(
-            ascii::string(b"Subscriber"), SUBSCRIBER,
-            option::none(), option::none(), option::none()
-        )
-    }
-
     // ── Upload a basic track as ARTIST (includes next_tx) ─────────────────────
     fun upload_track(scenario: &mut ts::Scenario, clock: &clock::Clock) {
         ts::next_tx(scenario, ARTIST);
@@ -80,8 +49,15 @@ module vibetrax::vibetrax_tests {
             ascii::string(b"ipfs://preview"),
             ascii::string(b"ipfs://full"),
             10,
+            ascii::string(b"Artist One"),
+            ascii::string(b"artist"),
+            100,
+            true,
             vector::empty(),
-            artist_user(),
+            vector::empty(),
+            vector::empty(),
+            vector::empty(),
+            vector::empty(),
             clock,
             ts::ctx(scenario)
         );
@@ -91,11 +67,16 @@ module vibetrax::vibetrax_tests {
     fun do_subscribe(scenario: &mut ts::Scenario, clock: &clock::Clock) {
         ts::next_tx(scenario, SUBSCRIBER);
         let payment = coin::mint_for_testing<IOTA>(SUBSCRIPTION_PRICE, ts::ctx(scenario));
-        vibetrax::subscribe(subscriber_user(), payment, clock, ts::ctx(scenario));
+        vibetrax::subscribe(
+            ascii::string(b"Subscriber"),
+            ascii::string(b"listener"),
+            payment,
+            clock,
+            ts::ctx(scenario)
+        );
     }
 
     // ── Fund ARTIST with `amount` VIBE from the reward pool ───────────────────
-    // This keeps supply tracking consistent (coins come from TreasuryCap mint).
     fun fund_artist_vibe(scenario: &mut ts::Scenario, amount: u64) {
         ts::next_tx(scenario, ADMIN);
         let mut treasury = ts::take_shared<VibeTreasury>(scenario);
@@ -148,10 +129,8 @@ module vibetrax::vibetrax_tests {
         ts::next_tx(&mut scenario, ADMIN);
         {
             let mut treasury = ts::take_shared<VibeTreasury>(&scenario);
-            // Drain the entire pool
             vibe_token::pay_stream_reward(&mut treasury, MAX_SUPPLY, SUBSCRIBER, ts::ctx(&mut scenario));
             assert!(vibe_token::reward_pool_balance(&treasury) == 0, 2);
-            // Second call must be a silent no-op, not an abort
             vibe_token::pay_stream_reward(&mut treasury, 1, SUBSCRIBER, ts::ctx(&mut scenario));
             assert!(vibe_token::reward_pool_balance(&treasury) == 0, 3);
             ts::return_shared(treasury);
@@ -165,7 +144,6 @@ module vibetrax::vibetrax_tests {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
 
-        // Get VIBE from the reward pool so supply tracking is correct
         fund_artist_vibe(&mut scenario, BOOST_PLAN_BASIC);
 
         ts::next_tx(&mut scenario, ARTIST);
@@ -174,9 +152,7 @@ module vibetrax::vibetrax_tests {
             let mut manager = ts::take_shared<CoinManager<VIBE_TOKEN>>(&scenario);
             let pool_before = vibe_token::reward_pool_balance(&treasury);
             let vibe = ts::take_from_address<coin::Coin<VIBE_TOKEN>>(&scenario, ARTIST);
-            // Burning reduces pool-derived supply; call must not abort
             vibe_token::burn(&mut treasury, &mut manager, vibe);
-            // The reward pool gave out the coins, so it still reflects the deduction
             assert!(vibe_token::reward_pool_balance(&treasury) == pool_before, 4);
             ts::return_shared(treasury);
             ts::return_shared(manager);
@@ -211,7 +187,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 2)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EINVALID_PRICE)]
     fun test_upload_music_zero_price_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -222,7 +198,9 @@ module vibetrax::vibetrax_tests {
             ascii::string(b"Bad Song"), ascii::string(b"desc"),
             ascii::string(b"genre"), ascii::string(b"img"),
             ascii::string(b"preview"), ascii::string(b"full"),
-            0, vector::empty(), artist_user(),
+            0,
+            ascii::string(b"Artist One"), ascii::string(b"artist"), 100, true,
+            vector::empty(), vector::empty(), vector::empty(), vector::empty(), vector::empty(),
             &clock, ts::ctx(&mut scenario)
         );
 
@@ -230,27 +208,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 4)]
-    fun test_upload_music_wrong_signer_fails() {
-        let mut scenario = ts::begin(ADMIN);
-        setup(&mut scenario);
-        let clock = clock::create_for_testing(ts::ctx(&mut scenario));
-
-        // BUYER signs but the User struct declares ARTIST — mismatch must abort
-        ts::next_tx(&mut scenario, BUYER);
-        vibetrax::upload_music(
-            ascii::string(b"Fake Song"), ascii::string(b"desc"),
-            ascii::string(b"genre"), ascii::string(b"img"),
-            ascii::string(b"preview"), ascii::string(b"full"),
-            10, vector::empty(), artist_user(),
-            &clock, ts::ctx(&mut scenario)
-        );
-
-        clock::destroy_for_testing(clock);
-        ts::end(scenario);
-    }
-
-    #[test, expected_failure(abort_code = 10)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EHAS_DUPLICATES)]
     fun test_upload_music_duplicate_collaborator_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -258,12 +216,17 @@ module vibetrax::vibetrax_tests {
 
         ts::next_tx(&mut scenario, ARTIST);
         // Same COLLAB address appears twice
-        let collabs = vector[collab_user(10, true), collab_user(10, true)];
         vibetrax::upload_music(
             ascii::string(b"Dup Song"), ascii::string(b"desc"),
             ascii::string(b"genre"), ascii::string(b"img"),
             ascii::string(b"preview"), ascii::string(b"full"),
-            10, collabs, artist_user(),
+            10,
+            ascii::string(b"Artist One"), ascii::string(b"artist"), 60, true,
+            vector[ascii::string(b"Collaborator"), ascii::string(b"Collaborator")],
+            vector[COLLAB, COLLAB],
+            vector[ascii::string(b"Producer"), ascii::string(b"Producer")],
+            vector[20, 20],
+            vector[true, true],
             &clock, ts::ctx(&mut scenario)
         );
 
@@ -287,7 +250,11 @@ module vibetrax::vibetrax_tests {
         {
             let mut music = ts::take_shared<Music>(&scenario);
             let payment = coin::mint_for_testing<IOTA>(10 * NANOS, ts::ctx(&mut scenario));
-            vibetrax::purchase_music_nft(&mut music, payment, buyer_user(), ts::ctx(&mut scenario));
+            vibetrax::purchase_music_nft(
+                &mut music, payment,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
+            );
             assert!(!vibetrax::is_for_sale(&music), 9);
             ts::return_shared(music);
         };
@@ -302,22 +269,31 @@ module vibetrax::vibetrax_tests {
         setup(&mut scenario);
         let clock = clock::create_for_testing(ts::ctx(&mut scenario));
 
-        // Upload with a 20% collaborator
+        // Upload with a 20% collaborator (artist keeps 80%)
         ts::next_tx(&mut scenario, ARTIST);
         vibetrax::upload_music(
             ascii::string(b"Collab Song"), ascii::string(b"desc"),
             ascii::string(b"genre"), ascii::string(b"img"),
             ascii::string(b"preview"), ascii::string(b"full"),
             10,
-            vector[collab_user(20, true)],
-            artist_user(), &clock, ts::ctx(&mut scenario)
+            ascii::string(b"Artist One"), ascii::string(b"artist"), 80, true,
+            vector[ascii::string(b"Collaborator")],
+            vector[COLLAB],
+            vector[ascii::string(b"Producer")],
+            vector[20],
+            vector[true],
+            &clock, ts::ctx(&mut scenario)
         );
 
         ts::next_tx(&mut scenario, BUYER);
         {
             let mut music = ts::take_shared<Music>(&scenario);
             let payment = coin::mint_for_testing<IOTA>(10 * NANOS, ts::ctx(&mut scenario));
-            vibetrax::purchase_music_nft(&mut music, payment, buyer_user(), ts::ctx(&mut scenario));
+            vibetrax::purchase_music_nft(
+                &mut music, payment,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
+            );
             assert!(!vibetrax::is_for_sale(&music), 10);
             ts::return_shared(music);
         };
@@ -326,7 +302,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 1)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EINVALID_PURCHASE)]
     fun test_purchase_not_for_sale_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -339,7 +315,11 @@ module vibetrax::vibetrax_tests {
         {
             let mut music = ts::take_shared<Music>(&scenario);
             let payment = coin::mint_for_testing<IOTA>(10 * NANOS, ts::ctx(&mut scenario));
-            vibetrax::purchase_music_nft(&mut music, payment, buyer_user(), ts::ctx(&mut scenario));
+            vibetrax::purchase_music_nft(
+                &mut music, payment,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
+            );
             ts::return_shared(music);
         };
 
@@ -348,11 +328,11 @@ module vibetrax::vibetrax_tests {
         {
             let mut music = ts::take_shared<Music>(&scenario);
             let payment = coin::mint_for_testing<IOTA>(10 * NANOS, ts::ctx(&mut scenario));
-            let collab_as_buyer = vibetrax::new_user(
-                ascii::string(b"Collab"), COLLAB,
-                option::none(), option::none(), option::none()
+            vibetrax::purchase_music_nft(
+                &mut music, payment,
+                ascii::string(b"Collab"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
             );
-            vibetrax::purchase_music_nft(&mut music, payment, collab_as_buyer, ts::ctx(&mut scenario));
             ts::return_shared(music);
         };
 
@@ -360,7 +340,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 7)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EINSUFFICIENT_AMOUNT)]
     fun test_purchase_wrong_amount_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -372,7 +352,11 @@ module vibetrax::vibetrax_tests {
         {
             let mut music = ts::take_shared<Music>(&scenario);
             let payment = coin::mint_for_testing<IOTA>(1, ts::ctx(&mut scenario)); // wrong
-            vibetrax::purchase_music_nft(&mut music, payment, buyer_user(), ts::ctx(&mut scenario));
+            vibetrax::purchase_music_nft(
+                &mut music, payment,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
+            );
             ts::return_shared(music);
         };
 
@@ -396,7 +380,11 @@ module vibetrax::vibetrax_tests {
         {
             let mut music = ts::take_shared<Music>(&scenario);
             let price_before = vibetrax::price(&music);
-            vibetrax::like_music(&mut music, buyer_user(), ts::ctx(&mut scenario));
+            vibetrax::like_music(
+                &mut music,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
+            );
             assert!(vibetrax::likes(&music) == 1, 11);
             assert!(vibetrax::price(&music) == price_before + LIKE_VALUE_INCREASE, 12);
             ts::return_shared(music);
@@ -406,7 +394,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 12)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EALREADY_LIKED)]
     fun test_like_music_twice_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -417,28 +405,16 @@ module vibetrax::vibetrax_tests {
         ts::next_tx(&mut scenario, BUYER);
         {
             let mut music = ts::take_shared<Music>(&scenario);
-            vibetrax::like_music(&mut music, buyer_user(), ts::ctx(&mut scenario));
-            vibetrax::like_music(&mut music, buyer_user(), ts::ctx(&mut scenario)); // must abort
-            ts::return_shared(music);
-        };
-
-        clock::destroy_for_testing(clock);
-        ts::end(scenario);
-    }
-
-    #[test, expected_failure(abort_code = 11)]
-    fun test_like_music_address_mismatch_fails() {
-        let mut scenario = ts::begin(ADMIN);
-        setup(&mut scenario);
-        let clock = clock::create_for_testing(ts::ctx(&mut scenario));
-
-        upload_track(&mut scenario, &clock);
-
-        // BUYER signs but passes artist_user (ARTIST address)
-        ts::next_tx(&mut scenario, BUYER);
-        {
-            let mut music = ts::take_shared<Music>(&scenario);
-            vibetrax::like_music(&mut music, artist_user(), ts::ctx(&mut scenario));
+            vibetrax::like_music(
+                &mut music,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
+            );
+            vibetrax::like_music(
+                &mut music,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario) // must abort
+            );
             ts::return_shared(music);
         };
 
@@ -470,7 +446,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 7)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EINSUFFICIENT_AMOUNT)]
     fun test_subscribe_wrong_price_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -478,7 +454,10 @@ module vibetrax::vibetrax_tests {
 
         ts::next_tx(&mut scenario, SUBSCRIBER);
         let payment = coin::mint_for_testing<IOTA>(1, ts::ctx(&mut scenario));
-        vibetrax::subscribe(subscriber_user(), payment, &clock, ts::ctx(&mut scenario));
+        vibetrax::subscribe(
+            ascii::string(b"Subscriber"), ascii::string(b"listener"),
+            payment, &clock, ts::ctx(&mut scenario)
+        );
 
         clock::destroy_for_testing(clock);
         ts::end(scenario);
@@ -503,7 +482,8 @@ module vibetrax::vibetrax_tests {
 
             vibetrax::stream_music(
                 &mut music, &mut sub, &mut treasury,
-                subscriber_user(), &clock, ts::ctx(&mut scenario)
+                ascii::string(b"Subscriber"), ascii::string(b"listener"),
+                &clock, ts::ctx(&mut scenario)
             );
 
             assert!(vibe_token::reward_pool_balance(&treasury) == pool_before - STREAM_TOKEN_REWARD, 14);
@@ -517,7 +497,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 13)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EALREADY_STREAMED)]
     fun test_stream_music_twice_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -533,8 +513,16 @@ module vibetrax::vibetrax_tests {
             let mut sub = ts::take_from_sender<Subscription>(&scenario);
             let mut treasury = ts::take_shared<VibeTreasury>(&scenario);
 
-            vibetrax::stream_music(&mut music, &mut sub, &mut treasury, subscriber_user(), &clock, ts::ctx(&mut scenario));
-            vibetrax::stream_music(&mut music, &mut sub, &mut treasury, subscriber_user(), &clock, ts::ctx(&mut scenario)); // must abort
+            vibetrax::stream_music(
+                &mut music, &mut sub, &mut treasury,
+                ascii::string(b"Subscriber"), ascii::string(b"listener"),
+                &clock, ts::ctx(&mut scenario)
+            );
+            vibetrax::stream_music(
+                &mut music, &mut sub, &mut treasury,
+                ascii::string(b"Subscriber"), ascii::string(b"listener"),
+                &clock, ts::ctx(&mut scenario) // must abort
+            );
 
             ts::return_shared(music);
             ts::return_to_sender(&scenario, sub);
@@ -545,7 +533,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 14)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::ESUBSCRIPTION_EXPIRED)]
     fun test_stream_expired_subscription_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -564,7 +552,11 @@ module vibetrax::vibetrax_tests {
             let mut sub = ts::take_from_sender<Subscription>(&scenario);
             let mut treasury = ts::take_shared<VibeTreasury>(&scenario);
 
-            vibetrax::stream_music(&mut music, &mut sub, &mut treasury, subscriber_user(), &clock, ts::ctx(&mut scenario));
+            vibetrax::stream_music(
+                &mut music, &mut sub, &mut treasury,
+                ascii::string(b"Subscriber"), ascii::string(b"listener"),
+                &clock, ts::ctx(&mut scenario)
+            );
 
             ts::return_shared(music);
             ts::return_to_sender(&scenario, sub);
@@ -590,7 +582,6 @@ module vibetrax::vibetrax_tests {
         ts::next_tx(&mut scenario, BUYER);
         {
             let music = ts::take_shared<Music>(&scenario);
-            // mint_for_testing is safe here — we're only transferring, not burning
             let tip = coin::mint_for_testing<VIBE_TOKEN>(50_000_000, ts::ctx(&mut scenario));
             vibetrax::tip_artist(&music, tip, ts::ctx(&mut scenario));
             ts::return_shared(music);
@@ -600,7 +591,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 7)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EINSUFFICIENT_AMOUNT)]
     fun test_tip_zero_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -632,7 +623,6 @@ module vibetrax::vibetrax_tests {
         clock::set_for_testing(&mut clock, 0);
 
         upload_track(&mut scenario, &clock);
-        // Seed ARTIST with exactly 100 VIBE from the reward pool
         fund_artist_vibe(&mut scenario, BOOST_PLAN_BASIC);
 
         ts::next_tx(&mut scenario, ARTIST);
@@ -712,7 +702,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 16)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EINVALID_BOOST_PLAN)]
     fun test_boost_invalid_plan_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -738,7 +728,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 4)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::ENOT_ARTIST)]
     fun test_boost_by_non_artist_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -793,7 +783,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 5)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::ENOT_OWNER)]
     fun test_toggle_sale_by_non_owner_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -837,7 +827,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 4)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::ENOT_ARTIST)]
     fun test_update_music_by_non_artist_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -861,7 +851,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 1)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EINVALID_PURCHASE)]
     fun test_update_music_after_sale_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -874,7 +864,11 @@ module vibetrax::vibetrax_tests {
         {
             let mut music = ts::take_shared<Music>(&scenario);
             let payment = coin::mint_for_testing<IOTA>(10 * NANOS, ts::ctx(&mut scenario));
-            vibetrax::purchase_music_nft(&mut music, payment, buyer_user(), ts::ctx(&mut scenario));
+            vibetrax::purchase_music_nft(
+                &mut music, payment,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
+            );
             ts::return_shared(music);
         };
 
@@ -906,7 +900,7 @@ module vibetrax::vibetrax_tests {
         ts::next_tx(&mut scenario, ARTIST);
         {
             let music = ts::take_shared<Music>(&scenario);
-            vibetrax::delete_music(music, ts::ctx(&mut scenario)); // object consumed and deleted
+            vibetrax::delete_music(music, ts::ctx(&mut scenario));
         };
 
         clock::destroy_for_testing(clock);
@@ -1003,7 +997,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 17)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EUNAUTHORIZED)]
     fun test_update_profile_unauthorized_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -1034,7 +1028,7 @@ module vibetrax::vibetrax_tests {
         ts::end(scenario);
     }
 
-    #[test, expected_failure(abort_code = 1)]
+    #[test, expected_failure(abort_code = vibetrax::vibetrax::EINVALID_PURCHASE)]
     fun test_delete_music_after_sale_fails() {
         let mut scenario = ts::begin(ADMIN);
         setup(&mut scenario);
@@ -1046,7 +1040,11 @@ module vibetrax::vibetrax_tests {
         {
             let mut music = ts::take_shared<Music>(&scenario);
             let payment = coin::mint_for_testing<IOTA>(10 * NANOS, ts::ctx(&mut scenario));
-            vibetrax::purchase_music_nft(&mut music, payment, buyer_user(), ts::ctx(&mut scenario));
+            vibetrax::purchase_music_nft(
+                &mut music, payment,
+                ascii::string(b"Buyer One"), ascii::string(b"listener"),
+                ts::ctx(&mut scenario)
+            );
             ts::return_shared(music);
         };
 

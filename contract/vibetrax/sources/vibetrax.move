@@ -52,7 +52,7 @@ module vibetrax::vibetrax {
     const BOOST_DURATION_BASIC_MS: u64 = 7  * 24 * 60 * 60 * 1000;
     const BOOST_DURATION_PRO_MS: u64 = 30  * 24 * 60 * 60 * 1000;
     const BOOST_DURATION_ELITE_MS: u64 = 90 * 24 * 60 * 60 * 1000;
-    const TREASURY_ADDRESS: address = @0x0; // TODO: replace with your actual wallet address
+    const TREASURY_ADDRESS: address = @0x7c7bbf348248342e6b1aebe7cc3bade1611df2e4bb95dae7b470c48393a7add3;
 
 
     // === Structs ==
@@ -292,19 +292,55 @@ module vibetrax::vibetrax {
         preview_music: String,
         full_music: String,
         price: u64,
-        collaborators: vector<User>,
-        artist: User,
+        artist_name: String,
+        artist_role: String,
+        artist_split: u64,
+        artist_has_royalty: bool,
+        collab_names: vector<String>,
+        collab_addresses: vector<address>,
+        collab_roles: vector<String>,
+        collab_splits: vector<u64>,
+        collab_has_royalty: vector<bool>,
         clock: &Clock,
         ctx: &mut TxContext
     ) {
         assert!(price > 0, EINVALID_PRICE);
         assert!(preview_music.length() > 0 && full_music.length() > 0, EINVALID_METADATA);
+        assert!(
+            collab_names.length() == collab_addresses.length() &&
+            collab_addresses.length() == collab_roles.length() &&
+            collab_roles.length() == collab_splits.length() &&
+            collab_splits.length() == collab_has_royalty.length(),
+            EINVALID_METADATA
+        );
 
-        // Assert caller is the declared artist instead of silently overwriting
         let sender = tx_context::sender(ctx);
-        assert!(artist.user_address == sender, ENOT_ARTIST);
 
-        // Duplicate check: count occurrences of each address; abort if any > 1
+        // Reconstruct artist
+        let artist = User {
+            name: artist_name,
+            user_address: sender,
+            role: option::some(artist_role),
+            split: option::some(artist_split),
+            has_royalty: option::some(artist_has_royalty),
+        };
+
+        // Reconstruct collaborators
+        let mut collaborators: vector<User> = vector::empty();
+        let mut i = 0;
+        while (i < collab_names.length()) {
+            let collaborator = User {
+                name: collab_names[i],
+                user_address: collab_addresses[i],
+                role: option::some(collab_roles[i]),
+                split: option::some(collab_splits[i]),
+                has_royalty: option::some(collab_has_royalty[i]),
+            };
+            collaborators.push_back(collaborator);
+            i = i + 1;
+        };
+
+        // Duplicate check
         if (collaborators.length() > 0) {
             collaborators.do_ref!(|collaborator| {
                 let count = count_address_occurrences(&collaborators, collaborator.user_address);
@@ -316,7 +352,6 @@ module vibetrax::vibetrax {
         let event_id = music_id.to_inner();
         let creation_time = clock.timestamp_ms();
 
-        // artist has `copy` so it can be used for both fields without a move error
         let nft = Music {
             id: music_id,
             artist: artist,
@@ -327,7 +362,7 @@ module vibetrax::vibetrax {
             music_image: music_image,
             preview_music: preview_music,
             full_music: full_music,
-            price: price * NANOS, // Convert to nanos for precision
+            price: price * NANOS,
             streaming_count: 0,
             collaborators: collaborators,
             for_sale: true,
@@ -348,7 +383,7 @@ module vibetrax::vibetrax {
             music_image: music_image,
             preview_music: preview_music,
             full_music: full_music,
-            price: price * NANOS, // Convert to nanos for precision
+            price: price * NANOS,
             streaming_count: 0,
             collaborators: collaborators,
             for_sale: true,
@@ -363,7 +398,8 @@ module vibetrax::vibetrax {
     public fun purchase_music_nft(
         music: &mut Music,
         mut payment: Coin<IOTA>,
-        buyer: User,
+        buyer_name: String,
+        buyer_role: String, 
         ctx: &mut TxContext
     ) {
         assert!(music.for_sale, EINVALID_PURCHASE);
@@ -371,6 +407,15 @@ module vibetrax::vibetrax {
         assert!(payment_amount == music.price, EINSUFFICIENT_AMOUNT);
 
         let signer_address = tx_context::sender(ctx);
+
+        let buyer = User{
+            name: buyer_name,
+            user_address: signer_address,
+            role: option::some(buyer_role),
+            split: option::none(),
+            has_royalty: option::none(),
+        };
+
         assert!(buyer.user_address == signer_address, EADDRESS_MISMATCH);
         assert!(buyer.user_address != music.current_owner.user_address, EINVALID_PURCHASE);
 
@@ -443,8 +488,15 @@ module vibetrax::vibetrax {
         });
     }
 
-    public fun like_music(music: &mut Music, liker: User, ctx: &mut TxContext) {
+    public fun like_music(music: &mut Music, liker_name: String, liker_role: String, ctx: &mut TxContext) {
         let signer_address = tx_context::sender(ctx);
+        let liker = User {
+            name: liker_name,
+            user_address: signer_address,
+            role: option::some(liker_role),
+            split: option::none(),
+            has_royalty: option::none(),
+        };
         assert!(liker.user_address == signer_address, EADDRESS_MISMATCH);
         // Add check to ensure one like per account per music
         assert!(!music.likes_table.contains(liker.user_address), EALREADY_LIKED);
@@ -473,11 +525,19 @@ module vibetrax::vibetrax {
         music: &mut Music,
         subscription: &mut Subscription,
         treasury: &mut VibeTreasury,
-        streamer: User,
+        streamer_name: String,
+        streamer_role: String,
         clock: &Clock,
         ctx: &mut TxContext
     ) {
         let signer_address = tx_context::sender(ctx);
+        let streamer = User {
+            name: streamer_name,
+            user_address: signer_address,
+            role: option::some(streamer_role),
+            split: option::none(),
+            has_royalty: option::none(),
+        };
         assert!(streamer.user_address == signer_address, EADDRESS_MISMATCH);
         assert!(subscription.subscriber.user_address == signer_address, ESUBSCRIPTION_MISMATCH);
         assert!(clock.timestamp_ms() <= subscription.expiry_ms, ESUBSCRIPTION_EXPIRED);
@@ -703,7 +763,8 @@ module vibetrax::vibetrax {
     }
 
     public fun subscribe(
-        subscriber: User,
+        subscriber_name: String,
+        subscriber_role: String,
         payment: Coin<IOTA>,
         clock: &Clock,
         ctx: &mut TxContext
@@ -712,22 +773,28 @@ module vibetrax::vibetrax {
         assert!(payment.value() == SUBSCRIPTION_PRICE, EINSUFFICIENT_AMOUNT);
         let price = payment.value();
         public_transfer(payment, TREASURY_ADDRESS);
-        let mut subscriber_user = subscriber;
-        subscriber_user.user_address = subscriber_address;
+
+        let subscriber = User {
+            name: subscriber_name,
+            user_address: subscriber_address,
+            role: option::some(subscriber_role),
+            split: option::none(),
+            has_royalty: option::none(),
+        };
 
         let expiry_ms = clock.timestamp_ms() + SUBSCRIPTION_DURATION_MS;
-        event::emit(SubscriptionCreated { subscriber: subscriber_user, price, expiry_ms });
+        event::emit(SubscriptionCreated { subscriber, price, expiry_ms });
 
         transfer::transfer(
             Subscription {
                 id: object::new(ctx),
-                subscriber: subscriber_user,
+                subscriber,
                 price,
                 expiry_ms,
                 daily_vibe_earned: 0,
                 last_earn_day: 0
             },
-            subscriber_user.user_address
+            subscriber_address
         );
     }
 
