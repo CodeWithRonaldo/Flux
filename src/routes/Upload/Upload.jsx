@@ -7,6 +7,7 @@ import { Check, Music, UploadIcon, User, X, CheckCircle2 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 import { useIota } from "../../hooks/useIota";
 import { uploadToPinata } from "../../util/helper";
+import { useMusicUpload } from "../../hooks/useMusicUpload";
 
 const Upload = () => {
   const [title, setTitle] = useState("");
@@ -20,6 +21,7 @@ const Upload = () => {
   const [artistHasRoyalty, setArtistHasRoyalty] = useState(false);
   const [contributors, setContributors] = useState([]);
   const [newCollaborator, setNewCollaborator] = useState({
+    name: "",
     role: "",
     address: "",
     percentage: "",
@@ -27,17 +29,16 @@ const Upload = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
-
+  const registeredUser = useOutletContext();
+  const { address } = useIota();
+  const currentUser = registeredUser?.filter((user) => user.owner === address);
+  const { uploadMusic } = useMusicUpload();
   const steps = [
     { id: 1, label: "Basics", icon: <Music size={18} /> },
     { id: 2, label: "Media", icon: <UploadIcon size={18} /> },
     { id: 3, label: "Royalties", icon: <User size={18} /> },
     { id: 4, label: "Review", icon: <Check size={18} /> },
   ];
-
-  const registeredUser = useOutletContext();
-  const { address } = useIota();
-
   const collaboratorTotal = contributors.reduce(
     (sum, c) => sum + c.percentage,
     0,
@@ -62,31 +63,45 @@ const Upload = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const [imageCid, lowQualityCid, highQualityCid] = await Promise.all([
-        uploadToPinata(imageFile),
-        uploadToPinata(lowQualityFile),
-        uploadToPinata(highQualityFile),
-      ]);
+      // const [imageCid, lowQualityCid, highQualityCid] = await Promise.all([
+      //   uploadToPinata(imageFile),
+      //   uploadToPinata(lowQualityFile),
+      //   uploadToPinata(highQualityFile),
+      // ]);
 
       const musicData = {
         title,
         description,
         genre,
         price: Number(price),
-        imageFile: imageCid,
-        lowQualityFile: lowQualityCid,
-        highQualityFile: highQualityCid,
+        // imageFile: imageCid,
+        // lowQualityFile: lowQualityCid,
+        // highQualityFile: highQualityCid,
+        imageFile:
+          "bafkreihz5tvn6so7zcyjho4zndr5xaqgxmddyrtaabzlur5saplm7u2gou",
+        lowQualityFile:
+          "bafybeicttve3baprc6jr3l3cf7tt7cz2lpq2l6fzp227esbqf5uq2kcnkq",
+        highQualityFile:
+          "bafybeicauv5iuut57rq5fd7weqoxgke2sdvslw3lr7vigzr7voqvuk7y7u",
         contributors: [
-          {
-            role: "Artist",
-            address,
-            percentage: artistPercentage,
-            hasRoyalty: artistHasRoyalty,
-          },
-          ...contributors,
+          ...contributors.map((c) => ({
+            name: c.name || "Collaborator",
+            user_address: c.address,
+            role: c.role || null,
+            split: Number(c.percentage) || null,
+            has_royalty: c.hasRoyalty !== undefined ? c.hasRoyalty : null,
+          })),
         ],
+        artist: {
+          name: currentUser[0]?.username || "Artist",
+          user_address: address,
+          role: currentUser[0]?.role || null,
+          split: Number(artistPercentage) || null,
+          has_royalty: artistHasRoyalty ?? null,
+        },
       };
-      console.log("Music data to submit:", musicData);
+      // console.log("Music data to submit:", musicData);
+      await uploadMusic(musicData);
     } catch (e) {
       console.log(e);
     } finally {
@@ -474,9 +489,17 @@ const Upload = () => {
                             hasRoyalty,
                           } = newCollaborator;
                           if (!role || !addr || !percentage) return;
+
+                          const collaboratorUser = registeredUser?.find(
+                            (u) => u.owner === addr,
+                          );
+                          const collaboratorName =
+                            collaboratorUser?.username || "Unknown User";
+
                           setContributors((prev) => [
                             ...prev,
                             {
+                              name: collaboratorName,
                               role,
                               address: addr,
                               percentage: Number(percentage),
@@ -484,6 +507,7 @@ const Upload = () => {
                             },
                           ]);
                           setNewCollaborator({
+                            name: "",
                             role: "",
                             address: "",
                             percentage: "",
@@ -589,10 +613,11 @@ const Upload = () => {
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
+                    type="button"
                     disabled={isSubmitting || remaining !== 0}
                     variant="btn-primary"
                     className={styles.submitButton}
+                    onClick={handleSubmit}
                   >
                     {isSubmitting ? "Uploading Track" : "Upload Track"}
                   </Button>
@@ -608,7 +633,9 @@ const Upload = () => {
             <p>
               You need approx. 0.1 IOTA for transaction fees on the network.
             </p>
-            <Button variant="btn-secondary">Get Testnet Token</Button>
+            <Button type="button" variant="btn-secondary">
+              Get Testnet Token
+            </Button>
           </BlackCard>
 
           <BlackCard className={styles.aside}>
