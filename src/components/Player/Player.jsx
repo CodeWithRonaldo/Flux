@@ -23,7 +23,7 @@ const Player = ({ music, className }) => {
     seek,
   } = useAudio();
 
-  const isCurrent = music ? currentTrack?.music_id === music.music_id : true;
+  const isCurrent = music ? currentTrack?.music_id === music?.music_id : true;
   const isPlayingCurrent = isCurrent && isPlaying;
 
   // Use track's duration if not current, otherwise global duration

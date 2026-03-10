@@ -31,7 +31,7 @@ const MusicCard = ({ music }) => {
     <div className={styles.musicCard} onClick={handleCardClick}>
       <div className={styles.imageContainer}>
         <img
-          src={`https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${music.music_image}`}
+          src={music.music_image}
           alt={music.title}
           className={styles.musicImg}
         />

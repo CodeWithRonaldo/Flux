@@ -41,7 +41,7 @@ export const AudioProvider = ({ children }) => {
     const audio = audioRef.current;
     if (currentTrack?.full_music) {
       const wasPlaying = isPlaying;
-      audio.src = currentTrack.full_music;
+      audio.src = currentTrack?.full_music;
       audio.load();
       if (wasPlaying) {
         audio.play().catch((err) => console.error("Playback failed:", err));
@@ -61,7 +61,7 @@ export const AudioProvider = ({ children }) => {
   }, [isPlaying]);
 
   const playTrack = (music) => {
-    if (currentTrack?.id === music.music_id) {
+    if (currentTrack?.music_id === music?.music_id) {
       togglePlay();
     } else {
       setCurrentTrack(music);
@@ -75,19 +75,19 @@ export const AudioProvider = ({ children }) => {
   };
 
   const nextTrack = () => {
-    const currentIndex = musics.findIndex(
-      (s) => s.music_id === currentTrack.id,
+    const currentIndex = musics?.findIndex(
+      (s) => s?.music_id === currentTrack?.music_id,
     );
-    const nextIndex = (currentIndex + 1) % musics.length;
+    const nextIndex = (currentIndex + 1) % musics?.length;
     setCurrentTrack(musics[nextIndex]);
     setIsPlaying(true);
   };
 
   const prevTrack = () => {
-    const currentIndex = musics.findIndex(
-      (s) => s.music_id === currentTrack.id,
+    const currentIndex = musics?.findIndex(
+      (s) => s?.music_id === currentTrack?.music_id,
     );
-    const prevIndex = (currentIndex - 1 + musics.length) % musics.length;
+    const prevIndex = (currentIndex - 1 + musics?.length) % musics?.length;
     setCurrentTrack(musics[prevIndex]);
     setIsPlaying(true);
   };

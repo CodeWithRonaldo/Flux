@@ -18,3 +18,7 @@ export const uploadToPinata = async (file) => {
     console.log(error);
   }
 };
+
+export const getPinataUrl = (cid) => {
+  return `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
+};
