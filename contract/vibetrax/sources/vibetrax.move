@@ -1,916 +1,933 @@
+module vibetrax::vibetrax;
 
-module vibetrax::vibetrax {
-    use std::ascii::String;
-    use std::string; // needed for Display field template strings
-    use iota::clock::Clock;
-    use iota::event;
-    use iota::coin::Coin;
-    use iota::iota::IOTA;
-    use iota::table::Table;
-    use iota::table;
-    use iota::transfer::public_transfer;
-    use iota::package;  // for claiming Publisher from the OTW
-    use iota::display;  // for creating Display<Music>
-    use iota::coin_manager::CoinManager;
-    use vibetrax::vibe_token::{Self, VibeTreasury, VIBE_TOKEN};
-    use iota::coin;
-    
+use iota::clock::Clock;
+use iota::coin::{Self, Coin};
+use iota::coin_manager::CoinManager;
+use iota::display;
+use iota::event;
+use iota::iota::IOTA;
+use iota::package;
+use iota::table::{Self, Table};
+use iota::transfer::public_transfer;
+use std::ascii::String;
+use std::string;
+use vibetrax::vibe_token::{Self, VibeTreasury, VIBE_TOKEN};
 
-    // === Errors ===
-    const EINVALID_PURCHASE: u64 = 1;
-    const EINVALID_PRICE: u64 = 2;
-    const EINVALID_ROYALTY: u64 = 3;
-    const ENOT_ARTIST: u64 = 4;
-    const ENOT_OWNER: u64 = 5;
-    const EINVALID_TRANSFER: u64 = 6;
-    const EINSUFFICIENT_AMOUNT: u64 = 7;
-    const EINVALID_METADATA: u64 = 8;
-    const EINVALID_STREAMING: u64 = 9;
-    const EHAS_DUPLICATES: u64 = 10;
-    const EADDRESS_MISMATCH: u64 = 11;
-    const EALREADY_LIKED: u64 = 12;
-    const EALREADY_STREAMED: u64 = 13;
-    const ESUBSCRIPTION_EXPIRED: u64 = 14;
-    const ESUBSCRIPTION_MISMATCH: u64 = 15;
-    const EINVALID_BOOST_PLAN: u64 = 16;
-    const EUNAUTHORIZED: u64 = 17;
+// === Errors ===
+const EINVALID_PURCHASE: u64 = 1;
+const EINVALID_PRICE: u64 = 2;
+const EINVALID_ROYALTY: u64 = 3;
+const ENOT_ARTIST: u64 = 4;
+const ENOT_OWNER: u64 = 5;
+const EINVALID_TRANSFER: u64 = 6;
+const EINSUFFICIENT_AMOUNT: u64 = 7;
+const EINVALID_METADATA: u64 = 8;
+const EINVALID_STREAMING: u64 = 9;
+const EHAS_DUPLICATES: u64 = 10;
+const EADDRESS_MISMATCH: u64 = 11;
+const EALREADY_LIKED: u64 = 12;
+const EALREADY_STREAMED: u64 = 13;
+const ESUBSCRIPTION_EXPIRED: u64 = 14;
+const ESUBSCRIPTION_MISMATCH: u64 = 15;
+const EINVALID_BOOST_PLAN: u64 = 16;
+const EUNAUTHORIZED: u64 = 17;
 
-    // === Constants ===
-    const BASIS_POINTS: u64 = 10_000; // For percentage calculations
-    const NANOS: u64 = 1_000_000_000;
-    const LIKE_VALUE_INCREASE: u64 = 2_000_000; // 0.002 IOTA in nanos
-    const PLATFORM_FEE: u64 = 100; // 1% fee in basis points
-    const SUBSCRIPTION_PRICE: u64 = 5_000_000_000; // 5 IOTA in nanos
-    const SUBSCRIPTION_DURATION_MS: u64 = 30 * 24 * 60 * 60 * 1000; // 30 days
-    const STREAM_TOKEN_REWARD: u64 = 10_000_000;  // 10 VIBE per stream (6 decimals: 10 × 1_000_000)
-    const DAILY_VIBE_CAP: u64 = 100_000_000;       // max 100 VIBE earned per day (10 streams)
-    const MS_PER_DAY: u64 = 86_400_000;             // milliseconds in one day
-    // Boost plan prices in VIBE base units (6 decimals)
-    const BOOST_PLAN_BASIC: u64 = 100_000_000;      //  100 VIBE —  7-day boost
-    const BOOST_PLAN_PRO: u64 = 500_000_000;        //  500 VIBE — 30-day boost
-    const BOOST_PLAN_ELITE: u64 = 1_000_000_000;    // 1000 VIBE — 90-day boost
-    const BOOST_DURATION_BASIC_MS: u64 = 7  * 24 * 60 * 60 * 1000;
-    const BOOST_DURATION_PRO_MS: u64 = 30  * 24 * 60 * 60 * 1000;
-    const BOOST_DURATION_ELITE_MS: u64 = 90 * 24 * 60 * 60 * 1000;
-    const TREASURY_ADDRESS: address = @0x7c7bbf348248342e6b1aebe7cc3bade1611df2e4bb95dae7b470c48393a7add3;
+// === Constants ===
+const BASIS_POINTS: u64 = 10_000; // For percentage calculations
+const NANOS: u64 = 1_000_000_000;
+const LIKE_VALUE_INCREASE: u64 = 2_000_000; // 0.002 IOTA in nanos
+const PLATFORM_FEE: u64 = 100; // 1% fee in basis points
+const SUBSCRIPTION_PRICE: u64 = 5_000_000_000; // 5 IOTA in nanos
+const SUBSCRIPTION_DURATION_MS: u64 = 30 * 24 * 60 * 60 * 1000; // 30 days
+const STREAM_TOKEN_REWARD: u64 = 10_000_000; // 10 VIBE per stream (6 decimals: 10 × 1_000_000)
+const DAILY_VIBE_CAP: u64 = 100_000_000; // max 100 VIBE earned per day (10 streams)
+const MS_PER_DAY: u64 = 86_400_000; // milliseconds in one day
+// Boost plan prices in VIBE base units (6 decimals)
+const BOOST_PLAN_BASIC: u64 = 100_000_000; //  100 VIBE —  7-day boost
+const BOOST_PLAN_PRO: u64 = 500_000_000; //  500 VIBE — 30-day boost
+const BOOST_PLAN_ELITE: u64 = 1_000_000_000; // 1000 VIBE — 90-day boost
+const BOOST_DURATION_BASIC_MS: u64 = 7  * 24 * 60 * 60 * 1000;
+const BOOST_DURATION_PRO_MS: u64 = 30  * 24 * 60 * 60 * 1000;
+const BOOST_DURATION_ELITE_MS: u64 = 90 * 24 * 60 * 60 * 1000;
+const TREASURY_ADDRESS: address =
+    @0x7c7bbf348248342e6b1aebe7cc3bade1611df2e4bb95dae7b470c48393a7add3;
 
+// === Structs ==
 
-    // === Structs ==
+// ── One-Time Witness ────────────────────────────────────────────────────────
+// MUST match the module name in ALL_CAPS and have only `drop`.
+// Passed into `init` by the Move runtime exactly once, at publish time.
+// Used here to claim a Publisher, which is required to create Display<Music>.
+public struct VIBETRAX has drop {}
 
-    // ── One-Time Witness ────────────────────────────────────────────────────────
-    // MUST match the module name in ALL_CAPS and have only `drop`.
-    // Passed into `init` by the Move runtime exactly once, at publish time.
-    // Used here to claim a Publisher, which is required to create Display<Music>.
-    public struct VIBETRAX has drop {}
+public struct User has copy, drop, store {
+    name: String,
+    user_address: address,
+    role: Option<String>,
+    split: Option<u64>,
+    has_royalty: Option<bool>,
+}
 
-    public struct User has store, copy, drop {
-        name: String,
-        user_address: address,
-        role: Option<String>,
-        split: Option<u64>,
-        has_royalty: Option<bool>
-    }
+public struct Music has key, store {
+    id: UID,
+    artist: User,
+    current_owner: User,
+    title: String,
+    description: String,
+    genre: String,
+    music_image: String,
+    preview_music: String,
+    full_music: String,
+    price: u64,
+    streaming_count: u64,
+    streaming_table: Table<address, bool>, // To track if a user has streamed the music
+    boost_expiry_ms: u64,
+    likes: u64,
+    likes_table: Table<address, bool>, // To track if a user has liked the music
+    collaborators: vector<User>,
+    for_sale: bool,
+    creation_time: u64,
+}
 
-    public struct Music has key, store {
-        id: UID,
-        artist: User,
-        current_owner: User,
-        title: String,
-        description: String,
-        genre: String,
-        music_image: String,
-        preview_music: String,
-        full_music: String,
-        price: u64,
-        streaming_count: u64,
-        streaming_table: Table<address, bool>, // To track if a user has streamed the music
-        boost_expiry_ms: u64,
-        likes: u64,
-        likes_table: Table<address, bool>, // To track if a user has liked the music
-        collaborators: vector<User>,
-        for_sale: bool,
-        creation_time: u64
-    }
+public struct Subscription has key {
+    id: UID,
+    subscriber: User,
+    price: u64,
+    expiry_ms: u64,
+    daily_vibe_earned: u64, // VIBE base units earned in the current calendar day
+    last_earn_day: u64, // floor(timestamp_ms / MS_PER_DAY) — resets daily counter
+}
 
-    public struct Subscription has key {
-        id: UID,
-        subscriber: User,
-        price: u64,
-        expiry_ms: u64,
-        daily_vibe_earned: u64, // VIBE base units earned in the current calendar day
-        last_earn_day: u64      // floor(timestamp_ms / MS_PER_DAY) — resets daily counter
-    }
+// ── UserProfile ──────────────────────────────────────────────────────────
+// Owned object created once per user during onboarding.
+// Stored in the user's wallet; emitted as an event so indexers can track it.
+public struct UserProfile has key {
+    id: UID,
+    owner: address,
+    role: String, // "artist" | "listener"
+    username: Option<String>,
+    bio: Option<String>,
+    genres: Option<vector<String>>,
+}
 
-    // ── UserProfile ──────────────────────────────────────────────────────────
-    // Owned object created once per user during onboarding.
-    // Stored in the user's wallet; emitted as an event so indexers can track it.
-    public struct UserProfile has key {
-        id: UID,
-        owner: address,
-        role: String,             // "artist" | "listener"
-        username: Option<String>,
-        bio: Option<String>,
-        genres: Option<vector<String>>,
-    }
+// === Events ===
 
-    // === Events ===
+public struct MusicUploaded has copy, drop {
+    music_id: ID,
+    artist: User,
+    current_owner: User,
+    title: String,
+    description: String,
+    genre: String,
+    music_image: String,
+    preview_music: String,
+    full_music: String,
+    price: u64,
+    streaming_count: u64,
+    boost_expiry_ms: u64,
+    likes: u64,
+    collaborators: vector<User>,
+    for_sale: bool,
+    creation_time: u64,
+}
 
-    public struct MusicUploaded has copy, drop {
-        music_id: ID,
-        artist: User,
-        current_owner: User,
-        title: String,
-        description: String,
-        genre: String,
-        music_image: String,
-        preview_music: String,
-        full_music: String,
-        price: u64,
-        streaming_count: u64,
-        boost_expiry_ms: u64,
-        likes: u64,
-        collaborators: vector<User>,
-        for_sale: bool,
-        creation_time: u64
-    }
+public struct MusicPurchased has copy, drop {
+    music_id: ID,
+    buyer: User,
+    amount: u64,
+}
 
-    public struct MusicPurchased has copy, drop {
-        music_id: ID,
-        buyer: User,
-        amount: u64
-    }
+public struct MusicLiked has copy, drop {
+    music_id: ID,
+    liker: User,
+    amount: u64,
+    new_price: u64,
+}
 
-    public struct MusicLiked has copy, drop {
-        music_id: ID,
-        liker: User,
-        amount: u64,
-        new_price: u64
-    }
+public struct RoyaltyPaid has copy, drop {
+    recipient: User,
+    amount: u64,
+}
 
-    public struct RoyaltyPaid has copy, drop {
-        recipient: User,
-        amount: u64
-    }
+public struct MusicSaleToggled has copy, drop {
+    music_id: ID,
+    for_sale: bool,
+}
 
-    public struct MusicSaleToggled has copy, drop {
-        music_id: ID,
-        for_sale: bool
-    }
+public struct MusicUpdated has copy, drop {
+    music_id: ID,
+    title: String,
+    description: String,
+    genre: String,
+    music_image: String,
+    preview_music: String,
+    full_music: String,
+}
 
-    public struct MusicUpdated has copy, drop {
-        music_id: ID,
-        title: String,
-        description: String,
-        genre: String,
-        music_image: String,
-        preview_music: String,
-        full_music: String,
-    }
+public struct SubscriptionCreated has copy, drop {
+    subscriber: User,
+    price: u64,
+    expiry_ms: u64,
+}
 
-    public struct SubscriptionCreated has copy, drop {
-        subscriber: User,
-        price: u64,
-        expiry_ms: u64
-    }
+public struct SubscriptionRenewed has copy, drop {
+    subscriber: User,
+    price: u64,
+    new_expiry_ms: u64,
+}
 
-    public struct SubscriptionRenewed has copy, drop {
-        subscriber: User,
-        price: u64,
-        new_expiry_ms: u64
-    }
+public struct MusicStreamed has copy, drop {
+    music_id: ID,
+    streamer: User,
+    vibe_earned: u64,
+}
 
-    public struct MusicStreamed has copy, drop {
-        music_id: ID,
-        streamer: User,
-        vibe_earned: u64
-    }
+public struct ArtistTipped has copy, drop {
+    music_id: ID,
+    tipper: address,
+    artist: address,
+    amount: u64,
+}
 
-    public struct ArtistTipped has copy, drop {
-        music_id: ID,
-        tipper: address,
-        artist: address,
-        amount: u64
-    }
+public struct MusicBoosted has copy, drop {
+    music_id: ID,
+    artist: User,
+    current_owner: User,
+    title: String,
+    description: String,
+    genre: String,
+    music_image: String,
+    preview_music: String,
+    full_music: String,
+    price: u64,
+    streaming_count: u64,
+    boost_expiry_ms: u64,
+    likes: u64,
+    collaborators: vector<User>,
+    for_sale: bool,
+    creation_time: u64,
+    plan: u8,
+    vibe_burned: u64,
+}
 
-    public struct MusicBoosted has copy, drop {
-        music_id: ID,
-        artist: User,
-        current_owner: User,
-        title: String,
-        description: String,
-        genre: String,
-        music_image: String,
-        preview_music: String,
-        full_music: String,
-        price: u64,
-        streaming_count: u64,
-        boost_expiry_ms: u64,
-        likes: u64,
-        collaborators: vector<User>,
-        for_sale: bool,
-        creation_time: u64,
-        plan: u8,
-        vibe_burned: u64
-    }
+public struct BalanceWithdrawn has copy, drop {
+    recipient: address,
+    sender: address,
+    amount: u64,
+}
 
-    public struct BalanceWithdrawn has copy, drop {
-        recipient: address,
-        sender: address,
-        amount: u64
-    }
+public struct UserRegistered has copy, drop {
+    profile_id: ID,
+    owner: address,
+    role: String,
+    username: Option<String>,
+    bio: Option<String>,
+    genres: vector<String>,
+}
 
-    public struct UserRegistered has copy, drop {
-        profile_id: ID,
-        owner: address,
-        role: String,
-        username: Option<String>,
-        bio: Option<String>,
-        genres: vector<String>,
-    }
+public struct UserProfileUpdated has copy, drop {
+    profile_id: ID,
+    owner: address,
+    role: String,
+    username: Option<String>,
+    bio: Option<String>,
+    genres: vector<String>,
+}
 
-    public struct UserProfileUpdated has copy, drop {
-        profile_id: ID,
-        owner: address,
-        role: String,
-        username: Option<String>,
-        bio: Option<String>,
-        genres: vector<String>,
-    }
+// === Method Aliases ===
 
-    // === Method Aliases ===
+// === Init ===
 
-    // === Init ===
+// ── init ────────────────────────────────────────────────────────────────────
+// Runs automatically ONCE when the package is published.
+// Sets up Display<Music> so wallets and explorers can render Music NFTs nicely.
+//
+// HOW DISPLAY WORKS:
+//   1. `package::claim(otw, ctx)` exchanges the OTW for a Publisher object.
+//      Publisher proves this module owns the `Music` type.
+//   2. `display::new<Music>(&publisher, ctx)` creates a Display template for Music.
+//   3. You add key→value pairs where values are template strings.
+//      `{field_name}` is replaced at query time with the actual field value.
+//      Only TOP-LEVEL fields of Music can be referenced (no nested access).
+//   4. `display.update_version()` commits the fields — must call this or
+//      the display won't be visible to indexers.
+//   5. Both Publisher and Display are transferred to the deployer (ctx.sender())
+//      so you can update display fields later if needed.
+//      If you freeze them instead, they become permanent and uneditable.
+fun init(otw: VIBETRAX, ctx: &mut TxContext) {
+    // Claim Publisher — proves this module created the Music type
+    let publisher = package::claim(otw, ctx);
 
-    // ── init ────────────────────────────────────────────────────────────────────
-    // Runs automatically ONCE when the package is published.
-    // Sets up Display<Music> so wallets and explorers can render Music NFTs nicely.
-    //
-    // HOW DISPLAY WORKS:
-    //   1. `package::claim(otw, ctx)` exchanges the OTW for a Publisher object.
-    //      Publisher proves this module owns the `Music` type.
-    //   2. `display::new<Music>(&publisher, ctx)` creates a Display template for Music.
-    //   3. You add key→value pairs where values are template strings.
-    //      `{field_name}` is replaced at query time with the actual field value.
-    //      Only TOP-LEVEL fields of Music can be referenced (no nested access).
-    //   4. `display.update_version()` commits the fields — must call this or
-    //      the display won't be visible to indexers.
-    //   5. Both Publisher and Display are transferred to the deployer (ctx.sender())
-    //      so you can update display fields later if needed.
-    //      If you freeze them instead, they become permanent and uneditable.
-    fun init(otw: VIBETRAX, ctx: &mut TxContext) {
-        // Claim Publisher — proves this module created the Music type
-        let publisher = package::claim(otw, ctx);
+    // Create the Display template for Music NFTs
+    let mut music_display = display::new<Music>(&publisher, ctx);
 
-        // Create the Display template for Music NFTs
-        let mut music_display = display::new<Music>(&publisher, ctx);
+    // Display field names are what wallets/explorers look for.
+    // Standard fields: name, description, image_url, creator, link
+    // Values use {field_name} to reference Music struct fields at render time.
+    music_display.add(string::utf8(b"name"), string::utf8(b"{title}"));
+    music_display.add(string::utf8(b"description"), string::utf8(b"{description}"));
+    // music_image is the IPFS/URL string stored on the Music object
+    music_display.add(string::utf8(b"image_url"), string::utf8(b"{music_image}"));
+    // genre is a bonus field — some explorers show custom fields
+    music_display.add(string::utf8(b"genre"), string::utf8(b"{genre}"));
 
-        // Display field names are what wallets/explorers look for.
-        // Standard fields: name, description, image_url, creator, link
-        // Values use {field_name} to reference Music struct fields at render time.
-        music_display.add(string::utf8(b"name"),        string::utf8(b"{title}"));
-        music_display.add(string::utf8(b"description"), string::utf8(b"{description}"));
-        // music_image is the IPFS/URL string stored on the Music object
-        music_display.add(string::utf8(b"image_url"),   string::utf8(b"{music_image}"));
-        // genre is a bonus field — some explorers show custom fields
-        music_display.add(string::utf8(b"genre"),       string::utf8(b"{genre}"));
+    // Commit the display fields — indexers won't pick them up until this is called
+    music_display.update_version();
 
-        // Commit the display fields — indexers won't pick them up until this is called
-        music_display.update_version();
+    // Transfer Publisher and Display to deployer so fields can be updated later.
+    // To lock them permanently, use transfer::public_freeze_object() instead.
+    public_transfer(publisher, ctx.sender());
+    public_transfer(music_display, ctx.sender());
+}
 
-        // Transfer Publisher and Display to deployer so fields can be updated later.
-        // To lock them permanently, use transfer::public_freeze_object() instead.
-        public_transfer(publisher, ctx.sender());
-        public_transfer(music_display, ctx.sender());
-    }
-
-    // === Public-Mutative Functions ===
-    public fun upload_music(
-        title: String,
-        description: String,
-        genre: String,
-        music_image: String,
-        preview_music: String,
-        full_music: String,
-        price: u64,
-        artist_name: String,
-        artist_role: String,
-        artist_split: u64,
-        artist_has_royalty: bool,
-        collab_names: vector<String>,
-        collab_addresses: vector<address>,
-        collab_roles: vector<String>,
-        collab_splits: vector<u64>,
-        collab_has_royalty: vector<bool>,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        assert!(price > 0, EINVALID_PRICE);
-        assert!(preview_music.length() > 0 && full_music.length() > 0, EINVALID_METADATA);
-        assert!(
-            collab_names.length() == collab_addresses.length() &&
+// === Public-Mutative Functions ===
+public fun upload_music(
+    title: String,
+    description: String,
+    genre: String,
+    music_image: String,
+    preview_music: String,
+    full_music: String,
+    price: u64,
+    artist_name: String,
+    artist_role: String,
+    artist_split: u64,
+    artist_has_royalty: bool,
+    collab_names: vector<String>,
+    collab_addresses: vector<address>,
+    collab_roles: vector<String>,
+    collab_splits: vector<u64>,
+    collab_has_royalty: vector<bool>,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    assert!(price > 0, EINVALID_PRICE);
+    assert!(preview_music.length() > 0 && full_music.length() > 0, EINVALID_METADATA);
+    assert!(
+        collab_names.length() == collab_addresses.length() &&
             collab_addresses.length() == collab_roles.length() &&
             collab_roles.length() == collab_splits.length() &&
             collab_splits.length() == collab_has_royalty.length(),
-            EINVALID_METADATA
-        );
+        EINVALID_METADATA,
+    );
 
-        let sender = tx_context::sender(ctx);
+    let sender = tx_context::sender(ctx);
 
-        // Reconstruct artist
-        let artist = User {
-            name: artist_name,
-            user_address: sender,
-            role: option::some(artist_role),
-            split: option::some(artist_split),
-            has_royalty: option::some(artist_has_royalty),
+    // Reconstruct artist
+    let artist = User {
+        name: artist_name,
+        user_address: sender,
+        role: option::some(artist_role),
+        split: option::some(artist_split),
+        has_royalty: option::some(artist_has_royalty),
+    };
+
+    // Reconstruct collaborators
+    let mut collaborators: vector<User> = vector::empty();
+    let mut i = 0;
+    while (i < collab_names.length()) {
+        let collaborator = User {
+            name: collab_names[i],
+            user_address: collab_addresses[i],
+            role: option::some(collab_roles[i]),
+            split: option::some(collab_splits[i]),
+            has_royalty: option::some(collab_has_royalty[i]),
         };
+        collaborators.push_back(collaborator);
+        i = i + 1;
+    };
 
-        // Reconstruct collaborators
-        let mut collaborators: vector<User> = vector::empty();
-        let mut i = 0;
-        while (i < collab_names.length()) {
-            let collaborator = User {
-                name: collab_names[i],
-                user_address: collab_addresses[i],
-                role: option::some(collab_roles[i]),
-                split: option::some(collab_splits[i]),
-                has_royalty: option::some(collab_has_royalty[i]),
-            };
-            collaborators.push_back(collaborator);
-            i = i + 1;
-        };
-
-        // Duplicate check
-        if (collaborators.length() > 0) {
-            collaborators.do_ref!(|collaborator| {
-                let count = count_address_occurrences(&collaborators, collaborator.user_address);
-                assert!(count <= 1, EHAS_DUPLICATES);
-            });
-        };
-
-        let music_id = object::new(ctx);
-        let event_id = music_id.to_inner();
-        let creation_time = clock.timestamp_ms();
-
-        let nft = Music {
-            id: music_id,
-            artist: artist,
-            current_owner: artist,
-            title: title,
-            description: description,
-            genre: genre,
-            music_image: music_image,
-            preview_music: preview_music,
-            full_music: full_music,
-            price: price * NANOS,
-            streaming_count: 0,
-            collaborators: collaborators,
-            for_sale: true,
-            creation_time: creation_time,
-            boost_expiry_ms: 0,
-            likes: 0,
-            likes_table: table::new(ctx),
-            streaming_table: table::new(ctx)
-        };
-
-        event::emit(MusicUploaded {
-            music_id: event_id,
-            artist: artist,
-            current_owner: artist,
-            title: title,
-            description: description,
-            genre: genre,
-            music_image: music_image,
-            preview_music: preview_music,
-            full_music: full_music,
-            price: price * NANOS,
-            streaming_count: 0,
-            collaborators: collaborators,
-            for_sale: true,
-            creation_time: creation_time,
-            likes: 0,
-            boost_expiry_ms: 0
+    // Duplicate check
+    if (collaborators.length() > 0) {
+        collaborators.do_ref!(|collaborator| {
+            let count = count_address_occurrences(&collaborators, collaborator.user_address);
+            assert!(count <= 1, EHAS_DUPLICATES);
         });
+    };
 
-        transfer::share_object(nft);
-    }
+    let music_id = object::new(ctx);
+    let event_id = music_id.to_inner();
+    let creation_time = clock.timestamp_ms();
 
-    public fun purchase_music_nft(
-        music: &mut Music,
-        mut payment: Coin<IOTA>,
-        buyer_name: String,
-        buyer_role: String, 
-        ctx: &mut TxContext
-    ) {
-        assert!(music.for_sale, EINVALID_PURCHASE);
-        let payment_amount = payment.value();
-        assert!(payment_amount == music.price, EINSUFFICIENT_AMOUNT);
+    let nft = Music {
+        id: music_id,
+        artist: artist,
+        current_owner: artist,
+        title: title,
+        description: description,
+        genre: genre,
+        music_image: music_image,
+        preview_music: preview_music,
+        full_music: full_music,
+        price: price * NANOS,
+        streaming_count: 0,
+        collaborators: collaborators,
+        for_sale: true,
+        creation_time: creation_time,
+        boost_expiry_ms: 0,
+        likes: 0,
+        likes_table: table::new(ctx),
+        streaming_table: table::new(ctx),
+    };
 
-        let signer_address = tx_context::sender(ctx);
+    event::emit(MusicUploaded {
+        music_id: event_id,
+        artist: artist,
+        current_owner: artist,
+        title: title,
+        description: description,
+        genre: genre,
+        music_image: music_image,
+        preview_music: preview_music,
+        full_music: full_music,
+        price: price * NANOS,
+        streaming_count: 0,
+        collaborators: collaborators,
+        for_sale: true,
+        creation_time: creation_time,
+        likes: 0,
+        boost_expiry_ms: 0,
+    });
 
-        let buyer = User{
-            name: buyer_name,
-            user_address: signer_address,
-            role: option::some(buyer_role),
-            split: option::none(),
-            has_royalty: option::none(),
-        };
+    transfer::share_object(nft);
+}
 
-        assert!(buyer.user_address == signer_address, EADDRESS_MISMATCH);
-        assert!(buyer.user_address != music.current_owner.user_address, EINVALID_PURCHASE);
+public fun purchase_music_nft(
+    music: &mut Music,
+    mut payment: Coin<IOTA>,
+    buyer_name: String,
+    buyer_role: String,
+    ctx: &mut TxContext,
+) {
+    assert!(music.for_sale, EINVALID_PURCHASE);
+    let payment_amount = payment.value();
+    assert!(payment_amount == music.price, EINSUFFICIENT_AMOUNT);
 
-        let seller = music.current_owner;
-        let initial_sale = music.current_owner.user_address == music.artist.user_address;
+    let signer_address = tx_context::sender(ctx);
 
-        if (initial_sale) {
-            if (music.collaborators.length() > 0) {
-                let mut i = 0;
-                while (i < music.collaborators.length()) {
-                    let collaborator = music.collaborators[i];
-                    if (collaborator.split.is_some()) {
-                        let collaborator_split = *collaborator.split.borrow();
-                        let split_value = (payment_amount * (collaborator_split * 100)) / BASIS_POINTS;
-                        let collab_coin = payment.split(split_value, ctx);
-                        public_transfer(collab_coin, collaborator.user_address);
-                    };
-                    i = i + 1;
+    let buyer = User {
+        name: buyer_name,
+        user_address: signer_address,
+        role: option::some(buyer_role),
+        split: option::none(),
+        has_royalty: option::none(),
+    };
+
+    assert!(buyer.user_address == signer_address, EADDRESS_MISMATCH);
+    assert!(buyer.user_address != music.current_owner.user_address, EINVALID_PURCHASE);
+
+    let seller = music.current_owner;
+    let initial_sale = music.current_owner.user_address == music.artist.user_address;
+
+    if (initial_sale) {
+        if (music.collaborators.length() > 0) {
+            let mut i = 0;
+            while (i < music.collaborators.length()) {
+                let collaborator = music.collaborators[i];
+                if (collaborator.split.is_some()) {
+                    let collaborator_split = *collaborator.split.borrow();
+                    let split_value = (payment_amount * (collaborator_split * 100)) / BASIS_POINTS;
+                    let collab_coin = payment.split(split_value, ctx);
+                    public_transfer(collab_coin, collaborator.user_address);
                 };
-
-                public_transfer(payment, music.artist.user_address);
-            } else {
-                // If no collaborators, entire amount goes to artist
-                public_transfer(payment, music.artist.user_address);
-            }
-
-        } else {
-             // Resale: Pay artist and collaborators royalties
-            let royalty_amount = (payment_amount * 2000) / BASIS_POINTS; // 20% royalty
-            let resale_value = payment_amount - royalty_amount;
-
-            // Pay current owner (seller)
-            let resale_coin = payment.split(resale_value, ctx);
-            public_transfer(resale_coin, seller.user_address);
-
-            // Pay artist and collaborators from royalty
-            if (music.collaborators.length() > 0) {
-                let mut i = 0;
-                while (i < music.collaborators.length()) {
-                    let collaborator = music.collaborators[i];
-                    if (collaborator.has_royalty.is_some() && *collaborator.has_royalty.borrow()) {
-                        let collaborator_split = *collaborator.split.borrow();
-                        let split_value = (royalty_amount * (collaborator_split * 100)) / BASIS_POINTS;
-                        let collab_coin = payment.split(split_value, ctx);
-                        public_transfer(collab_coin, collaborator.user_address);
-
-                        event::emit(RoyaltyPaid {
-                            recipient: collaborator,
-                            amount: split_value
-                        });
-                    };
-                    i = i + 1;
-                };
-
-                public_transfer(payment, music.artist.user_address);
-            } else {
-                // If no collaborators, entire royalty goes to artist
-                public_transfer(payment, music.artist.user_address);
-            }
-        };
-
-        // Transfer ownership to buyer
-        music.current_owner = buyer;
-        music.for_sale = false;
-
-        event::emit(MusicPurchased {
-            music_id: music.id.to_inner(),
-            buyer: buyer,
-            amount: payment_amount
-        });
-    }
-
-    public fun like_music(music: &mut Music, liker_name: String, liker_role: String, ctx: &mut TxContext) {
-        let signer_address = tx_context::sender(ctx);
-        let liker = User {
-            name: liker_name,
-            user_address: signer_address,
-            role: option::some(liker_role),
-            split: option::none(),
-            has_royalty: option::none(),
-        };
-        assert!(liker.user_address == signer_address, EADDRESS_MISMATCH);
-        // Add check to ensure one like per account per music
-        assert!(!music.likes_table.contains(liker.user_address), EALREADY_LIKED);
-        music.likes = music.likes + 1;
-        // Music value increase calculation:
-        // 10,000,000,000
-        //      2,000,000
-        // -----------------
-        // 10,002,000,000 
-        // -----------------
-        // 10,002,000,000 / 1,000,000,000 = 10.002 IOTA
-
-        music.price = music.price + LIKE_VALUE_INCREASE;
-        music.likes_table.add(liker.user_address, true);
-
-        event::emit(MusicLiked {
-            music_id: music.id.to_inner(),
-            liker: liker,
-            amount: LIKE_VALUE_INCREASE,
-            new_price: music.price
-        });
-
-    }
-
-    public fun stream_music(
-        music: &mut Music,
-        subscription: &mut Subscription,
-        treasury: &mut VibeTreasury,
-        streamer_name: String,
-        streamer_role: String,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        let signer_address = tx_context::sender(ctx);
-        let streamer = User {
-            name: streamer_name,
-            user_address: signer_address,
-            role: option::some(streamer_role),
-            split: option::none(),
-            has_royalty: option::none(),
-        };
-        assert!(streamer.user_address == signer_address, EADDRESS_MISMATCH);
-        assert!(subscription.subscriber.user_address == signer_address, ESUBSCRIPTION_MISMATCH);
-        assert!(clock.timestamp_ms() <= subscription.expiry_ms, ESUBSCRIPTION_EXPIRED);
-        assert!(!music.streaming_table.contains(streamer.user_address), EALREADY_STREAMED);
-
-        music.streaming_count = music.streaming_count + 1;
-        music.price = music.price + LIKE_VALUE_INCREASE;
-        music.streaming_table.add(streamer.user_address, true);
-
-        // ── Daily VIBE cap ────────────────────────────────────────────────────
-        // Reset counter if the subscriber hasn't streamed yet today.
-        let today = clock.timestamp_ms() / MS_PER_DAY;
-        if (subscription.last_earn_day < today) {
-            subscription.daily_vibe_earned = 0;
-            subscription.last_earn_day = today;
-        };
-
-        let mut vibe_earned = 0u64;
-        let remaining_cap = DAILY_VIBE_CAP - subscription.daily_vibe_earned;
-        if (remaining_cap > 0) {
-            let reward = if (STREAM_TOKEN_REWARD <= remaining_cap) {
-                STREAM_TOKEN_REWARD
-            } else {
-                remaining_cap
+                i = i + 1;
             };
-            vibe_token::pay_stream_reward(treasury, reward, signer_address, ctx);
-            subscription.daily_vibe_earned = subscription.daily_vibe_earned + reward;
-            vibe_earned = reward;
-        };
 
-        event::emit(MusicStreamed {
-            music_id: music.id.to_inner(),
-            streamer,
-            vibe_earned
-        });
-    }
-
-    public fun update_music(
-        music: &mut Music,
-        title: Option<String>,
-        description: Option<String>,
-        genre: Option<String>,
-        music_image: Option<String>,
-        preview_music: Option<String>,
-        full_music: Option<String>,
-        ctx: &mut TxContext
-    ) {
-        let signer_address = ctx.sender();
-        assert!(music.artist.user_address == signer_address, ENOT_ARTIST);
-        // All updates locked after first sale
-        assert!(music.current_owner.user_address == music.artist.user_address, EINVALID_PURCHASE);
-
-        if (title.is_some()) { music.title = title.destroy_some() };
-        if (description.is_some()) { music.description = description.destroy_some() };
-        if (genre.is_some()) { music.genre = genre.destroy_some() };
-        if (music_image.is_some()) { music.music_image = music_image.destroy_some() };
-        if (preview_music.is_some()) { music.preview_music = preview_music.destroy_some() };
-        if (full_music.is_some()) { music.full_music = full_music.destroy_some() };
-
-        event::emit(MusicUpdated { 
-            music_id: music.id.to_inner(), 
-            title: music.title, 
-            description: music.description, 
-            genre: music.genre, 
-            music_image: music.music_image, 
-            preview_music: music.preview_music, 
-            full_music: music.full_music 
-        });
-    }
-
-    public fun delete_music(music: Music, ctx: &mut TxContext) {
-        let signer_address = ctx.sender();
-        assert!(music.artist.user_address == signer_address, ENOT_ARTIST);
-        // Only allow deletion if music has never been sold
-        assert!(music.current_owner.user_address == music.artist.user_address, EINVALID_PURCHASE);
-        
-        let Music {id, streaming_table, likes_table, ..} = music;
-
-        // Tables must be explicitly destroyed
-        table::destroy_empty(streaming_table);
-        table::destroy_empty(likes_table);
-        object::delete(id);
-    }
-
-    public fun toggle_sale(music: &mut Music, ctx: &mut TxContext) {
-        let signer_address = ctx.sender();
-        assert!(music.current_owner.user_address == signer_address, ENOT_OWNER);
-        music.for_sale = !music.for_sale;
-
-        event::emit(MusicSaleToggled {
-            music_id: music.id.to_inner(),
-            for_sale: music.for_sale
-        });
-    }
-
-    // ── Tip Artist ───────────────────────────────────────────────────────────
-    // Sends VIBE directly from the caller's wallet to the music's original artist.
-    // The tipper must hold enough VIBE (earned from streaming or bought on the DEX).
-    public fun tip_artist(
-        music: &Music,
-        tip: iota::coin::Coin<VIBE_TOKEN>,
-        ctx: &mut TxContext
-    ) {
-        let tipper = ctx.sender();
-        let amount = tip.value();
-        assert!(amount > 0, EINSUFFICIENT_AMOUNT);
-        public_transfer(tip, music.artist.user_address);
-
-        event::emit(ArtistTipped {
-            music_id: music.id.to_inner(),
-            tipper,
-            artist: music.artist.user_address,
-            amount
-        });
-    }
-
-    // ── Boost Music ──────────────────────────────────────────────────────────
-    // Artist pays VIBE to promote their track. The VIBE is burned permanently
-    // (deflationary). Three plans are available:
-    //   plan 0 — Basic :  100 VIBE,  7-day boost
-    //   plan 1 — Pro   :  500 VIBE, 30-day boost
-    //   plan 2 — Elite : 1000 VIBE, 90-day boost
-    // If the music is already boosted the expiry extends from today (not from
-    // the current expiry), which keeps things simple.
-    public fun boost_music(
-        music: &mut Music,
-        treasury: &mut VibeTreasury,
-        manager: &mut CoinManager<VIBE_TOKEN>,
-        payment: iota::coin::Coin<VIBE_TOKEN>,
-        plan: u8,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        let signer_address = ctx.sender();
-        assert!(music.artist.user_address == signer_address, ENOT_ARTIST);
-        assert!(plan <= 2, EINVALID_BOOST_PLAN);
-
-        let (required_vibe, duration_ms) = if (plan == 0) {
-            (BOOST_PLAN_BASIC, BOOST_DURATION_BASIC_MS)
-        } else if (plan == 1) {
-            (BOOST_PLAN_PRO, BOOST_DURATION_PRO_MS)
+            public_transfer(payment, music.artist.user_address);
         } else {
-            (BOOST_PLAN_ELITE, BOOST_DURATION_ELITE_MS)
+            // If no collaborators, entire amount goes to artist
+            public_transfer(payment, music.artist.user_address);
+        }
+    } else {
+        // Resale: Pay artist and collaborators royalties
+        let royalty_amount = (payment_amount * 2000) / BASIS_POINTS; // 20% royalty
+        let resale_value = payment_amount - royalty_amount;
+
+        // Pay current owner (seller)
+        let resale_coin = payment.split(resale_value, ctx);
+        public_transfer(resale_coin, seller.user_address);
+
+        // Pay artist and collaborators from royalty
+        if (music.collaborators.length() > 0) {
+            let mut i = 0;
+            while (i < music.collaborators.length()) {
+                let collaborator = music.collaborators[i];
+                if (collaborator.has_royalty.is_some() && *collaborator.has_royalty.borrow()) {
+                    let collaborator_split = *collaborator.split.borrow();
+                    let split_value = (royalty_amount * (collaborator_split * 100)) / BASIS_POINTS;
+                    let collab_coin = payment.split(split_value, ctx);
+                    public_transfer(collab_coin, collaborator.user_address);
+
+                    event::emit(RoyaltyPaid {
+                        recipient: collaborator,
+                        amount: split_value,
+                    });
+                };
+                i = i + 1;
+            };
+
+            public_transfer(payment, music.artist.user_address);
+        } else {
+            // If no collaborators, entire royalty goes to artist
+            public_transfer(payment, music.artist.user_address);
+        }
+    };
+
+    // Transfer ownership to buyer
+    music.current_owner = buyer;
+    music.for_sale = false;
+
+    event::emit(MusicPurchased {
+        music_id: music.id.to_inner(),
+        buyer: buyer,
+        amount: payment_amount,
+    });
+}
+
+public fun like_music(
+    music: &mut Music,
+    liker_name: String,
+    liker_role: String,
+    ctx: &mut TxContext,
+) {
+    let signer_address = tx_context::sender(ctx);
+    let liker = User {
+        name: liker_name,
+        user_address: signer_address,
+        role: option::some(liker_role),
+        split: option::none(),
+        has_royalty: option::none(),
+    };
+    assert!(liker.user_address == signer_address, EADDRESS_MISMATCH);
+    // Add check to ensure one like per account per music
+    assert!(!music.likes_table.contains(liker.user_address), EALREADY_LIKED);
+    music.likes = music.likes + 1;
+    // Music value increase calculation:
+    // 10,000,000,000
+    //      2,000,000
+    // -----------------
+    // 10,002,000,000
+    // -----------------
+    // 10,002,000,000 / 1,000,000,000 = 10.002 IOTA
+
+    music.price = music.price + LIKE_VALUE_INCREASE;
+    music.likes_table.add(liker.user_address, true);
+
+    event::emit(MusicLiked {
+        music_id: music.id.to_inner(),
+        liker: liker,
+        amount: LIKE_VALUE_INCREASE,
+        new_price: music.price,
+    });
+}
+
+public fun stream_music(
+    music: &mut Music,
+    subscription: &mut Subscription,
+    treasury: &mut VibeTreasury,
+    streamer_name: String,
+    streamer_role: String,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    let signer_address = tx_context::sender(ctx);
+    let streamer = User {
+        name: streamer_name,
+        user_address: signer_address,
+        role: option::some(streamer_role),
+        split: option::none(),
+        has_royalty: option::none(),
+    };
+    assert!(streamer.user_address == signer_address, EADDRESS_MISMATCH);
+    assert!(subscription.subscriber.user_address == signer_address, ESUBSCRIPTION_MISMATCH);
+    assert!(clock.timestamp_ms() <= subscription.expiry_ms, ESUBSCRIPTION_EXPIRED);
+    assert!(!music.streaming_table.contains(streamer.user_address), EALREADY_STREAMED);
+
+    music.streaming_count = music.streaming_count + 1;
+    music.price = music.price + LIKE_VALUE_INCREASE;
+    music.streaming_table.add(streamer.user_address, true);
+
+    // ── Daily VIBE cap ────────────────────────────────────────────────────
+    // Reset counter if the subscriber hasn't streamed yet today.
+    let today = clock.timestamp_ms() / MS_PER_DAY;
+    if (subscription.last_earn_day < today) {
+        subscription.daily_vibe_earned = 0;
+        subscription.last_earn_day = today;
+    };
+
+    let mut vibe_earned = 0u64;
+    let remaining_cap = DAILY_VIBE_CAP - subscription.daily_vibe_earned;
+    if (remaining_cap > 0) {
+        let reward = if (STREAM_TOKEN_REWARD <= remaining_cap) {
+            STREAM_TOKEN_REWARD
+        } else {
+            remaining_cap
         };
+        vibe_token::pay_stream_reward(treasury, reward, signer_address, ctx);
+        subscription.daily_vibe_earned = subscription.daily_vibe_earned + reward;
+        vibe_earned = reward;
+    };
 
-        assert!(payment.value() == required_vibe, EINSUFFICIENT_AMOUNT);
+    event::emit(MusicStreamed {
+        music_id: music.id.to_inner(),
+        streamer,
+        vibe_earned,
+    });
+}
 
-        // Burn the VIBE permanently — CoinManager tracks the reduced total supply.
-        vibe_token::burn(treasury, manager, payment);
+public fun update_music(
+    music: &mut Music,
+    title: Option<String>,
+    description: Option<String>,
+    genre: Option<String>,
+    music_image: Option<String>,
+    preview_music: Option<String>,
+    full_music: Option<String>,
+    ctx: &mut TxContext,
+) {
+    let signer_address = ctx.sender();
+    assert!(music.artist.user_address == signer_address, ENOT_ARTIST);
+    // All updates locked after first sale
+    assert!(music.current_owner.user_address == music.artist.user_address, EINVALID_PURCHASE);
 
-        let boost_expiry_ms = clock.timestamp_ms() + duration_ms;
-        music.boost_expiry_ms = boost_expiry_ms;
+    if (title.is_some()) { music.title = title.destroy_some() };
+    if (description.is_some()) { music.description = description.destroy_some() };
+    if (genre.is_some()) { music.genre = genre.destroy_some() };
+    if (music_image.is_some()) { music.music_image = music_image.destroy_some() };
+    if (preview_music.is_some()) { music.preview_music = preview_music.destroy_some() };
+    if (full_music.is_some()) { music.full_music = full_music.destroy_some() };
 
-        event::emit(MusicBoosted {
-            music_id: music.id.to_inner(),
-            artist: music.artist,
-            current_owner: music.current_owner,
-            title: music.title,
-            description: music.description,
-            genre: music.genre,
-            music_image: music.music_image,
-            preview_music: music.preview_music,
-            full_music: music.full_music,
-            price: music.price,
-            streaming_count: music.streaming_count,
-            boost_expiry_ms: music.boost_expiry_ms,
-            likes: music.likes,
-             collaborators: music.collaborators,
-            for_sale: music.for_sale,
-            creation_time: music.creation_time,
-            plan,
-            vibe_burned: required_vibe
-        });
-    }
+    event::emit(MusicUpdated {
+        music_id: music.id.to_inner(),
+        title: music.title,
+        description: music.description,
+        genre: music.genre,
+        music_image: music.music_image,
+        preview_music: music.preview_music,
+        full_music: music.full_music,
+    });
+}
+
+public fun delete_music(music: Music, ctx: &mut TxContext) {
+    let signer_address = ctx.sender();
+    assert!(music.artist.user_address == signer_address, ENOT_ARTIST);
+    // Only allow deletion if music has never been sold
+    assert!(music.current_owner.user_address == music.artist.user_address, EINVALID_PURCHASE);
+
+    let Music { id, streaming_table, likes_table, .. } = music;
+
+    // Tables must be explicitly destroyed
+    table::destroy_empty(streaming_table);
+    table::destroy_empty(likes_table);
+    object::delete(id);
+}
+
+public fun toggle_sale(music: &mut Music, ctx: &mut TxContext) {
+    let signer_address = ctx.sender();
+    assert!(music.current_owner.user_address == signer_address, ENOT_OWNER);
+    music.for_sale = !music.for_sale;
+
+    event::emit(MusicSaleToggled {
+        music_id: music.id.to_inner(),
+        for_sale: music.for_sale,
+    });
+}
+
+// ── Tip Artist ───────────────────────────────────────────────────────────
+// Sends VIBE directly from the caller's wallet to the music's original artist.
+// The tipper must hold enough VIBE (earned from streaming or bought on the DEX).
+public fun tip_artist(music: &Music, tip: iota::coin::Coin<VIBE_TOKEN>, ctx: &mut TxContext) {
+    let tipper = ctx.sender();
+    let amount = tip.value();
+    assert!(amount > 0, EINSUFFICIENT_AMOUNT);
+    public_transfer(tip, music.artist.user_address);
+
+    event::emit(ArtistTipped {
+        music_id: music.id.to_inner(),
+        tipper,
+        artist: music.artist.user_address,
+        amount,
+    });
+}
+
+// ── Boost Music ──────────────────────────────────────────────────────────
+// Artist pays VIBE to promote their track. The VIBE is burned permanently
+// (deflationary). Three plans are available:
+//   plan 0 — Basic :  100 VIBE,  7-day boost
+//   plan 1 — Pro   :  500 VIBE, 30-day boost
+//   plan 2 — Elite : 1000 VIBE, 90-day boost
+// If the music is already boosted the expiry extends from today (not from
+// the current expiry), which keeps things simple.
+public fun boost_music(
+    music: &mut Music,
+    treasury: &mut VibeTreasury,
+    manager: &mut CoinManager<VIBE_TOKEN>,
+    payment: iota::coin::Coin<VIBE_TOKEN>,
+    plan: u8,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    let signer_address = ctx.sender();
+    assert!(music.artist.user_address == signer_address, ENOT_ARTIST);
+    assert!(plan <= 2, EINVALID_BOOST_PLAN);
+
+    let (required_vibe, duration_ms) = if (plan == 0) {
+        (BOOST_PLAN_BASIC, BOOST_DURATION_BASIC_MS)
+    } else if (plan == 1) {
+        (BOOST_PLAN_PRO, BOOST_DURATION_PRO_MS)
+    } else {
+        (BOOST_PLAN_ELITE, BOOST_DURATION_ELITE_MS)
+    };
+
+    assert!(payment.value() == required_vibe, EINSUFFICIENT_AMOUNT);
+
+    // Burn the VIBE permanently — CoinManager tracks the reduced total supply.
+    vibe_token::burn(treasury, manager, payment);
+
+    let boost_expiry_ms = clock.timestamp_ms() + duration_ms;
+    music.boost_expiry_ms = boost_expiry_ms;
+
+    event::emit(MusicBoosted {
+        music_id: music.id.to_inner(),
+        artist: music.artist,
+        current_owner: music.current_owner,
+        title: music.title,
+        description: music.description,
+        genre: music.genre,
+        music_image: music.music_image,
+        preview_music: music.preview_music,
+        full_music: music.full_music,
+        price: music.price,
+        streaming_count: music.streaming_count,
+        boost_expiry_ms: music.boost_expiry_ms,
+        likes: music.likes,
+        collaborators: music.collaborators,
+        for_sale: music.for_sale,
+        creation_time: music.creation_time,
+        plan,
+        vibe_burned: required_vibe,
+    });
+}
+
+// ── Register User ────────────────────────────────────────────────────────
+// Called once during onboarding. Creates a UserProfile owned by the caller.
+// role must be "artist" or "listener". username, bio, and genres are optional.
+public fun register_user(
+    role: String,
+    username: Option<String>,
+    bio: Option<String>,
+    genres: Option<vector<String>>,
+    ctx: &mut TxContext,
+) {
+    let owner = ctx.sender();
+    let profile_uid = object::new(ctx);
+    let profile_id = profile_uid.to_inner();
+    let genres_vec = option::destroy_with_default(genres, vector::empty());
+
+    event::emit(UserRegistered { profile_id, owner, role, username, bio, genres: genres_vec });
+
+    transfer::transfer(
+        UserProfile {
+            id: profile_uid,
+            owner,
+            role,
+            username,
+            bio,
+            genres: option::some(genres_vec),
+        },
+        owner,
+    );
+}
+
+// ── Update User Profile ──────────────────────────────────────────────────
+// Owner can update any subset of fields. Pass option::none() to leave a field unchanged.
+public fun update_profile(
+    profile: &mut UserProfile,
+    username: Option<String>,
+    bio: Option<String>,
+    genres: Option<vector<String>>,
+    ctx: &mut TxContext,
+) {
+    assert!(profile.owner == ctx.sender(), EUNAUTHORIZED);
+    if (username.is_some()) { profile.username = username };
+    if (bio.is_some()) { profile.bio = bio };
+    if (genres.is_some()) { profile.genres = genres };
+
+    let genres_vec = if (profile.genres.is_some()) { *profile.genres.borrow() } else {
+        vector::empty()
+    };
+    event::emit(UserProfileUpdated {
+        profile_id: profile.id.to_inner(),
+        owner: profile.owner,
+        role: profile.role,
+        username: profile.username,
+        bio: profile.bio,
+        genres: genres_vec,
+    });
+}
+
+public fun subscribe(
+    subscriber_name: String,
+    subscriber_role: String,
+    payment: Coin<IOTA>,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    let subscriber_address = ctx.sender();
+    assert!(payment.value() == SUBSCRIPTION_PRICE, EINSUFFICIENT_AMOUNT);
+    let price = payment.value();
+    public_transfer(payment, TREASURY_ADDRESS);
+
+    let subscriber = User {
+        name: subscriber_name,
+        user_address: subscriber_address,
+        role: option::some(subscriber_role),
+        split: option::none(),
+        has_royalty: option::none(),
+    };
+
+    let expiry_ms = clock.timestamp_ms() + SUBSCRIPTION_DURATION_MS;
+    event::emit(SubscriptionCreated { subscriber, price, expiry_ms });
+
+    transfer::transfer(
+        Subscription {
+            id: object::new(ctx),
+            subscriber,
+            price,
+            expiry_ms,
+            daily_vibe_earned: 0,
+            last_earn_day: 0,
+        },
+        subscriber_address,
+    );
+}
 
 
-    // ── Register User ────────────────────────────────────────────────────────
-    // Called once during onboarding. Creates a UserProfile owned by the caller.
-    // role must be "artist" or "listener". username, bio, and genres are optional.
-    public fun register_user(
-        role: String,
-        username: Option<String>,
-        bio: Option<String>,
-        genres: Option<vector<String>>,
-        ctx: &mut TxContext
-    ) {
-        let owner = ctx.sender();
-        let profile_uid = object::new(ctx);
-        let profile_id = profile_uid.to_inner();
-        let genres_vec = option::destroy_with_default(genres, vector::empty());
+public fun renew_subscription(
+    subscription: &mut Subscription,
+    payment: Coin<IOTA>,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    let subscriber_address = ctx.sender();
+    assert!(subscription.subscriber.user_address == subscriber_address, ESUBSCRIPTION_MISMATCH);
+    assert!(payment.value() == SUBSCRIPTION_PRICE, EINSUFFICIENT_AMOUNT);
+    let price = payment.value();
+    public_transfer(payment, TREASURY_ADDRESS);
 
-        event::emit(UserRegistered { profile_id, owner, role, username, bio, genres: genres_vec  });
+    let now = clock.timestamp_ms();
+    assert!(now >= subscription.expiry_ms, ESUBSCRIPTION_EXPIRED);
 
-        transfer::transfer(
-            UserProfile { id: profile_uid, owner, role, username, bio, genres: option::some(genres_vec) },
-            owner
-        );
-    }
+    subscription.expiry_ms = now + SUBSCRIPTION_DURATION_MS;
 
-    // ── Update User Profile ──────────────────────────────────────────────────
-    // Owner can update any subset of fields. Pass option::none() to leave a field unchanged.
-    public fun update_profile(
-        profile: &mut UserProfile,
-        username: Option<String>,
-        bio: Option<String>,
-        genres: Option<vector<String>>,
-        ctx: &mut TxContext
-    ) {
-        assert!(profile.owner == ctx.sender(), EUNAUTHORIZED);
-        if (username.is_some()) { profile.username = username };
-        if (bio.is_some()) { profile.bio = bio };
-        if (genres.is_some()) { profile.genres = genres };
+    event::emit(SubscriptionRenewed {
+        subscriber: subscription.subscriber,
+        price: price,
+        new_expiry_ms: subscription.expiry_ms,
+    });
+}
 
-        let genres_vec = if (profile.genres.is_some()) { *profile.genres.borrow() } else { vector::empty() };
-        event::emit(UserProfileUpdated {
-            profile_id: profile.id.to_inner(),
-            owner: profile.owner,
-            role: profile.role,
-            username: profile.username,
-            bio: profile.bio,
-            genres: genres_vec,
-        });
-    }
+public entry fun withdrawIotaBalance(
+    token: &mut Coin<IOTA>,
+    amount: u64,
+    recipient: address,
+    ctx: &mut TxContext,
+) {
+    let mut coin_to_transfer = coin::split(token, amount, ctx);
 
-    public fun subscribe(
-        subscriber_name: String,
-        subscriber_role: String,
-        payment: Coin<IOTA>,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        let subscriber_address = ctx.sender();
-        assert!(payment.value() == SUBSCRIPTION_PRICE, EINSUFFICIENT_AMOUNT);
-        let price = payment.value();
-        public_transfer(payment, TREASURY_ADDRESS);
+    // Deduct 1% platform fee
+    let fee_amount = (amount * PLATFORM_FEE) / BASIS_POINTS;
+    let fee_coin = coin_to_transfer.split(fee_amount, ctx);
+    public_transfer(fee_coin, TREASURY_ADDRESS);
 
-        let subscriber = User {
-            name: subscriber_name,
-            user_address: subscriber_address,
-            role: option::some(subscriber_role),
-            split: option::none(),
-            has_royalty: option::none(),
-        };
+    event::emit(BalanceWithdrawn {
+        recipient,
+        sender: ctx.sender(),
+        amount: amount - fee_amount,
+    });
 
-        let expiry_ms = clock.timestamp_ms() + SUBSCRIPTION_DURATION_MS;
-        event::emit(SubscriptionCreated { subscriber, price, expiry_ms });
+    transfer::public_transfer(coin_to_transfer, recipient);
+}
 
-        transfer::transfer(
-            Subscription {
-                id: object::new(ctx),
-                subscriber,
-                price,
-                expiry_ms,
-                daily_vibe_earned: 0,
-                last_earn_day: 0
-            },
-            subscriber_address
-        );
-    }
+public entry fun withdrawVibeBalance(
+    token: &mut Coin<VIBE_TOKEN>,
+    amount: u64,
+    recipient: address,
+    ctx: &mut TxContext,
+) {
+    let mut coin_to_transfer = coin::split(token, amount, ctx);
 
-    public fun renew_subscription(
-        subscription: &mut Subscription,
-        payment: Coin<IOTA>,
-        clock: &Clock,
-        ctx: &mut TxContext
-    ) {
-        let subscriber_address = ctx.sender();
-        assert!(subscription.subscriber.user_address == subscriber_address, ESUBSCRIPTION_MISMATCH);
-        assert!(payment.value() == SUBSCRIPTION_PRICE, EINSUFFICIENT_AMOUNT);
-        let price = payment.value();
-        public_transfer(payment, TREASURY_ADDRESS);
+    // Deduct 1% platform fee
+    let fee_amount = (amount * PLATFORM_FEE) / BASIS_POINTS;
+    let fee_coin = coin_to_transfer.split(fee_amount, ctx);
+    public_transfer(fee_coin, TREASURY_ADDRESS);
 
-        let now = clock.timestamp_ms();
-        assert!(now >= subscription.expiry_ms, ESUBSCRIPTION_EXPIRED);
-        
-        subscription.expiry_ms = now + SUBSCRIPTION_DURATION_MS;
+    event::emit(BalanceWithdrawn {
+        recipient,
+        sender: ctx.sender(),
+        amount: amount - fee_amount,
+    });
 
-        event::emit(SubscriptionRenewed { subscriber: subscription.subscriber, price: price, new_expiry_ms: subscription.expiry_ms });
-    }
+    transfer::public_transfer(coin_to_transfer, recipient);
+}
 
-    public entry fun withdrawIotaBalance(
-        token: &mut Coin<IOTA>,
-        amount: u64,
-        recipient: address,
-        ctx: &mut TxContext,
-    ) {
-        let mut coin_to_transfer = coin::split(token, amount, ctx);
+// === Public-View Functions ===
 
-        // Deduct 1% platform fee
-        let fee_amount = (amount * PLATFORM_FEE) / BASIS_POINTS;
-        let fee_coin = coin_to_transfer.split(fee_amount, ctx);
-        public_transfer(fee_coin, TREASURY_ADDRESS);
+public fun is_for_sale(music: &Music): bool { music.for_sale }
 
-        event::emit(BalanceWithdrawn {
-            recipient,
-            sender: ctx.sender(),
-            amount: amount - fee_amount
-        });
+public fun price(music: &Music): u64 { music.price }
 
-        transfer::public_transfer(coin_to_transfer, recipient);
-    }
+public fun likes(music: &Music): u64 { music.likes }
 
-    public entry fun withdrawVibeBalance(
-        token: &mut Coin<VIBE_TOKEN>,
-        amount: u64,
-        recipient: address,
-        ctx: &mut TxContext,
-    ) {
-        let mut coin_to_transfer = coin::split(token, amount, ctx);
+public fun boost_expiry(music: &Music): u64 { music.boost_expiry_ms }
 
-        // Deduct 1% platform fee
-        let fee_amount = (amount * PLATFORM_FEE) / BASIS_POINTS;
-        let fee_coin = coin_to_transfer.split(fee_amount, ctx);
-        public_transfer(fee_coin, TREASURY_ADDRESS);
+public fun streaming_count(music: &Music): u64 { music.streaming_count }
 
-        event::emit(BalanceWithdrawn {
-            recipient,
-            sender: ctx.sender(),
-            amount: amount - fee_amount
-        });
+public fun subscription_expiry(sub: &Subscription): u64 { sub.expiry_ms }
 
-        transfer::public_transfer(coin_to_transfer, recipient);
-    }
+public fun profile_role(profile: &UserProfile): String { profile.role }
 
-    // === Public-View Functions ===
+public fun profile_owner(profile: &UserProfile): address { profile.owner }
 
-    public fun is_for_sale(music: &Music): bool { music.for_sale }
-    public fun price(music: &Music): u64 { music.price }
-    public fun likes(music: &Music): u64 { music.likes }
-    public fun boost_expiry(music: &Music): u64 { music.boost_expiry_ms }
-    public fun streaming_count(music: &Music): u64 { music.streaming_count }
-    public fun subscription_expiry(sub: &Subscription): u64 { sub.expiry_ms }
+public fun profile_username(profile: &UserProfile): Option<String> { profile.username }
 
-    public fun profile_role(profile: &UserProfile): String { profile.role }
-    public fun profile_owner(profile: &UserProfile): address { profile.owner }
-    public fun profile_username(profile: &UserProfile): Option<String> { profile.username }
-    public fun profile_bio(profile: &UserProfile): Option<String> { profile.bio }
-    public fun profile_genres(profile: &UserProfile): vector<String> {
-        if (profile.genres.is_some()) { *profile.genres.borrow() } else { vector::empty() }
-    }
+public fun profile_bio(profile: &UserProfile): Option<String> { profile.bio }
 
-    // === Admin Functions ===
+public fun profile_genres(profile: &UserProfile): vector<String> {
+    if (profile.genres.is_some()) { *profile.genres.borrow() } else { vector::empty() }
+}
 
-    // === Public-Package Functions ===
+// === Admin Functions ===
 
-    // Construct a User value. Useful for frontends and tests.
-    public fun new_user(
-        name: std::ascii::String,
-        user_address: address,
-        role: Option<std::ascii::String>,
-        split: Option<u64>,
-        has_royalty: Option<bool>
-    ): User {
-        User { name, user_address, role, split, has_royalty }
-    }
+// === Public-Package Functions ===
 
-    // === Private Functions ===
+// Construct a User value. Useful for frontends and tests.
+public fun new_user(
+    name: std::ascii::String,
+    user_address: address,
+    role: Option<std::ascii::String>,
+    split: Option<u64>,
+    has_royalty: Option<bool>,
+): User {
+    User { name, user_address, role, split, has_royalty }
+}
 
-    fun count_address_occurrences(collaborators: &vector<User>, target: address): u64 {
-        let mut count = 0u64;
-        collaborators.do_ref!(|collab| {
-            if (collab.user_address == target) {
-                count = count + 1;
-            }
-        });
-        count
-    }
+// === Private Functions ===
 
-    // === Test Functions ===
-    #[test_only]
-    public fun init_for_testing(ctx: &mut TxContext) {
-        init(VIBETRAX {}, ctx);
-    }
+fun count_address_occurrences(collaborators: &vector<User>, target: address): u64 {
+    let mut count = 0u64;
+    collaborators.do_ref!(|collab| {
+        if (collab.user_address == target) {
+            count = count + 1;
+        }
+    });
+    count
+}
+
+// === Test Functions ===
+#[test_only]
+public fun init_for_testing(ctx: &mut TxContext) {
+    init(VIBETRAX {}, ctx);
 }
 
 // For Move coding conventions, see
