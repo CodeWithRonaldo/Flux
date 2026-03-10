@@ -2,9 +2,9 @@ import { useAudio } from "../../hooks/useAudio";
 import { Ellipsis, Heart, Volume2 } from "lucide-react";
 import styles from "./TrackItem.module.css";
 
-const TrackItem = ({ song, rank }) => {
+const TrackItem = ({ music, rank }) => {
   const { currentTrack, playTrack, isPlaying } = useAudio();
-  const isCurrent = currentTrack?.id === song.id;
+  const isCurrent = currentTrack?.id === music.music_id;
   const isActuallyPlaying = isCurrent && isPlaying;
 
   return (
@@ -16,16 +16,20 @@ const TrackItem = ({ song, rank }) => {
           rank
         )}
       </div>
-      <div className={styles.songInfo} onClick={() => playTrack(song)}>
-        <img src={song.albumArt} alt={song.title} className={styles.albumArt} />
+      <div className={styles.songInfo} onClick={() => playTrack(music)}>
+        <img
+          src={music.music_image}
+          alt={music.title}
+          className={styles.albumArt}
+        />
         <div className={styles.songDetails}>
-          <div className={styles.title}>{song.title}</div>
-          <div className={styles.artist}>{song.artist}</div>
+          <div className={styles.title}>{music.title}</div>
+          <div className={styles.artist}>{music.artist.name}</div>
         </div>
       </div>
 
       <div className={styles.actions}>
-        {/* <div className={styles.duration}>{song.duration}</div> */}
+        {/* <div className={styles.duration}>{music.duration}</div> */}
         <button className={styles.iconButton}>
           <Heart />
         </button>

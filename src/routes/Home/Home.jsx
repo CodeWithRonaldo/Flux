@@ -5,14 +5,17 @@ import ArtistCard from "../../components/ArtistCard/ArtistCard";
 import { songs, artists } from "../../util/songList";
 import Player from "../../components/Player/Player";
 import { useAudio } from "../../hooks/useAudio";
-import RoleSelectionModal from "../../components/RoleSelectionModal/RoleSelectionModal";
 import { useState } from "react";
-import ListenerOnboarding from "../../components/ListenerOnboarding/ListenerOnboarding";
-import ArtistOnboarding from "../../components/ArtistOnboarding/ArtistOnboarding";
 import Subscribe from "../../components/Subscribe/Subscribe";
+import { useFetchMusic } from "../../hooks/useFetchMusic";
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { musics, isPending, isError } = useFetchMusic();
+
+  if (!isPending) {
+    console.log("music", musics);
+  }
 
   const { currentTrack } = useAudio();
   return (
@@ -48,8 +51,8 @@ const Home = () => {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>New Releases</h2>
         <div className={styles.musicGrid}>
-          {songs.map((track) => (
-            <MusicCard key={track.id} track={track} />
+          {musics.map((music) => (
+            <MusicCard key={music.music_id} music={music} />
           ))}
         </div>
       </section>

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { songs } from "../util/songList";
 import { AudioContext } from "./AudioContext";
+import { useFetchMusic } from "../hooks/useFetchMusic";
 
 export const AudioProvider = ({ children }) => {
-  const [currentTrack, setCurrentTrack] = useState(songs[0]);
+  const { musics } = useFetchMusic();
+  const [currentTrack, setCurrentTrack] = useState(musics[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -37,9 +39,9 @@ export const AudioProvider = ({ children }) => {
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (currentTrack?.audio) {
+    if (currentTrack?.full_music) {
       const wasPlaying = isPlaying;
-      audio.src = currentTrack.audio;
+      audio.src = currentTrack.full_music;
       audio.load();
       if (wasPlaying) {
         audio.play().catch((err) => console.error("Playback failed:", err));
@@ -58,11 +60,11 @@ export const AudioProvider = ({ children }) => {
     }
   }, [isPlaying]);
 
-  const playTrack = (track) => {
-    if (currentTrack?.id === track.id) {
+  const playTrack = (music) => {
+    if (currentTrack?.id === music.music_id) {
       togglePlay();
     } else {
-      setCurrentTrack(track);
+      setCurrentTrack(music);
       setIsPlaying(true);
       setIsBottomPlayerVisible(true);
     }
@@ -73,16 +75,20 @@ export const AudioProvider = ({ children }) => {
   };
 
   const nextTrack = () => {
-    const currentIndex = songs.findIndex((s) => s.id === currentTrack.id);
-    const nextIndex = (currentIndex + 1) % songs.length;
-    setCurrentTrack(songs[nextIndex]);
+    const currentIndex = musics.findIndex(
+      (s) => s.music_id === currentTrack.id,
+    );
+    const nextIndex = (currentIndex + 1) % musics.length;
+    setCurrentTrack(musics[nextIndex]);
     setIsPlaying(true);
   };
 
   const prevTrack = () => {
-    const currentIndex = songs.findIndex((s) => s.id === currentTrack.id);
-    const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
-    setCurrentTrack(songs[prevIndex]);
+    const currentIndex = musics.findIndex(
+      (s) => s.music_id === currentTrack.id,
+    );
+    const prevIndex = (currentIndex - 1 + musics.length) % musics.length;
+    setCurrentTrack(musics[prevIndex]);
     setIsPlaying(true);
   };
 

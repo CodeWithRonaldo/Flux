@@ -3,7 +3,7 @@ import TrackItem from "../TrackItem/TrackItem";
 import SearchBar from "../SearchBar/SearchBar";
 import { BlackCard } from "../GlassCard/GlassCard";
 
-const TrackList = ({ title, songs, hasSearch = false }) => {
+const TrackList = ({ title, musics, hasSearch = false }) => {
   return (
     <BlackCard className={styles.container}>
       <div className={styles.header}>
@@ -13,8 +13,8 @@ const TrackList = ({ title, songs, hasSearch = false }) => {
       {hasSearch && <SearchBar className={styles.searchBar} />}
 
       <div className={styles.songList}>
-        {songs?.map((song, index) => (
-          <TrackItem key={song.id} song={song} rank={index + 1} />
+        {musics?.map((music, index) => (
+          <TrackItem key={music.music_id} music={music} rank={index + 1} />
         ))}
       </div>
     </BlackCard>

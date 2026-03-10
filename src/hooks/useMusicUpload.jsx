@@ -11,40 +11,12 @@ export const useMusicUpload = () => {
   const { keypair } = useIota();
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
 
-  const User = bcs.struct("User", {
-    name: bcs.string(),
-    user_address: bcs.Address,
-    role: bcs.option(bcs.string()),
-    split: bcs.option(bcs.u64()),
-    has_royalty: bcs.option(bcs.bool()),
-  });
-
   const uploadMusic = async (musicData) => {
     if (!keypair) {
       console.log("Wallet not connected");
       return;
     }
-    const collaboratorsBcs = bcs.vector(User).serialize(
-      musicData.contributors.map((c) => ({
-        name: c.name,
-        user_address: c.user_address,
-        role: c.role,
-        split: c.split !== null ? BigInt(c.split) : null,
-        has_royalty: c.has_royalty,
-      })),
-    );
 
-    const artistUser = User.serialize({
-      name: musicData.artist.name,
-      user_address: musicData.artist.user_address,
-      role: musicData.artist.role,
-      split: musicData.artist.split,
-      has_royalty: musicData.artist.has_royalty,
-    });
-
-    console.log(collaboratorsBcs.toBytes());
-    console.log(artistUser.toBytes());
-    console.log("Music data to submit:", musicData);
     try {
       setLoading(true);
       const tx = new Transaction();
@@ -58,8 +30,15 @@ export const useMusicUpload = () => {
           tx.pure.string(musicData.lowQualityFile),
           tx.pure.string(musicData.highQualityFile),
           tx.pure.u64(Number(musicData.price)),
-          tx.pure(collaboratorsBcs),
-          tx.pure(artistUser),
+          tx.pure.string(musicData.artist.name),
+          tx.pure.string(musicData.artist.role),
+          tx.pure.u64(musicData.artist.artistPercentage),
+          tx.pure.bool(musicData.artist.artistHasRoyalty),
+          tx.pure.vector("string", musicData.collaboratorNames),
+          tx.pure.vector("address", musicData.collaboratorAddresses),
+          tx.pure.vector("string", musicData.collaboratorRoles),
+          tx.pure.vector("u64", musicData.collaboratorPercentage),
+          tx.pure.vector("bool", musicData.collaboratorHasRoyalty),
           tx.object("0x6"),
         ],
       });

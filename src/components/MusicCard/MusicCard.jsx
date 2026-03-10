@@ -3,18 +3,19 @@ import { Play, Pause } from "lucide-react";
 import { useAudio } from "../../hooks/useAudio";
 import styles from "./MusicCard.module.css";
 
-const MusicCard = ({ track }) => {
+const MusicCard = ({ music }) => {
   const navigate = useNavigate();
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
 
-  const isCurrent = currentTrack?.id === track.id;
+  const isCurrent = currentTrack?.id === music.music_id;
   const isPlayingCurrent = isCurrent && isPlaying;
+  const trackType = "premium";
 
   const handleCardClick = () => {
     if (!isCurrent) {
-      playTrack(track);
+      playTrack(music);
     }
-    navigate(`/play/${track.id}`);
+    navigate(`/play/${music.music_id}`);
   };
 
   const handlePlayToggle = (e) => {
@@ -22,7 +23,7 @@ const MusicCard = ({ track }) => {
     if (isCurrent) {
       togglePlay();
     } else {
-      playTrack(track);
+      playTrack(music);
     }
   };
 
@@ -30,8 +31,8 @@ const MusicCard = ({ track }) => {
     <div className={styles.musicCard} onClick={handleCardClick}>
       <div className={styles.imageContainer}>
         <img
-          src={track.albumArt}
-          alt={track.title}
+          src={`https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${music.music_image}`}
+          alt={music.title}
           className={styles.musicImg}
         />
 
@@ -47,16 +48,16 @@ const MusicCard = ({ track }) => {
 
         <div
           className={`${styles.qualityBadge} ${
-            track.type === "premium" ? styles.premiumBadge : ""
+            trackType === "premium" ? styles.premiumBadge : ""
           }`}
         >
-          {track.type}
+          {trackType}
         </div>
       </div>
 
       <div className={styles.musicDetails}>
-        <h3 className={styles.musicTitle}>{track.title}</h3>
-        <p className={styles.musicArtist}>{track.artist}</p>
+        <h3 className={styles.musicTitle}>{music.title}</h3>
+        <p className={styles.musicArtist}>{music.artist.name}</p>
       </div>
     </div>
   );

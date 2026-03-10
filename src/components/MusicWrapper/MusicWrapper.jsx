@@ -7,21 +7,22 @@ import { usePlaylist } from "../../hooks/usePlaylist";
 
 const MusicWrapper = ({
   children,
-  songs,
+  musics,
   showTrackList = true,
   showPlaylistSelector = false,
-  trackListTitle = "Top 100 Global Songs"
+  trackListTitle = "Top 100 Global Songs",
 }) => {
-  const { playlists, currentPlaylist, createPlaylist, setCurrentPlaylist } = usePlaylist();
+  const { playlists, currentPlaylist, createPlaylist, setCurrentPlaylist } =
+    usePlaylist();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Get current songs based on selected playlist
   const getCurrentSongs = () => {
     if (currentPlaylist === "top100") {
-      return songs;
+      return musics;
     }
     const playlist = playlists.find((p) => p.id === currentPlaylist);
-    return playlist ? playlist.songs : [];
+    return playlist ? playlist.musics : [];
   };
 
   const handleCreatePlaylist = (name) => {
@@ -34,11 +35,11 @@ const MusicWrapper = ({
       <div className={styles.leftContainer}>{children}</div>
       <div className={styles.rightContainer}>
         {showPlaylistSelector && (
-          <PlayListSelector
-            onCreateClick={() => setShowCreateModal(true)}
-          />
+          <PlayListSelector onCreateClick={() => setShowCreateModal(true)} />
         )}
-        {showTrackList && <TrackList title={trackListTitle} songs={getCurrentSongs()} />}
+        {showTrackList && (
+          <TrackList title={trackListTitle} musics={getCurrentSongs()} />
+        )}
       </div>
 
       {showPlaylistSelector && (

@@ -63,44 +63,34 @@ const Upload = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // const [imageCid, lowQualityCid, highQualityCid] = await Promise.all([
-      //   uploadToPinata(imageFile),
-      //   uploadToPinata(lowQualityFile),
-      //   uploadToPinata(highQualityFile),
-      // ]);
+      const [imageCid, lowQualityCid, highQualityCid] = await Promise.all([
+        uploadToPinata(imageFile),
+        uploadToPinata(lowQualityFile),
+        uploadToPinata(highQualityFile),
+      ]);
 
       const musicData = {
         title,
         description,
         genre,
         price: Number(price),
-        // imageFile: imageCid,
-        // lowQualityFile: lowQualityCid,
-        // highQualityFile: highQualityCid,
-        imageFile:
-          "bafkreihz5tvn6so7zcyjho4zndr5xaqgxmddyrtaabzlur5saplm7u2gou",
-        lowQualityFile:
-          "bafybeicttve3baprc6jr3l3cf7tt7cz2lpq2l6fzp227esbqf5uq2kcnkq",
-        highQualityFile:
-          "bafybeicauv5iuut57rq5fd7weqoxgke2sdvslw3lr7vigzr7voqvuk7y7u",
-        contributors: [
-          ...contributors.map((c) => ({
-            name: c.name || "Collaborator",
-            user_address: c.address,
-            role: c.role || null,
-            split: Number(c.percentage) || null,
-            has_royalty: c.hasRoyalty !== undefined ? c.hasRoyalty : null,
-          })),
-        ],
+        imageFile: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${imageCid}`,
+        lowQualityFile: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${lowQualityCid}`,
+        highQualityFile: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${highQualityCid}`,
+        collaboratorNames: contributors.map((c) => c.name),
+        collaboratorAddresses: contributors.map((c) => c.address),
+        collaboratorRoles: contributors.map((c) => c.role),
+        collaboratorPercentage: contributors.map((c) => c.percentage),
+        collaboratorHasRoyalty: contributors.map((c) => c.hasRoyalty),
         artist: {
-          name: currentUser[0]?.username || "Artist",
-          user_address: address,
-          role: currentUser[0]?.role || null,
-          split: Number(artistPercentage) || null,
-          has_royalty: artistHasRoyalty ?? null,
+          name: currentUser[0]?.username,
+          address,
+          role: currentUser[0]?.role,
+          artistPercentage,
+          artistHasRoyalty,
         },
       };
-      // console.log("Music data to submit:", musicData);
+      console.log("Music data to submit:", musicData);
       await uploadMusic(musicData);
     } catch (e) {
       console.log(e);

@@ -41,6 +41,8 @@ function App() {
     (user) => user.owner === address,
   );
 
+  console.log(registeredUser);
+
   useEffect(() => {
     if (address && !isLoading) {
       if (isUserRegistered && isUserRegistered.length > 0) {

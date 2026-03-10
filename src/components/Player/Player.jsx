@@ -10,7 +10,7 @@ import {
   Repeat,
 } from "lucide-react";
 
-const Player = ({ track, className }) => {
+const Player = ({ music, className }) => {
   const {
     currentTrack,
     isPlaying,
@@ -23,11 +23,11 @@ const Player = ({ track, className }) => {
     seek,
   } = useAudio();
 
-  const isCurrent = track ? currentTrack?.id === track.id : true;
+  const isCurrent = music ? currentTrack?.music_id === music.music_id : true;
   const isPlayingCurrent = isCurrent && isPlaying;
 
   // Use track's duration if not current, otherwise global duration
-  const displayDuration = isCurrent ? duration : track?.duration || 0;
+  const displayDuration = isCurrent ? duration : music?.duration || 0;
   const displayCurrentTime = isCurrent ? currentTime : 0;
 
   const formatTime = (time) => {
@@ -108,7 +108,7 @@ const Player = ({ track, className }) => {
             if (isCurrent) {
               togglePlay();
             } else {
-              playTrack(track);
+              playTrack(music);
             }
           }}
         >
