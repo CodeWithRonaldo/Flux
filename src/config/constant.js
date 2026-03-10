@@ -1,17 +1,17 @@
 // ── Runtime constants (used in user-facing transactions) ──────────────────
 export const VIBETRAX_PACKAGE_ID =
-  "0xe6c86a1ca8f7f8391f77e5ba492c0a26550fe3f8f4fb6e4d786fefa993065462"; // all function calls
+  "0xe2221f44cbb440ec5c300878f2d686dc1593db21d17739273a712b0b415683a8"; // all function calls
 export const VIBETRAX_TREASURY_ID =
-  "0x5f0024d012a0d66c53018067efa1498858c923acb7dec518efe61100592b095f"; // stream_music, boost_music, pay_stream_reward, register_user
+  "0x19a2a8aa4f22d01732014fb50e123e05cfb981030a860ad4d3415c157937c2fc"; // stream_music, boost_music, pay_stream_reward, register_user
 export const VIBETRAX_COIN_MANAGER_ID =
-  "0x1faafca5ab252e06af24cc640a00578d8e3b1b4feecc5c9ef7091e93391ba77b"; // boost_music, burn
+  "0xca82eb12accc4b4b8dc1141832b5f8d48fe0c1d04e3f0f8e72b325b7572166db"; // boost_music, burn
 
 // ── Admin-only objects (not used in frontend transactions) ────────────────
 export const VIBETRAX_UPGRADE_CAP_ID =
-  "0x2ebd95b0c1a6eabc21ec23851b5e304ae038c0f2ce6984ab0a3739dd016c3de8"; // future contract upgrades
+  "0xe1200a3d12bece9185d3cba5c50090705247c54a77cfa1b325bac9a1a0117a01"; // future contract upgrades
 export const VIBETRAX_PUBLISHER_ID =
-  "0x21f0dfa41272139b86b0f5807a2728f16d969ffb6d58c4da21e5cb554704245d "; // Display management
+  "0x03dbd4b3af1beff7f27af63bf43b20e19e0db7662f24feec19807e30e86464ea "; // Display management
 export const VIBETRAX_DISPLAY_MUSIC_ID =
-  "0x7d7a9cbebc1fd8230ebd9baaf3ce4dfac7fcd55be53b8df0ab041d8d57ed6d48"; // Music NFT display template
+  "0xbc41aa8c10f3d216ec90d6275ea763cb4f1fafc1396852f4455678f03f78cbb2"; // Music NFT display template
 export const VIBETRAX_METADATA_CAP_ID =
-  "0xd978fa26b24e4668f5def9f545342d0ca276796d671dd1a55cbaf97e5c88360c"; // update VIBE token metadata
+  "0xce17674af644cd809d19e2b9d697ad53ca94f4444a5b1288a3e572f82aadf099"; // update VIBE token metadata
