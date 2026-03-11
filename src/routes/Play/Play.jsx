@@ -11,7 +11,8 @@ import PurchaseModal from "../../components/PurchaseModal/PurchaseModal";
 import AddToPlaylistModal from "../../components/AddToPlaylistModal/AddToPlaylistModal";
 import PlayListModal from "../../components/PlayListModal/PlayListModal";
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
+import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useAudio } from "../../hooks/useAudio";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
 import { usePlaylist } from "../../hooks/usePlaylist";
@@ -22,6 +23,8 @@ import { formatPrice } from "../../util/helper";
 
 const Play = () => {
   const { id } = useParams();
+  const registeredUser = useOutletContext();
+  const currentUser = registeredUser?.[0];
   const navigate = useNavigate();
   const { currentTrack, playTrack } = useAudio();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
@@ -54,6 +57,14 @@ const Play = () => {
   const recentSongs = musics?.slice(0, 3);
   const moreSongs = musics?.slice(0, 4);
   const songToShow = currentTrack || musics?.[0];
+
+  const { data: onChainMusic } = useIotaClientQuery(
+    "getObject",
+    { id: songToShow?.music_id ?? "", options: { showContent: true } },
+    { enabled: !!songToShow?.music_id }
+  );
+  const musicFields = onChainMusic?.data?.content?.fields;
+  const isCurrentOwner = musicFields?.current_owner?.fields?.user_address === currentUser?.owner;
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);
@@ -150,7 +161,7 @@ const Play = () => {
                 {formatPrice(songToShow.price)} IOTA
               </span>
             </div>
-            <Button onClick={handleOpenPurchaseModal}>Own this track</Button>
+            {!isCurrentOwner && <Button onClick={handleOpenPurchaseModal}>Own this track</Button>}
           </div>
         </div>
         <div className={styles.nowPlayingPlayer}>
@@ -184,6 +195,8 @@ const Play = () => {
         music={songToShow}
         isOpen={isPurchaseModalOpen}
         onClose={handleClosePurchaseModal}
+        buyer={currentUser}
+        musicFields={musicFields}
       />
 
       <AddToPlaylistModal

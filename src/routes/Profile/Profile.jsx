@@ -20,6 +20,8 @@ import { formatAddress } from "../../util/helper";
 import { useWeb3AuthDisconnect, useWeb3AuthUser } from "@web3auth/modal/react";
 import { useOutletContext } from "react-router-dom";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
+import { useIotaClientQuery } from "@iota/dapp-kit";
+import { useNetworkVariables } from "../../config/networkConfig";
 
 const Profile = () => {
   const { balance, address } = useIota();
@@ -28,10 +30,25 @@ const Profile = () => {
   const { musics, isPending, isError } = useFetchMusic();
   const { userInfo } = useWeb3AuthUser();
 
+  const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const userProfile = registeredUser?.filter((user) => user.owner === address);
 
+  const { data: purchasedIds } = useIotaClientQuery(
+    "queryEvents",
+    { query: { MoveEventType: `${vibeTraxPackageId}::vibetrax::MusicPurchased` } },
+    {
+      select: (data) =>
+        data.data
+          .map((x) => x.parsedJson)
+          .filter((e) => e.buyer?.user_address === address)
+          .map((e) => e.music_id),
+    }
+  );
+
   const userMusics = musics?.filter(
-    (music) => music?.current_owner?.user_address === address,
+    (music) =>
+      music.artist?.user_address === address ||
+      purchasedIds?.includes(music.music_id)
   );
 
   const stats = [

@@ -122,3 +122,151 @@
 .actions button {
   flex: 1;
 }
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 4rem 2rem;
+  min-height: 320px;
+}
+
+.loadingOrb {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbRing {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--color-primary);
+  animation: spin 1.2s linear infinite;
+}
+
+.orbRing:nth-child(1) {
+  width: 120px;
+  height: 120px;
+  border-top-color: var(--color-primary);
+  animation-duration: 1.2s;
+}
+
+.orbRing:nth-child(2) {
+  width: 90px;
+  height: 90px;
+  border-top-color: var(--color-secondary);
+  animation-duration: 0.9s;
+  animation-direction: reverse;
+}
+
+.orbRing:nth-child(3) {
+  width: 60px;
+  height: 60px;
+  border-top-color: rgba(255, 255, 255, 0.3);
+  animation-duration: 1.5s;
+}
+
+.orbIcon {
+  color: white;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loadingTitle {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  font-family: var(--font);
+  letter-spacing: -0.3px;
+}
+
+.loadingSubtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  font-family: var(--font);
+}
+
+.dots::after {
+  content: "";
+  animation: ellipsis 1.4s steps(4, end) infinite;
+}
+
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 4rem 2rem;
+  min-height: 320px;
+  animation: fadeIn 0.4s ease;
+}
+
+.successIcon {
+  color: var(--color-primary);
+  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.successTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  font-family: var(--font);
+}
+
+.successSubtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  font-family: var(--font);
+  text-transform: capitalize;
+}
+
+.successSubtitle strong {
+  color: white;
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.9); }
+}
+
+@keyframes ellipsis {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .roleCards {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+}

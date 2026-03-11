@@ -49,5 +49,46 @@ export const useVibetraxHook = () => {
       setLoading(false);
     }
   };
-  return { registerUser, loading };
+  const buyMusic = async (musicData) => {
+    if (!keypair){
+      console.log("Wallet not connected");
+      return;
+    }
+    try{
+      setLoading(true);
+      const tx = new Transaction();
+      const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(musicData.amount)]);
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::purchase_music_nft`,
+        arguments: [
+          tx.object(musicData.musicId),
+          coin,
+          tx.pure.string(musicData.buyerName),
+          tx.pure.string(musicData.buyerRole),
+        ],
+      });
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+
+      console.log("Transaction result", result);
+      if (result.effects?.status?.status !== "success") {
+        console.log("Transaction failed:", result.effects?.status);
+        return null;
+      }
+      return result;
+
+    } catch (e){
+      console.log("Error:", e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+
+    
+  };
+  return { registerUser, buyMusic, loading };
+
 };
