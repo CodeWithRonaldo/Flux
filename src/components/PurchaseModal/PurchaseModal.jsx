@@ -13,15 +13,13 @@ import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useState } from "react";
 import { formatPrice } from "../../util/helper";
 
-const PurchaseModal = ({ music, isOpen, onClose, buyer, musicFields }) => {
+const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
   const { buyMusic, loading } = useVibetraxHook();
   const [done, setDone] = useState(false);
 
   if (!music) return null;
 
   const trackPrice = parseFloat(formatPrice(music.price));
-  const isOwner = musicFields?.current_owner?.fields?.user_address === buyer?.owner;
-  const notForSale = musicFields ? !musicFields.for_sale : false;
 
   const handleBuy = async () => {
     const musicData = {
@@ -100,8 +98,8 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer, musicFields }) => {
           <Button onClick={onClose} variant="btn-ghost">
             Cancel
           </Button>
-          <Button onClick={handleBuy} disabled={loading || isOwner || notForSale}>
-            {isOwner ? "You own this track" : notForSale ? "Not for sale" : "Confirm & Pay"}
+          <Button onClick={handleBuy} disabled={loading}>
+            Confirm & Pay
           </Button>
         </div>
       </div>
