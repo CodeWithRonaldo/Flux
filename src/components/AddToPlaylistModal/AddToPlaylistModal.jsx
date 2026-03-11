@@ -5,12 +5,12 @@ import { ListPlus, Check, Plus } from "lucide-react";
 import { usePlaylist } from "../../hooks/usePlaylist";
 import Button from "../Button/Button";
 
-const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
+const AddToPlaylistModal = ({ isOpen, onClose, music, onCreatePlaylist }) => {
   const { playlists, addSongToPlaylist } = usePlaylist();
   const [addedPlaylists, setAddedPlaylists] = useState(new Set());
 
   const handleAddToPlaylist = (playlistId) => {
-    addSongToPlaylist(playlistId, song);
+    addSongToPlaylist(playlistId, music);
     setAddedPlaylists((prev) => new Set([...prev, playlistId]));
 
     setTimeout(() => {
@@ -23,7 +23,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
   };
 
   const isSongInPlaylist = (playlist) => {
-    return playlist.songs.some((s) => s.id === song?.id);
+    return playlist.songs.some((s) => s.id === music?.music_id);
   };
 
   const handleClose = () => {
@@ -40,7 +40,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, song, onCreatePlaylist }) => {
           </div>
           <h2 className={styles.title}>Add to Playlist</h2>
           <p className={styles.subtitle}>
-            Choose a playlist to add "{song?.title}"
+            Choose a playlist to add "{music?.title}"
           </p>
         </div>
 

@@ -31,7 +31,7 @@ const Library = () => {
   const filteredSongs = musics?.filter((music) => {
     const matchesSearch =
       music?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      music?.artist.toLowerCase().includes(searchQuery.toLowerCase());
+      music?.artist.name.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (searchQuery !== "") return matchesSearch;
 

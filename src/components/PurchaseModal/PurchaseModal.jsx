@@ -3,11 +3,11 @@ import styles from "./PurchaseModal.module.css";
 import Button from "../Button/Button";
 import { Zap, TrendingUp, Coins, ShieldCheck } from "lucide-react";
 
-const PurchaseModal = ({ track, isOpen, onClose }) => {
-  if (!track) return null;
+const PurchaseModal = ({ music, isOpen, onClose }) => {
+  if (!music) return null;
 
   const platformFee = 0.01;
-  const totalPrice = (parseFloat(track.price) + platformFee).toFixed(2);
+  const totalPrice = (parseFloat(music?.price) + platformFee).toFixed(2);
 
   const benefits = [
     {
@@ -34,19 +34,19 @@ const PurchaseModal = ({ track, isOpen, onClose }) => {
         <div className={styles.header}>
           <h2 className={styles.title}>Confirm Ownership</h2>
           <p className={styles.subtitle}>
-            You are about to own <span>{track.title}</span>
+            You are about to own <span>{music?.title}</span>
           </p>
         </div>
 
         <div className={styles.trackSummary}>
           <img
-            src={track.albumArt}
-            alt={track.title}
+            src={music?.music_image}
+            alt={music?.title}
             className={styles.albumArt}
           />
           <div className={styles.trackInfo}>
-            <h3>{track.title}</h3>
-            <p>{track.artist}</p>
+            <h3>{music?.title}</h3>
+            <p>{music?.artist?.name}</p>
           </div>
         </div>
 
@@ -65,7 +65,7 @@ const PurchaseModal = ({ track, isOpen, onClose }) => {
         <div className={styles.feesSection}>
           <div className={styles.feeRow}>
             <span>Track Price</span>
-            <span>{track.price} IOTA</span>
+            <span>{music?.price} IOTA</span>
           </div>
           <div className={styles.feeRow}>
             <span>Platform Fee</span>

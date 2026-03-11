@@ -8,14 +8,14 @@ import { useAudio } from "../../hooks/useAudio";
 import { useState } from "react";
 import Subscribe from "../../components/Subscribe/Subscribe";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
+import { useOutletContext } from "react-router-dom";
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { musics, isPending, isError } = useFetchMusic();
+  const registeredUser = useOutletContext();
 
-  if (!isPending) {
-    console.log("music", musics);
-  }
+  console.log(musics);
 
   const { currentTrack } = useAudio();
   return (
@@ -40,7 +40,7 @@ const Home = () => {
         <div className={styles.right}>
           <div className={styles.music}>
             <p className={styles.title}>{currentTrack?.title}</p>
-            <p className={styles.artist}>{currentTrack?.artist}</p>
+            <p className={styles.artist}>{currentTrack?.artist.name}</p>
           </div>
           <div className={styles.playerContainer}>
             <Player />
@@ -60,7 +60,7 @@ const Home = () => {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Top Artists</h2>
         <div className={styles.artistList}>
-          {artists.slice(0, 4).map((artist, index) => (
+          {registeredUser?.slice(0, 4).map((artist, index) => (
             <ArtistCard key={index} artist={artist} />
           ))}
         </div>

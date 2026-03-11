@@ -27,7 +27,7 @@ const Player = ({ music, className }) => {
   const isPlayingCurrent = isCurrent && isPlaying;
 
   // Use track's duration if not current, otherwise global duration
-  const displayDuration = isCurrent ? duration : music?.duration || 0;
+  const displayDuration = isCurrent ? duration : 0;
   const displayCurrentTime = isCurrent ? currentTime : 0;
 
   const formatTime = (time) => {

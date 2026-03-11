@@ -15,16 +15,24 @@ import {
 } from "lucide-react";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import MusicCard from "../../components/MusicCard/MusicCard";
-import { useEffect } from "react";
 import { useIota } from "../../hooks/useIota";
 import { formatAddress } from "../../util/helper";
-import { useWeb3AuthDisconnect } from "@web3auth/modal/react";
+import { useWeb3AuthDisconnect, useWeb3AuthUser } from "@web3auth/modal/react";
 import { useOutletContext } from "react-router-dom";
+import { useFetchMusic } from "../../hooks/useFetchMusic";
 
 const Profile = () => {
   const { balance, address } = useIota();
   const { disconnect, loading: isDisconnecting } = useWeb3AuthDisconnect();
   const registeredUser = useOutletContext();
+  const { musics, isPending, isError } = useFetchMusic();
+  const { userInfo } = useWeb3AuthUser();
+
+  const userProfile = registeredUser?.filter((user) => user.owner === address);
+
+  const userMusics = musics?.filter(
+    (music) => music?.current_owner?.user_address === address,
+  );
 
   const stats = [
     {
@@ -40,7 +48,7 @@ const Profile = () => {
     {
       icon: <Music size={18} absoluteStrokeWidth />,
       label: "Tracks",
-      value: songs.length,
+      value: userMusics.length,
     },
     {
       icon: <Play size={18} absoluteStrokeWidth />,
@@ -65,7 +73,7 @@ const Profile = () => {
 
   return (
     <MusicWrapper
-      songs={songs}
+      musics={userMusics}
       showTrackList={false}
       showPlaylistSelector={true}
     >
@@ -73,14 +81,22 @@ const Profile = () => {
         <div className={styles.profileContainer}>
           <div className={styles.profileHeader}>
             <div className={styles.profileInfoContainer}>
-              <Jazzicon diameter={100} seed={jsNumberForAddress(address)} />
+              {userInfo?.profileImage ? (
+                <img
+                  src={userInfo?.profileImage}
+                  alt={userInfo?.name}
+                  className={styles.profileImage}
+                />
+              ) : (
+                <Jazzicon diameter={100} seed={jsNumberForAddress(address)} />
+              )}
               <div className={styles.profileInfo}>
                 <h1 className={styles.profileName}>
-                  {registeredUser?.[0]?.username || "Vibe User"}
+                  {userProfile?.[0]?.username || userInfo?.name}
                 </h1>
                 <p>
                   <User2 size={16} absoluteStrokeWidth />
-                  {registeredUser?.[0]?.role || ""}
+                  {userProfile?.[0]?.role || ""}
                 </p>
                 <p className={styles.walletRow}>
                   <Wallet size={16} absoluteStrokeWidth />
@@ -106,7 +122,7 @@ const Profile = () => {
           </div>
 
           <div className={styles.bio}>
-            <p>{registeredUser?.[0]?.bio || ""}</p>
+            <p>{userProfile?.[0]?.bio || ""}</p>
           </div>
 
           <div className={styles.statsRow}>
@@ -126,10 +142,10 @@ const Profile = () => {
 
       <section className={styles.section}>
         <h2>Your Tracks</h2>
-        {songs.length > 0 && (
+        {userMusics?.length > 0 && (
           <div className={styles.musicGrid}>
-            {songs.map((track) => (
-              <MusicCard key={track.id} track={track} />
+            {userMusics.map((music) => (
+              <MusicCard key={music?.music_id} music={music} />
             ))}
           </div>
         )}

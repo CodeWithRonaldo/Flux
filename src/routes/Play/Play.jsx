@@ -17,6 +17,8 @@ import { BlackCard } from "../../components/GlassCard/GlassCard";
 import { usePlaylist } from "../../hooks/usePlaylist";
 import TipModal from "../../components/TipModal/TipModal";
 import BoostModal from "../../components/BoostModal/BoostModal";
+import { useFetchMusic } from "../../hooks/useFetchMusic";
+import { formatPrice } from "../../util/helper";
 
 const Play = () => {
   const { id } = useParams();
@@ -29,11 +31,12 @@ const Play = () => {
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
+  const { musics, isPending, isError } = useFetchMusic();
 
   // Sync context with URL param on mount or URL change
   useEffect(() => {
-    if (id && currentTrack?.id !== parseInt(id)) {
-      const songToPlay = songs.find((s) => s.id === parseInt(id));
+    if (id && currentTrack?.music_id !== parseInt(id)) {
+      const songToPlay = musics?.find((s) => s.music_id === parseInt(id));
       if (songToPlay) {
         playTrack(songToPlay);
       }
@@ -43,14 +46,14 @@ const Play = () => {
 
   // Sync URL with context change (e.g. via Next/Prev buttons)
   useEffect(() => {
-    if (currentTrack && id && currentTrack.id !== parseInt(id)) {
-      navigate(`/play/${currentTrack.id}`, { replace: true });
+    if (currentTrack && id && currentTrack?.music_id !== parseInt(id)) {
+      navigate(`/play/${currentTrack?.music_id}`, { replace: true });
     }
   }, [currentTrack, id]);
 
-  const recentSongs = songs.slice(0, 3);
-  const moreSongs = songs.slice(0, 4);
-  const songToShow = currentTrack || songs[0];
+  const recentSongs = musics?.slice(0, 3);
+  const moreSongs = musics?.slice(0, 4);
+  const songToShow = currentTrack || musics?.[0];
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);
@@ -73,7 +76,7 @@ const Play = () => {
 
   return (
     <MusicWrapper
-      songs={moreSongs}
+      musics={moreSongs}
       playlist={true}
       trackListTitle={"More From Artist"}
     >
@@ -87,14 +90,16 @@ const Play = () => {
       rgba(0, 0, 0, 0.7) 50%,
       rgba(0, 0, 0, 0.9) 80%
     ),
-    url(${songToShow.albumArt}) center/cover no-repeat`,
+    url(${songToShow.music_image}) center/cover no-repeat`,
         }}
       >
         <div className={styles.nowPlayingDetails}>
           <h4 className={styles.nowPlayingTitle}>Now Playing</h4>
           <div>
-            <h1 className={styles.nowPlayingTrack}>{songToShow.title}</h1>
-            <p className={styles.nowPlayingArtist}>{songToShow.artist}</p>
+            <h1 className={styles.nowPlayingTrack}>{songToShow?.title}</h1>
+            <p className={styles.nowPlayingArtist}>
+              {songToShow?.artist?.name}
+            </p>
           </div>
           <div className={styles.nowPlayingActions}>
             <div className={styles.tooltipWrapper}>
@@ -141,7 +146,9 @@ const Play = () => {
           <div className={styles.purchaseContainer}>
             <div className={styles.priceTag}>
               <span className={styles.priceLabel}>Price</span>
-              <span className={styles.priceValue}>{songToShow.price} IOTA</span>
+              <span className={styles.priceValue}>
+                {formatPrice(songToShow.price)} IOTA
+              </span>
             </div>
             <Button onClick={handleOpenPurchaseModal}>Own this track</Button>
           </div>
@@ -152,13 +159,16 @@ const Play = () => {
       </section>
 
       <section className={styles.recentlyPlayed}>
-        <TrackList title="Recently Played" songs={recentSongs} />
+        <TrackList title="Recently Played" musics={recentSongs} />
       </section>
       <section className={styles.section}>
         <h2 className={styles.featuredTitle}>Contributors</h2>
         <div className={styles.artistList}>
-          {artists.map((artist, index) => (
-            <ArtistCard artist={artist} key={index} />
+          {songToShow?.collaborators?.map((collaborator) => (
+            <ArtistCard
+              artist={collaborator}
+              key={collaborator?.user_address}
+            />
           ))}
         </div>
       </section>
@@ -171,7 +181,7 @@ const Play = () => {
         onClose={() => setIsTipModalOpen(false)}
       />
       <PurchaseModal
-        track={songToShow}
+        music={songToShow}
         isOpen={isPurchaseModalOpen}
         onClose={handleClosePurchaseModal}
       />
@@ -179,7 +189,7 @@ const Play = () => {
       <AddToPlaylistModal
         isOpen={isAddToPlaylistOpen}
         onClose={() => setIsAddToPlaylistOpen(false)}
-        song={songToShow}
+        music={songToShow}
         onCreatePlaylist={handleCreatePlaylistFromModal}
       />
 

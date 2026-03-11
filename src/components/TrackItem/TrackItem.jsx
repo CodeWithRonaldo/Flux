@@ -18,13 +18,13 @@ const TrackItem = ({ music, rank }) => {
       </div>
       <div className={styles.songInfo} onClick={() => playTrack(music)}>
         <img
-          src={music.music_image}
-          alt={music.title}
+          src={music?.music_image}
+          alt={music?.title}
           className={styles.albumArt}
         />
         <div className={styles.songDetails}>
-          <div className={styles.title}>{music.title}</div>
-          <div className={styles.artist}>{music.artist.name}</div>
+          <div className={styles.title}>{music?.title}</div>
+          <div className={styles.artist}>{music?.artist.name}</div>
         </div>
       </div>
 

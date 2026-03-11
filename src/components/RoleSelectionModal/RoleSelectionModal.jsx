@@ -6,11 +6,13 @@ import Button from "../Button/Button";
 import ListenerOnboarding from "../ListenerOnboarding/ListenerOnboarding";
 import ArtistOnboarding from "../ArtistOnboarding/ArtistOnboarding";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
+import { useWeb3AuthUser } from "@web3auth/modal/react";
 
 const RoleSelectionModal = ({ isOpen, onClose }) => {
   const [role, setRole] = useState("");
   const [done, setDone] = useState(false);
   const { registerUser, loading } = useVibetraxHook();
+  const { userInfo } = useWeb3AuthUser();
 
   const onListener = () => setRole("listener");
   const onArtist = () => setRole("artist");
@@ -18,7 +20,7 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
   const handleComplete = async (data) => {
     const userData = {
       role,
-      artistName: data.artistName || "",
+      artistName: data.artistName || userInfo?.name,
       bio: data.bio || "",
       genre: data.genres || [],
     };
@@ -66,11 +68,14 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
         </div>
       )}
 
-      {role !== "" && !loading && !done && (
-        role === "listener"
-          ? <ListenerOnboarding onComplete={handleComplete} />
-          : <ArtistOnboarding onComplete={handleComplete} />
-      )}
+      {role !== "" &&
+        !loading &&
+        !done &&
+        (role === "listener" ? (
+          <ListenerOnboarding onComplete={handleComplete} />
+        ) : (
+          <ArtistOnboarding onComplete={handleComplete} />
+        ))}
 
       {loading && (
         <div className={styles.loadingContainer}>
@@ -79,11 +84,18 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
             <div className={styles.orbRing} />
             <div className={styles.orbRing} />
             <div className={styles.orbIcon}>
-              {role === "listener" ? <Headphones size={32} /> : <Music size={32} />}
+              {role === "listener" ? (
+                <Headphones size={32} />
+              ) : (
+                <Music size={32} />
+              )}
             </div>
           </div>
           <h2 className={styles.loadingTitle}>Setting up your profile</h2>
-          <p className={styles.loadingSubtitle}>Confirming on IOTA blockchain<span className={styles.dots} /></p>
+          <p className={styles.loadingSubtitle}>
+            Confirming on IOTA blockchain
+            <span className={styles.dots} />
+          </p>
         </div>
       )}
 
@@ -94,7 +106,8 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
           </div>
           <h2 className={styles.successTitle}>You&apos;re all set!</h2>
           <p className={styles.successSubtitle}>
-            Welcome to Flux as a{role === "artist" ? "n" : ""} <strong>{role}</strong>
+            Welcome to Flux as a{role === "artist" ? "n" : ""}{" "}
+            <strong>{role}</strong>
           </p>
         </div>
       )}

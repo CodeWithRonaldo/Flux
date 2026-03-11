@@ -38,6 +38,13 @@
   gap: 20px;
 }
 
+.profileImage {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border-radius: 99px;
+}
+
 .walletRow {
   display: flex;
   align-items: center;

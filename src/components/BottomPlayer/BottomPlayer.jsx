@@ -18,7 +18,7 @@ const BottomPlayer = () => {
   if (!currentTrack) return null;
 
   const handleContainerClick = () => {
-    navigate(`/play/${currentTrack.id}`);
+    navigate(`/play/${currentTrack.music_id}`);
   };
 
   const handleClose = (e) => {
@@ -48,13 +48,13 @@ const BottomPlayer = () => {
     <div className={styles.bottomPlayer} onClick={handleContainerClick}>
       <div className={styles.left}>
         <img
-          src={currentTrack.albumArt}
-          alt={currentTrack.title}
+          src={currentTrack?.music_image}
+          alt={currentTrack?.title}
           className={styles.albumArt}
         />
         <div className={styles.trackInfo}>
           <p className={styles.title}>{currentTrack.title}</p>
-          <p className={styles.artist}>{currentTrack.artist}</p>
+          <p className={styles.artist}>{currentTrack.artist.name}</p>
         </div>
       </div>
 
