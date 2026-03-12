@@ -19,14 +19,14 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
 
   if (!music) return null;
 
-  const trackPrice = parseFloat(formatPrice(music.price));
+  console.log(buyer?.[0]?.username);
 
   const handleBuy = async () => {
     const musicData = {
       musicId: music.music_id,
       amount: parseInt(music.price),
-      buyerName: buyer?.username ?? "",
-      buyerRole: buyer?.role ?? "",
+      buyerName: buyer?.[0]?.username ?? "",
+      buyerRole: buyer?.[0]?.role ?? "",
     };
     const result = await buyMusic(musicData);
     if (!result?.digest) return;
@@ -55,54 +55,56 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className={styles.purchaseContainer}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Confirm Ownership</h2>
-          <p className={styles.subtitle}>
-            You are about to own <span>{music?.title}</span>
-          </p>
-        </div>
+      {!loading && !done && (
+        <div className={styles.purchaseContainer}>
+          <div className={styles.header}>
+            <h2 className={styles.title}>Confirm Ownership</h2>
+            <p className={styles.subtitle}>
+              You are about to own <span>{music?.title}</span>
+            </p>
+          </div>
 
-        <div className={styles.trackSummary}>
-          <img
-            src={music?.music_image}
-            alt={music?.title}
-            className={styles.albumArt}
-          />
-          <div className={styles.trackInfo}>
-            <h3>{music?.title}</h3>
-            <p>{music?.artist?.name}</p>
+          <div className={styles.trackSummary}>
+            <img
+              src={music?.music_image}
+              alt={music?.title}
+              className={styles.albumArt}
+            />
+            <div className={styles.trackInfo}>
+              <h3>{music?.title}</h3>
+              <p>{music?.artist?.name}</p>
+            </div>
+          </div>
+
+          <div className={styles.benefitsSection}>
+            <h4>Ownership Benefits</h4>
+            <ul className={styles.benefitsList}>
+              {benefits.map((benefit, index) => (
+                <li key={index} className={styles.benefitItem}>
+                  {benefit.icon}
+                  <span>{benefit.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className={styles.feesSection}>
+            <div className={`${styles.feeRow} ${styles.totalRow}`}>
+              <span>Total Payable</span>
+              <span>{formatPrice(music?.price)} IOTA</span>
+            </div>
+          </div>
+
+          <div className={styles.actions}>
+            <Button onClick={onClose} variant="btn-ghost">
+              Cancel
+            </Button>
+            <Button onClick={handleBuy} disabled={loading}>
+              Confirm & Pay
+            </Button>
           </div>
         </div>
-
-        <div className={styles.benefitsSection}>
-          <h4>Ownership Benefits</h4>
-          <ul className={styles.benefitsList}>
-            {benefits.map((benefit, index) => (
-              <li key={index} className={styles.benefitItem}>
-                {benefit.icon}
-                <span>{benefit.text}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className={styles.feesSection}>
-          <div className={`${styles.feeRow} ${styles.totalRow}`}>
-            <span>Total Payable</span>
-            <span>{trackPrice} IOTA</span>
-          </div>
-        </div>
-
-        <div className={styles.actions}>
-          <Button onClick={onClose} variant="btn-ghost">
-            Cancel
-          </Button>
-          <Button onClick={handleBuy} disabled={loading}>
-            Confirm & Pay
-          </Button>
-        </div>
-      </div>
+      )}
       {loading && (
         <div className={styles.loadingContainer}>
           <div className={styles.loadingOrb}>

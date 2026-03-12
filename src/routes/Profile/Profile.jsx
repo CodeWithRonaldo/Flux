@@ -33,22 +33,13 @@ const Profile = () => {
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const userProfile = registeredUser?.filter((user) => user.owner === address);
 
-  const { data: purchasedIds } = useIotaClientQuery(
-    "queryEvents",
-    { query: { MoveEventType: `${vibeTraxPackageId}::vibetrax::MusicPurchased` } },
-    {
-      select: (data) =>
-        data.data
-          .map((x) => x.parsedJson)
-          .filter((e) => e.buyer?.user_address === address)
-          .map((e) => e.music_id),
-    }
-  );
-
   const userMusics = musics?.filter(
     (music) =>
-      music.artist?.user_address === address ||
-      purchasedIds?.includes(music.music_id)
+      music?.artist?.user_address === address ||
+      music?.current_owner?.user_address === address ||
+      music?.collaborators.some(
+        (collaborator) => collaborator?.user_address === address,
+      ),
   );
 
   const stats = [

@@ -6,11 +6,9 @@ import Player from "../../components/Player/Player";
 import TrackList from "../../components/TrackList/TrackList";
 import { BanknoteArrowUp, Ellipsis, Heart, Menu, Plus } from "lucide-react";
 import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
-import { songs, artists } from "../../util/songList";
 import PurchaseModal from "../../components/PurchaseModal/PurchaseModal";
 import AddToPlaylistModal from "../../components/AddToPlaylistModal/AddToPlaylistModal";
 import PlayListModal from "../../components/PlayListModal/PlayListModal";
-
 import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { useAudio } from "../../hooks/useAudio";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
@@ -19,11 +17,11 @@ import TipModal from "../../components/TipModal/TipModal";
 import BoostModal from "../../components/BoostModal/BoostModal";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { formatPrice } from "../../util/helper";
+import { useIota } from "../../hooks/useIota";
 
 const Play = () => {
   const { id } = useParams();
   const registeredUser = useOutletContext();
-  const currentUser = registeredUser?.[0];
   const navigate = useNavigate();
   const { currentTrack, playTrack } = useAudio();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
@@ -34,6 +32,9 @@ const Play = () => {
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
   const { musics, isPending, isError } = useFetchMusic();
+  const { address } = useIota();
+
+  const currentUser = registeredUser?.filter((user) => user.owner === address);
 
   // Sync context with URL param on mount or URL change
   useEffect(() => {
@@ -56,6 +57,22 @@ const Play = () => {
   const recentSongs = musics?.slice(0, 3);
   const moreSongs = musics?.slice(0, 4);
   const songToShow = currentTrack || musics?.[0];
+
+  console.log("songToShow", songToShow);
+
+  const forSale = songToShow?.for_sale === true;
+
+  const isPremium =
+    address === songToShow?.current_owner?.user_address ||
+    address === songToShow?.artist?.user_address ||
+    songToShow?.collaborators.some(
+      (collaborator) => collaborator.user_address === address,
+    );
+
+  const showEditButton =
+    songToShow?.current_owner?.user_address ===
+      songToShow?.artist?.user_address &&
+    songToShow?.current_owner?.user_address === address;
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);
@@ -104,14 +121,16 @@ const Play = () => {
             </p>
           </div>
           <div className={styles.nowPlayingActions}>
-            <div className={styles.tooltipWrapper}>
-              <Ellipsis
-                size={30}
-                className={styles.icons}
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              />
-              <span className={styles.tooltip}>More options</span>
-            </div>
+            {showEditButton && (
+              <div className={styles.tooltipWrapper}>
+                <Ellipsis
+                  size={30}
+                  className={styles.icons}
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                />
+                <span className={styles.tooltip}>More options</span>
+              </div>
+            )}
 
             <div className={styles.tooltipWrapper}>
               <Heart size={30} className={styles.icons} />
@@ -152,7 +171,9 @@ const Play = () => {
                 {formatPrice(songToShow.price)} IOTA
               </span>
             </div>
-            <Button onClick={handleOpenPurchaseModal}>Own this track</Button>
+            {forSale && !isPremium && (
+              <Button onClick={handleOpenPurchaseModal}>Own this track</Button>
+            )}
           </div>
         </div>
         <div className={styles.nowPlayingPlayer}>
