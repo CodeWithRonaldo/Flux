@@ -39,9 +39,9 @@ export const AudioProvider = ({ children }) => {
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (currentTrack?.full_music) {
+    if (currentTrack?.preview_music) {
       const wasPlaying = isPlaying;
-      audio.src = currentTrack?.full_music;
+      audio.src = currentTrack.preview_music;
       audio.load();
       if (wasPlaying) {
         audio.play().catch((err) => console.error("Playback failed:", err));
@@ -97,6 +97,17 @@ export const AudioProvider = ({ children }) => {
     setCurrentTime(time);
   };
 
+  const updateCurrentSrc = (src) => {
+    if (!src) return;
+    const audio = audioRef.current;
+    const wasPlaying = isPlaying;
+    audio.src = src;
+    audio.load();
+    if (wasPlaying) {
+      audio.play().catch((err) => console.error("Playback failed:", err));
+    }
+  };
+
   const value = {
     currentTrack,
     isPlaying,
@@ -109,6 +120,7 @@ export const AudioProvider = ({ children }) => {
     nextTrack,
     prevTrack,
     seek,
+    updateCurrentSrc,
   };
 
   return (

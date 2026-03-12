@@ -4,7 +4,7 @@ import styles from "./TrackItem.module.css";
 
 const TrackItem = ({ music, rank }) => {
   const { currentTrack, playTrack, isPlaying } = useAudio();
-  const isCurrent = currentTrack?.id === music.music_id;
+  const isCurrent = currentTrack?.music_id === music?.music_id;
   const isActuallyPlaying = isCurrent && isPlaying;
 
   return (
@@ -24,7 +24,7 @@ const TrackItem = ({ music, rank }) => {
         />
         <div className={styles.songDetails}>
           <div className={styles.title}>{music?.title}</div>
-          <div className={styles.artist}>{music?.artist.name}</div>
+          <div className={styles.artist}>{music?.artist?.name}</div>
         </div>
       </div>
 

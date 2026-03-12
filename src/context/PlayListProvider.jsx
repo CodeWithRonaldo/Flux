@@ -54,7 +54,7 @@ const PlayListProvider = ({ children }) => {
     setPlaylists((prev) =>
       prev.map((p) => {
         if (p.id === playlistId) {
-          if (p.songs.find((s) => s.id === song.id)) {
+          if (p.songs.find((s) => s.music_id === song.music_id)) {
             return p;
           }
           return { ...p, songs: [...p.songs, song] };
@@ -68,7 +68,7 @@ const PlayListProvider = ({ children }) => {
     setPlaylists((prev) =>
       prev.map((p) =>
         p.id === playlistId
-          ? { ...p, songs: p.songs.filter((s) => s.id !== songId) }
+          ? { ...p, songs: p.songs.filter((s) => s.music_id !== songId) }
           : p,
       ),
     );

@@ -23,7 +23,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, music, onCreatePlaylist }) => {
   };
 
   const isSongInPlaylist = (playlist) => {
-    return playlist.songs.some((s) => s.id === music?.music_id);
+    return playlist.songs.some((s) => s.music_id === music?.music_id);
   };
 
   const handleClose = () => {

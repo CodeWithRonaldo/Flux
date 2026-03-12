@@ -13,7 +13,12 @@ export function IotaProvider({ children }) {
 
   useEffect(() => {
     const getAddress = async () => {
-      if (!web3Auth.provider) return;
+      if (!web3Auth.provider) {
+        setAddress("");
+        setKeypair(null);
+        setBalance("");
+        return;
+      }
       console.log("getting address");
 
       const privateKey = await web3Auth.provider.request({

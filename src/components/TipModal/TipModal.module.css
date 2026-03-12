@@ -80,6 +80,45 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+.artistName {
+  color: var(--color-secondary);
+  font-weight: 600;
+}
+
+.quickAmounts {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.quickBtn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quickBtn:hover {
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.quickBtnActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.inputGroup {
+  width: 100%;
+}
+
 .actions {
   display: flex;
   gap: 1rem;

@@ -15,7 +15,7 @@ const Home = () => {
   const { musics, isPending, isError } = useFetchMusic();
   const registeredUser = useOutletContext();
 
-  console.log(musics);
+  // console.log(musics);
 
   const { currentTrack } = useAudio();
   return (

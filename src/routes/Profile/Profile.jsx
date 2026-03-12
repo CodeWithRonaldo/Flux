@@ -1,6 +1,5 @@
 import styles from "./Profile.module.css";
 import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
-import { songs } from "../../util/songList";
 import Button from "../../components/Button/Button";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
 import {
@@ -18,7 +17,7 @@ import MusicCard from "../../components/MusicCard/MusicCard";
 import { useIota } from "../../hooks/useIota";
 import { formatAddress } from "../../util/helper";
 import { useWeb3AuthDisconnect, useWeb3AuthUser } from "@web3auth/modal/react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useNetworkVariables } from "../../config/networkConfig";
@@ -30,8 +29,24 @@ const Profile = () => {
   const { musics, isPending, isError } = useFetchMusic();
   const { userInfo } = useWeb3AuthUser();
 
+  const navigate = useNavigate();
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const userProfile = registeredUser?.filter((user) => user.owner === address);
+
+  const { data: vibeBalanceData } = useIotaClientQuery(
+    "getBalance",
+    {
+      owner: address ?? "",
+      coinType: `${vibeTraxPackageId}::vibe_token::VIBE_TOKEN`,
+    },
+    { enabled: !!address },
+  );
+
+  const vibeBalance = vibeBalanceData
+    ? (Number(vibeBalanceData.totalBalance) / 1_000_000).toLocaleString(undefined, {
+        maximumFractionDigits: 2,
+      })
+    : "0";
 
   const userMusics = musics?.filter(
     (music) =>
@@ -50,8 +65,8 @@ const Profile = () => {
     },
     {
       icon: <Coins size={18} absoluteStrokeWidth />,
-      label: "Flux Balance",
-      value: "1,240 FLX",
+      label: "Vibe Balance",
+      value: `${vibeBalance} VIBE`,
     },
     {
       icon: <Music size={18} absoluteStrokeWidth />,
@@ -122,7 +137,13 @@ const Profile = () => {
             </div>
 
             <div className={styles.profileActions}>
-              <Button onClick={disconnect} disabled={isDisconnecting}>
+              <Button
+                onClick={() => {
+                  disconnect;
+                  navigate("/");
+                }}
+                disabled={isDisconnecting}
+              >
                 {isDisconnecting ? "Disconnecting..." : "Disconnect Wallet"}
               </Button>
               <Button variant="btn-ghost">Edit Profile</Button>
@@ -139,7 +160,7 @@ const Profile = () => {
                 <div className={styles.statIcon}>{stat.icon}</div>
                 <div className={styles.statValue}>{stat.value}</div>
                 <div className={styles.statLabel}>{stat.label}</div>
-                {stat.label.includes("Flux") && (
+                {stat.label.includes("Vibe") && (
                   <Plus size={18} className={styles.addStatIcon} />
                 )}
               </div>

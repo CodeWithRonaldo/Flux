@@ -9,6 +9,7 @@ import RoleSelectionModal from "./components/RoleSelectionModal/RoleSelectionMod
 import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useNetworkVariables } from "./config/networkConfig";
 import { useIota } from "./hooks/useIota";
+
 function App() {
   const location = useLocation();
   const { currentTrack, isBottomPlayerVisible } = useAudio();
@@ -33,7 +34,9 @@ function App() {
     {
       select: (data) => data.data.flatMap((x) => x.parsedJson),
       // .filter((y) => y.owner === address),
+      refetchInterval: 3000,
     },
+    
   );
 
   const isUserRegistered = registeredUser?.filter(

@@ -16,6 +16,7 @@ import { usePlaylist } from "../../hooks/usePlaylist";
 import TipModal from "../../components/TipModal/TipModal";
 import BoostModal from "../../components/BoostModal/BoostModal";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
+import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { formatPrice } from "../../util/helper";
 import { useIota } from "../../hooks/useIota";
 
@@ -23,7 +24,7 @@ const Play = () => {
   const { id } = useParams();
   const registeredUser = useOutletContext();
   const navigate = useNavigate();
-  const { currentTrack, playTrack } = useAudio();
+  const { currentTrack, playTrack, updateCurrentSrc } = useAudio();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,6 +34,7 @@ const Play = () => {
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
   const { musics, isPending, isError } = useFetchMusic();
   const { address } = useIota();
+  const { subscription, isSubscribed, isExpired } = useFetchSubscription();
 
   const currentUser = registeredUser?.filter((user) => user.owner === address);
 
@@ -58,7 +60,7 @@ const Play = () => {
   const moreSongs = musics?.slice(0, 4);
   const songToShow = currentTrack || musics?.[0];
 
-  console.log("songToShow", songToShow);
+  // console.log("songToShow", songToShow);
 
   const forSale = songToShow?.for_sale === true;
 
@@ -73,6 +75,16 @@ const Play = () => {
     songToShow?.current_owner?.user_address ===
       songToShow?.artist?.user_address &&
     songToShow?.current_owner?.user_address === address;
+
+  // Upgrade audio src to full quality when access is confirmed
+  useEffect(() => {
+    if (!songToShow) return;
+    const src =
+      isPremium || isSubscribed
+        ? songToShow.full_music
+        : songToShow.preview_music;
+    updateCurrentSrc(src);
+  }, [isPremium, isSubscribed, songToShow?.music_id]);
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);
@@ -109,7 +121,7 @@ const Play = () => {
       rgba(0, 0, 0, 0.7) 50%,
       rgba(0, 0, 0, 0.9) 80%
     ),
-    url(${songToShow.music_image}) center/cover no-repeat`,
+    url(${songToShow?.music_image}) center/cover no-repeat`,
         }}
       >
         <div className={styles.nowPlayingDetails}>
@@ -168,7 +180,7 @@ const Play = () => {
             <div className={styles.priceTag}>
               <span className={styles.priceLabel}>Price</span>
               <span className={styles.priceValue}>
-                {formatPrice(songToShow.price)} IOTA
+                {formatPrice(songToShow?.price)} IOTA
               </span>
             </div>
             {forSale && !isPremium && (
@@ -198,10 +210,12 @@ const Play = () => {
       <BoostModal
         isOpen={isBoostModalOpen}
         onClose={() => setIsBoostModalOpen(false)}
+        music={songToShow}
       />
       <TipModal
         isOpen={isTipModalOpen}
         onClose={() => setIsTipModalOpen(false)}
+        music={songToShow}
       />
       <PurchaseModal
         music={songToShow}

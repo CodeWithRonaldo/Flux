@@ -128,12 +128,12 @@ const PlayListSelector = ({ onCreateClick, title = "My Playlists" }) => {
                     ) : (
                       <div className={styles.songsList}>
                         {playlist.songs.map((song, index) => (
-                          <div key={song.id} className={styles.songItemWrapper}>
-                            <TrackItem song={song} rank={index + 1} />
+                          <div key={song.music_id} className={styles.songItemWrapper}>
+                            <TrackItem music={song} rank={index + 1} />
                             <button
                               className={styles.removeSongButton}
                               onClick={(e) =>
-                                handleRemoveSong(e, playlist.id, song.id)
+                                handleRemoveSong(e, playlist.id, song.music_id)
                               }
                               title="Remove from playlist"
                             >

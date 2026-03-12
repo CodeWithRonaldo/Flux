@@ -1,34 +1,28 @@
 import Modal from "../Modal/Modal";
-import styles from "./PurchaseModal.module.css";
+import styles from "../PurchaseModal/PurchaseModal.module.css";
 import Button from "../Button/Button";
-import {
-  Zap,
-  TrendingUp,
-  Coins,
-  ShieldCheck,
-  Music,
-  CheckCircle,
-} from "lucide-react";
+import { Zap, Music2, Coins, Radio, CheckCircle, Music } from "lucide-react";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useState } from "react";
-import { formatPrice } from "../../util/helper";
 
-const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
-  const { buyMusic, loading } = useVibetraxHook();
+const SUBSCRIPTION_PRICE = "5.00";
+
+const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
+  const { subscribe, renewSubscription, loading } = useVibetraxHook();
   const [done, setDone] = useState(false);
 
-  if (!music) return null;
+  const isRenewal = !!subscription;
 
-  // console.log(buyer?.[0]?.username);
-
-  const handleBuy = async () => {
-    const musicData = {
-      musicId: music.music_id,
-      amount: parseInt(music.price),
-      buyerName: buyer?.[0]?.username ?? "",
-      buyerRole: buyer?.[0]?.role ?? "",
+  const handleSubscribe = async () => {
+    const subData = {
+      subscriberName: subscriber?.[0]?.username ?? "",
+      subscriberRole: subscriber?.[0]?.role ?? "",
     };
-    const result = await buyMusic(musicData);
+
+    const result = isRenewal
+      ? await renewSubscription({ ...subData, subscriptionId: subscription.id })
+      : await subscribe(subData);
+
     if (!result?.digest) return;
     setDone(true);
     setTimeout(() => onClose(), 1800);
@@ -36,20 +30,20 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
 
   const benefits = [
     {
-      icon: <ShieldCheck size={20} className={styles.benefitIcon} />,
-      text: "Full ownership of the digital track",
+      icon: <Radio size={20} className={styles.benefitIcon} />,
+      text: "Unlimited music streaming",
     },
     {
       icon: <Zap size={20} className={styles.benefitIcon} />,
-      text: "Automatic access to premium version",
+      text: "Earn VIBE tokens with every stream",
     },
     {
-      icon: <TrendingUp size={20} className={styles.benefitIcon} />,
-      text: "Earn as the music value rises with engagement",
+      icon: <Music2 size={20} className={styles.benefitIcon} />,
+      text: "Access to full-length premium tracks",
     },
     {
       icon: <Coins size={20} className={styles.benefitIcon} />,
-      text: `Earn bonus FLX tokens for this purchase`,
+      text: "Up to 100 VIBE earned per day",
     },
   ];
 
@@ -58,26 +52,18 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
       {!loading && !done && (
         <div className={styles.purchaseContainer}>
           <div className={styles.header}>
-            <h2 className={styles.title}>Confirm Ownership</h2>
+            <h2 className={styles.title}>
+              {isRenewal ? "Renew Subscription" : "Subscribe to Flux"}
+            </h2>
             <p className={styles.subtitle}>
-              You are about to own <span>{music?.title}</span>
+              {isRenewal
+                ? "Renew your subscription for another 30 days"
+                : "Get full access to streaming and earn VIBE tokens"}
             </p>
           </div>
 
-          <div className={styles.trackSummary}>
-            <img
-              src={music?.music_image}
-              alt={music?.title}
-              className={styles.albumArt}
-            />
-            <div className={styles.trackInfo}>
-              <h3>{music?.title}</h3>
-              <p>{music?.artist?.name}</p>
-            </div>
-          </div>
-
           <div className={styles.benefitsSection}>
-            <h4>Ownership Benefits</h4>
+            <h4>What you get</h4>
             <ul className={styles.benefitsList}>
               {benefits.map((benefit, index) => (
                 <li key={index} className={styles.benefitItem}>
@@ -91,7 +77,7 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
           <div className={styles.feesSection}>
             <div className={`${styles.feeRow} ${styles.totalRow}`}>
               <span>Total Payable</span>
-              <span>{formatPrice(music?.price)} IOTA</span>
+              <span>{SUBSCRIPTION_PRICE} IOTA / 30 days</span>
             </div>
           </div>
 
@@ -99,12 +85,13 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
             <Button onClick={onClose} variant="btn-ghost">
               Cancel
             </Button>
-            <Button onClick={handleBuy} disabled={loading}>
-              Confirm & Pay
+            <Button onClick={handleSubscribe} disabled={loading}>
+              {isRenewal ? "Renew Now" : "Subscribe Now"}
             </Button>
           </div>
         </div>
       )}
+
       {loading && (
         <div className={styles.loadingContainer}>
           <div className={styles.loadingOrb}>
@@ -115,7 +102,9 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
               <Music size={32} />
             </div>
           </div>
-          <h2 className={styles.loadingTitle}>Processing your purchase</h2>
+          <h2 className={styles.loadingTitle}>
+            {isRenewal ? "Renewing subscription" : "Processing subscription"}
+          </h2>
           <p className={styles.loadingSubtitle}>
             Confirming on IOTA blockchain
             <span className={styles.dots} />
@@ -135,4 +124,4 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
   );
 };
 
-export default PurchaseModal;
+export default SubscriptionModal;

@@ -22,7 +22,7 @@ const MusicWrapper = ({
       return musics;
     }
     const playlist = playlists.find((p) => p.id === currentPlaylist);
-    return playlist ? playlist.musics : [];
+    return playlist ? playlist.songs : [];
   };
 
   const handleCreatePlaylist = (name) => {
