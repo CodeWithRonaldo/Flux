@@ -21,6 +21,8 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useNetworkVariables } from "../../config/networkConfig";
+import { useFetchSubscription } from "../../hooks/useFetchSubscription";
+import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 
 const Profile = () => {
   const { balance, address } = useIota();
@@ -31,6 +33,8 @@ const Profile = () => {
 
   const navigate = useNavigate();
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
+  const { subscription, isSubscribed, refetch: refetchSubscription } = useFetchSubscription();
+  const { claimRewards, loading: isClaiming } = useVibetraxHook();
   const userProfile = registeredUser?.filter((user) => user.owner === address);
 
   const { data: vibeBalanceData } = useIotaClientQuery(
@@ -166,6 +170,26 @@ const Profile = () => {
               </div>
             ))}
           </div>
+
+          {isSubscribed && subscription?.pending_vibe > 0 && (
+            <div className={styles.pendingRewards}>
+              <div className={styles.pendingInfo}>
+                <Coins size={18} absoluteStrokeWidth />
+                <span>
+                  <strong>
+                    {(subscription.pending_vibe / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 2 })} VIBE
+                  </strong>{" "}
+                  pending — earned from streaming
+                </span>
+              </div>
+              <Button
+                onClick={() => claimRewards(subscription.id).then((r) => { if (r) refetchSubscription(); })}
+                disabled={isClaiming}
+              >
+                {isClaiming ? "Claiming..." : "Claim VIBE"}
+              </Button>
+            </div>
+          )}
         </div>
       </BlackCard>
 

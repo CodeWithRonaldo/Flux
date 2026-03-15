@@ -278,6 +278,71 @@ export const useVibetraxHook = () => {
     }
   };
 
-  return { registerUser, buyMusic, subscribe, renewSubscription, tipArtist, boostMusic, loading };
+  const streamMusic = async (streamData) => {
+    if (!keypair) return null;
+    try {
+      setLoading(true);
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::stream_music`,
+        arguments: [
+          tx.object(streamData.musicId),
+          tx.object(streamData.subscriptionId),
+          tx.pure.string(streamData.streamerName),
+          tx.pure.string(streamData.streamerRole),
+          tx.object("0x6"),
+        ],
+      });
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+      console.log("Stream result", result);
+      if (result.effects?.status?.status !== "success") {
+        console.log("Stream failed:", result.effects?.status);
+        return null;
+      }
+      return result;
+    } catch (e) {
+      console.log("Error:", e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const claimRewards = async (subscriptionId) => {
+    if (!keypair) return null;
+    try {
+      setLoading(true);
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::claim_rewards`,
+        arguments: [
+          tx.object(subscriptionId),
+          tx.object(vibeTraxTreasuryId),
+        ],
+      });
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+      console.log("Claim result", result);
+      if (result.effects?.status?.status !== "success") {
+        console.log("Claim failed:", result.effects?.status);
+        return null;
+      }
+      return result;
+    } catch (e) {
+      console.log("Error:", e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { registerUser, buyMusic, subscribe, renewSubscription, tipArtist, boostMusic, streamMusic, claimRewards, loading };
 
 };

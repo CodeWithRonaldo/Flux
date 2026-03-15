@@ -27,10 +27,13 @@ export const useFetchSubscription = () => {
           subscriber: f.subscriber?.fields ?? f.subscriber,
           price: f.price,
           daily_vibe_earned: f.daily_vibe_earned,
+          pending_vibe: Number(f.pending_vibe ?? 0),
         };
       },
     },
   );
+
+  console.log("Fetched subscription:", subscription);
 
   const now = Date.now();
   const isSubscribed = !!subscription && subscription.expiry_ms > now;

@@ -117,6 +117,26 @@
   cursor: pointer;
 }
 
+.pendingRewards {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: rgba(100, 200, 150, 0.08);
+  border: 1px solid rgba(100, 200, 150, 0.25);
+}
+
+.pendingInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+}
+
 .statValue {
   font-size: 1.1rem;
   font-weight: 700;

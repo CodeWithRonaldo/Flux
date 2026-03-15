@@ -36,9 +36,8 @@ function App() {
       // .filter((y) => y.owner === address),
       refetchInterval: 3000,
     },
-    
   );
-
+  console.log("Registered users:", registeredUser);
   const isUserRegistered = registeredUser?.filter(
     (user) => user.owner === address,
   );

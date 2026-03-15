@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./Play.module.css";
 import ArtistCard from "../../components/ArtistCard/ArtistCard";
 import Button from "../../components/Button/Button";
@@ -17,6 +17,7 @@ import TipModal from "../../components/TipModal/TipModal";
 import BoostModal from "../../components/BoostModal/BoostModal";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
+import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { formatPrice } from "../../util/helper";
 import { useIota } from "../../hooks/useIota";
 
@@ -24,7 +25,7 @@ const Play = () => {
   const { id } = useParams();
   const registeredUser = useOutletContext();
   const navigate = useNavigate();
-  const { currentTrack, playTrack, updateCurrentSrc } = useAudio();
+  const { currentTrack, playTrack, updateCurrentSrc, currentTime } = useAudio();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,9 +33,11 @@ const Play = () => {
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
-  const { musics, isPending, isError } = useFetchMusic();
+  const { musics } = useFetchMusic();
   const { address } = useIota();
-  const { subscription, isSubscribed, isExpired } = useFetchSubscription();
+  const { subscription, isSubscribed } = useFetchSubscription();
+  const { streamMusic } = useVibetraxHook();
+  const streamedRef = useRef(new Set());
 
   const currentUser = registeredUser?.filter((user) => user.owner === address);
 
@@ -85,6 +88,28 @@ const Play = () => {
         : songToShow.preview_music;
     updateCurrentSrc(src);
   }, [isPremium, isSubscribed, songToShow?.music_id]);
+
+  // The session dedup set intentionally persists across track changes —
+  // once a track is streamed this session it won't fire again even if revisited.
+  // To re-earn on a new session, the page must be refreshed (contract also guards via streaming_table).
+
+  // Record a stream on-chain after 30s of playback — once per track per session
+  useEffect(() => {
+    if (!isSubscribed || !subscription || !songToShow) return;
+    if (currentTime < 30) return;
+
+    const musicId = songToShow.music_id;
+    if (streamedRef.current.has(musicId)) return;
+
+    const name = subscription.subscriber?.name || currentUser?.[0]?.role || "user";
+    const role = currentUser?.[0]?.role || "listener";
+
+    streamedRef.current.add(musicId);
+    streamMusic({ musicId, subscriptionId: subscription.id, streamerName: name, streamerRole: role })
+      .then((result) => {
+        if (!result) streamedRef.current.delete(musicId);
+      });
+  }, [isSubscribed, songToShow?.music_id, subscription?.id, currentTime]);
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);

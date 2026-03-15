@@ -14,9 +14,13 @@ const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
   const isRenewal = !!subscription;
 
   const handleSubscribe = async () => {
+    const rawUsername = subscriber?.[0]?.username;
+    const resolvedName = (Array.isArray(rawUsername) ? rawUsername[0] : rawUsername)
+      ?? subscriber?.[0]?.role
+      ?? "user";
     const subData = {
-      subscriberName: subscriber?.[0]?.username ?? "",
-      subscriberRole: subscriber?.[0]?.role ?? "",
+      subscriberName: resolvedName,
+      subscriberRole: subscriber?.[0]?.role ?? "listener",
     };
 
     const result = isRenewal
@@ -53,7 +57,7 @@ const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
         <div className={styles.purchaseContainer}>
           <div className={styles.header}>
             <h2 className={styles.title}>
-              {isRenewal ? "Renew Subscription" : "Subscribe to Flux"}
+              {isRenewal ? "Renew Subscription" : "Subscribe to VibeTrax"}
             </h2>
             <p className={styles.subtitle}>
               {isRenewal
