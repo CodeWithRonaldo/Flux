@@ -23,7 +23,7 @@ import { useIota } from "../../hooks/useIota";
 
 const Play = () => {
   const { id } = useParams();
-  const registeredUser = useOutletContext();
+  const registeredUsers = useOutletContext();
   const navigate = useNavigate();
   const { currentTrack, playTrack, updateCurrentSrc, currentTime } = useAudio();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
@@ -39,7 +39,7 @@ const Play = () => {
   const { streamMusic } = useVibetraxHook();
   const streamedRef = useRef(new Set());
 
-  const currentUser = registeredUser?.filter((user) => user.owner === address);
+  const currentUser = registeredUsers?.filter((user) => user.owner === address);
 
   // Sync context with URL param on mount or URL change
   useEffect(() => {
@@ -101,14 +101,19 @@ const Play = () => {
     const musicId = songToShow.music_id;
     if (streamedRef.current.has(musicId)) return;
 
-    const name = subscription.subscriber?.name || currentUser?.[0]?.role || "user";
+    const name =
+      subscription.subscriber?.name || currentUser?.[0]?.role || "user";
     const role = currentUser?.[0]?.role || "listener";
 
     streamedRef.current.add(musicId);
-    streamMusic({ musicId, subscriptionId: subscription.id, streamerName: name, streamerRole: role })
-      .then((result) => {
-        if (!result) streamedRef.current.delete(musicId);
-      });
+    streamMusic({
+      musicId,
+      subscriptionId: subscription.id,
+      streamerName: name,
+      streamerRole: role,
+    }).then((result) => {
+      if (!result) streamedRef.current.delete(musicId);
+    });
   }, [isSubscribed, songToShow?.music_id, subscription?.id, currentTime]);
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);

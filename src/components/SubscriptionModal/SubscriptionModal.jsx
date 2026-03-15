@@ -4,23 +4,21 @@ import Button from "../Button/Button";
 import { Zap, Music2, Coins, Radio, CheckCircle, Music } from "lucide-react";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useState } from "react";
+import { useWeb3AuthUser } from "@web3auth/modal/react";
 
 const SUBSCRIPTION_PRICE = "5.00";
 
 const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
+  const { userInfo } = useWeb3AuthUser();
   const { subscribe, renewSubscription, loading } = useVibetraxHook();
   const [done, setDone] = useState(false);
 
   const isRenewal = !!subscription;
 
   const handleSubscribe = async () => {
-    const rawUsername = subscriber?.[0]?.username;
-    const resolvedName = (Array.isArray(rawUsername) ? rawUsername[0] : rawUsername)
-      ?? subscriber?.[0]?.role
-      ?? "user";
     const subData = {
-      subscriberName: resolvedName,
-      subscriberRole: subscriber?.[0]?.role ?? "listener",
+      subscriberName: subscriber?.[0]?.username || userInfo?.name,
+      subscriberRole: subscriber?.[0]?.role || "",
     };
 
     const result = isRenewal

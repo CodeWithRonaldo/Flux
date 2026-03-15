@@ -6,7 +6,11 @@ export const useFetchSubscription = () => {
   const vibeTraxPackageId = useNetworkVariable("vibeTraxPackageId");
   const { address } = useIota();
 
-  const { data: subscription, isPending, refetch } = useIotaClientQuery(
+  const {
+    data: subscription,
+    isPending,
+    refetch,
+  } = useIotaClientQuery(
     "getOwnedObjects",
     {
       owner: address ?? "",
@@ -32,8 +36,6 @@ export const useFetchSubscription = () => {
       },
     },
   );
-
-  console.log("Fetched subscription:", subscription);
 
   const now = Date.now();
   const isSubscribed = !!subscription && subscription.expiry_ms > now;

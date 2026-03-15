@@ -27,15 +27,19 @@ import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 const Profile = () => {
   const { balance, address } = useIota();
   const { disconnect, loading: isDisconnecting } = useWeb3AuthDisconnect();
-  const registeredUser = useOutletContext();
+  const registeredUsers = useOutletContext();
   const { musics, isPending, isError } = useFetchMusic();
   const { userInfo } = useWeb3AuthUser();
 
   const navigate = useNavigate();
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
-  const { subscription, isSubscribed, refetch: refetchSubscription } = useFetchSubscription();
+  const {
+    subscription,
+    isSubscribed,
+    refetch: refetchSubscription,
+  } = useFetchSubscription();
   const { claimRewards, loading: isClaiming } = useVibetraxHook();
-  const userProfile = registeredUser?.filter((user) => user.owner === address);
+  const userProfile = registeredUsers?.filter((user) => user.owner === address);
 
   const { data: vibeBalanceData } = useIotaClientQuery(
     "getBalance",
@@ -47,9 +51,12 @@ const Profile = () => {
   );
 
   const vibeBalance = vibeBalanceData
-    ? (Number(vibeBalanceData.totalBalance) / 1_000_000).toLocaleString(undefined, {
-        maximumFractionDigits: 2,
-      })
+    ? (Number(vibeBalanceData.totalBalance) / 1_000_000).toLocaleString(
+        undefined,
+        {
+          maximumFractionDigits: 2,
+        },
+      )
     : "0";
 
   const userMusics = musics?.filter(
@@ -177,13 +184,21 @@ const Profile = () => {
                 <Coins size={18} absoluteStrokeWidth />
                 <span>
                   <strong>
-                    {(subscription.pending_vibe / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 2 })} VIBE
+                    {(subscription.pending_vibe / 1_000_000).toLocaleString(
+                      undefined,
+                      { maximumFractionDigits: 2 },
+                    )}{" "}
+                    VIBE
                   </strong>{" "}
                   pending — earned from streaming
                 </span>
               </div>
               <Button
-                onClick={() => claimRewards(subscription.id).then((r) => { if (r) refetchSubscription(); })}
+                onClick={() =>
+                  claimRewards(subscription.id).then((r) => {
+                    if (r) refetchSubscription();
+                  })
+                }
                 disabled={isClaiming}
               >
                 {isClaiming ? "Claiming..." : "Claim VIBE"}

@@ -43,7 +43,9 @@ const TipModal = ({ isOpen, onClose, music }) => {
           </div>
           <h2 className={styles.title}>Tip Artist</h2>
           <p className={styles.subtitle}>
-            Support <span className={styles.artistName}>{music?.artist?.name}</span> with VIBE tokens
+            Support{" "}
+            <span className={styles.artistName}>{music?.artist?.name}</span>{" "}
+            with VIBE tokens
           </p>
 
           <div className={styles.quickAmounts}>
@@ -73,7 +75,10 @@ const TipModal = ({ isOpen, onClose, music }) => {
             <Button variant="btn-ghost" onClick={handleClose}>
               Cancel
             </Button>
-            <Button onClick={handleTip} disabled={!amount || Number(amount) <= 0}>
+            <Button
+              onClick={handleTip}
+              disabled={!amount || Number(amount) <= 0}
+            >
               Send Tip
             </Button>
           </div>

@@ -29,9 +29,9 @@ const Upload = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
-  const registeredUser = useOutletContext();
+  const registeredUsers = useOutletContext();
   const { address } = useIota();
-  const currentUser = registeredUser?.filter((user) => user.owner === address);
+  const currentUser = registeredUsers?.filter((user) => user.owner === address);
   const { uploadMusic } = useMusicUpload();
   const steps = [
     { id: 1, label: "Basics", icon: <Music size={18} /> },
@@ -428,7 +428,7 @@ const Upload = () => {
                           <option value="" disabled>
                             Select User
                           </option>
-                          {registeredUser?.map((user) => (
+                          {registeredUsers?.map((user) => (
                             <option key={user.owner} value={user.owner}>
                               {user.owner}
                             </option>
@@ -480,7 +480,7 @@ const Upload = () => {
                           } = newCollaborator;
                           if (!role || !addr || !percentage) return;
 
-                          const collaboratorUser = registeredUser?.find(
+                          const collaboratorUser = registeredUsers?.find(
                             (u) => u.owner === addr,
                           );
                           const collaboratorName =

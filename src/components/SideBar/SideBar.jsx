@@ -18,16 +18,17 @@ const Links = [
   { name: "Profile", icon: CircleUserRound, path: "/profile" },
 ];
 
-const SideBar = ({ isUserRegistered }) => {
-  const hasRegisteredUser = isUserRegistered?.length > 0;
-  const canUpload = hasRegisteredUser && isUserRegistered[0]?.role === "artist";
+const SideBar = ({ currentUser }) => {
+  const hasRegistered = currentUser?.length > 0;
+  const canUpload =
+    hasRegistered && currentUser[0]?.role.toLowerCase() === "artist";
 
   return (
     <div className={styles.sidebar}>
       <div>
         {Links.map((link) => {
           if (link.name === "Upload" && !canUpload) return null;
-          if (link.name === "Profile" && !hasRegisteredUser) return null;
+          if (link.name === "Profile" && !hasRegistered) return null;
           return (
             <li key={link.name}>
               <NavLink

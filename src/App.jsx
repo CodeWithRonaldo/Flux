@@ -24,7 +24,7 @@ function App() {
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const { address } = useIota();
 
-  const { data: registeredUser, isLoading } = useIotaClientQuery(
+  const { data: registeredUsers, isLoading } = useIotaClientQuery(
     "queryEvents",
     {
       query: {
@@ -37,14 +37,12 @@ function App() {
       refetchInterval: 3000,
     },
   );
-  console.log("Registered users:", registeredUser);
-  const isUserRegistered = registeredUser?.filter(
-    (user) => user.owner === address,
-  );
+
+  const currentUser = registeredUsers?.filter((user) => user.owner === address);
 
   useEffect(() => {
     if (address && !isLoading) {
-      if (isUserRegistered && isUserRegistered.length > 0) {
+      if (currentUser && currentUser.length > 0) {
         setIsSelectRole(false);
       } else {
         setIsSelectRole(true);
@@ -56,11 +54,11 @@ function App() {
 
   return (
     <div className={styles.mainContainer}>
-      <Header />
+      <Header currentUser={currentUser} />
       <div className={styles.contentContainer}>
-        <Outlet context={registeredUser} />
+        <Outlet context={registeredUsers} />
       </div>
-      <SideBar isUserRegistered={isUserRegistered} />
+      <SideBar currentUser={currentUser} />
       {shouldShowBottomPlayer && <BottomPlayer />}
 
       <RoleSelectionModal

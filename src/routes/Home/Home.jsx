@@ -13,7 +13,7 @@ import { useOutletContext } from "react-router-dom";
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { musics, isPending, isError } = useFetchMusic();
-  const registeredUser = useOutletContext();
+  const registeredUsers = useOutletContext();
 
   // console.log(musics);
 
@@ -60,7 +60,7 @@ const Home = () => {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Top Artists</h2>
         <div className={styles.artistList}>
-          {registeredUser?.slice(0, 4).map((artist, index) => (
+          {registeredUsers?.slice(0, 4).map((artist, index) => (
             <ArtistCard key={index} artist={artist} />
           ))}
         </div>
