@@ -31,6 +31,7 @@ const ESUBSCRIPTION_EXPIRED: u64 = 14;
 const ESUBSCRIPTION_MISMATCH: u64 = 15;
 const EINVALID_BOOST_PLAN: u64 = 16;
 const EUNAUTHORIZED: u64 = 17;
+const EREWARDS_EMPTY: u64 = 18;
 
 // === Constants ===
 const BASIS_POINTS: u64 = 10_000; // For percentage calculations
@@ -95,7 +96,8 @@ public struct Subscription has key {
     price: u64,
     expiry_ms: u64,
     daily_vibe_earned: u64, // VIBE base units earned in the current calendar day
-    last_earn_day: u64, // floor(timestamp_ms / MS_PER_DAY) — resets daily counter
+    last_earn_day: u64,     // floor(timestamp_ms / MS_PER_DAY) — resets daily counter
+    pending_vibe: u64,      // accumulated VIBE not yet claimed
 }
 
 // ── UserProfile ──────────────────────────────────────────────────────────
@@ -180,6 +182,11 @@ public struct MusicStreamed has copy, drop {
     music_id: ID,
     streamer: User,
     vibe_earned: u64,
+}
+
+public struct VibeRewardsClaimed has copy, drop {
+    subscriber: User,
+    amount: u64,
 }
 
 public struct ArtistTipped has copy, drop {
@@ -524,7 +531,6 @@ public fun like_music(
 public fun stream_music(
     music: &mut Music,
     subscription: &mut Subscription,
-    treasury: &mut VibeTreasury,
     streamer_name: String,
     streamer_role: String,
     clock: &Clock,
@@ -563,7 +569,8 @@ public fun stream_music(
         } else {
             remaining_cap
         };
-        vibe_token::pay_stream_reward(treasury, reward, signer_address, ctx);
+        // Accumulate into pending balance — user claims via claim_rewards()
+        subscription.pending_vibe = subscription.pending_vibe + reward;
         subscription.daily_vibe_earned = subscription.daily_vibe_earned + reward;
         vibe_earned = reward;
     };
@@ -572,6 +579,28 @@ public fun stream_music(
         music_id: music.id.to_inner(),
         streamer,
         vibe_earned,
+    });
+}
+
+// ── Claim Rewards ─────────────────────────────────────────────────────────
+// Transfers all accumulated pending VIBE from the subscription to the caller.
+// Can be called at any time — subscription does not need to be active.
+public fun claim_rewards(
+    subscription: &mut Subscription,
+    treasury: &mut VibeTreasury,
+    ctx: &mut TxContext,
+) {
+    let signer_address = ctx.sender();
+    assert!(subscription.subscriber.user_address == signer_address, ESUBSCRIPTION_MISMATCH);
+    assert!(subscription.pending_vibe > 0, EREWARDS_EMPTY);
+
+    let amount = subscription.pending_vibe;
+    subscription.pending_vibe = 0;
+    vibe_token::pay_stream_reward(treasury, amount, signer_address, ctx);
+
+    event::emit(VibeRewardsClaimed {
+        subscriber: subscription.subscriber,
+        amount,
     });
 }
 
@@ -797,6 +826,7 @@ public fun subscribe(
             expiry_ms,
             daily_vibe_earned: 0,
             last_earn_day: 0,
+            pending_vibe: 0,
         },
         subscriber_address,
     );
@@ -884,6 +914,8 @@ public fun boost_expiry(music: &Music): u64 { music.boost_expiry_ms }
 public fun streaming_count(music: &Music): u64 { music.streaming_count }
 
 public fun subscription_expiry(sub: &Subscription): u64 { sub.expiry_ms }
+
+public fun pending_vibe(sub: &Subscription): u64 { sub.pending_vibe }
 
 public fun profile_role(profile: &UserProfile): String { profile.role }
 
