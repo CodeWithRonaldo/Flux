@@ -27,6 +27,10 @@ export const router = createBrowserRouter([
         element: <Upload />,
       },
       {
+        path: "upload/:id",
+        element: <Upload />,
+      },
+      {
         path: "profile",
         element: <Profile />,
       },

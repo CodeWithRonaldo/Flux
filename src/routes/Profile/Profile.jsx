@@ -149,8 +149,8 @@ const Profile = () => {
 
             <div className={styles.profileActions}>
               <Button
-                onClick={() => {
-                  disconnect;
+                onClick={async () => {
+                  await disconnect();
                   navigate("/");
                 }}
                 disabled={isDisconnecting}

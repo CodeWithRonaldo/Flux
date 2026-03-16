@@ -35,6 +35,7 @@ export const useFetchMusic = () => {
       },
       {
         enabled: musicIds.length > 0,
+        refetchInterval: 3000,
         select: (data) =>
           data
             .filter((obj) => obj.data?.content?.fields)

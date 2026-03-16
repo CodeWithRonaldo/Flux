@@ -1,15 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BlackCard, GlassCard } from "../../components/GlassCard/GlassCard";
 import Form from "../../components/Form/Form";
 import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
 import { Check, Music, UploadIcon, User, X, CheckCircle2 } from "lucide-react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useParams, useNavigate } from "react-router-dom";
 import { useIota } from "../../hooks/useIota";
 import { uploadToPinata } from "../../util/helper";
 import { useMusicUpload } from "../../hooks/useMusicUpload";
+import { useFetchMusic } from "../../hooks/useFetchMusic";
+import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 
 const Upload = () => {
+  const { id } = useParams();
+  const isEditMode = !!id;
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [genre, setGenre] = useState("");
@@ -17,6 +22,9 @@ const Upload = () => {
   const [imageFile, setImageFile] = useState(null);
   const [highQualityFile, setHighQualityFile] = useState(null);
   const [lowQualityFile, setLowQualityFile] = useState(null);
+  const [existingImageUrl, setExistingImageUrl] = useState("");
+  const [existingPreviewUrl, setExistingPreviewUrl] = useState("");
+  const [existingFullUrl, setExistingFullUrl] = useState("");
   const [artistPercentage, setArtistPercentage] = useState(100);
   const [artistHasRoyalty, setArtistHasRoyalty] = useState(false);
   const [contributors, setContributors] = useState([]);
@@ -33,12 +41,34 @@ const Upload = () => {
   const { address } = useIota();
   const currentUser = registeredUsers?.filter((user) => user.owner === address);
   const { uploadMusic } = useMusicUpload();
-  const steps = [
+  const { updateMusic } = useVibetraxHook();
+  const { musics } = useFetchMusic();
+
+  const existingMusic = isEditMode ? musics?.find((m) => m.music_id === id) : null;
+
+  useEffect(() => {
+    if (!existingMusic) return;
+    setTitle(existingMusic.title ?? "");
+    setDescription(existingMusic.description ?? "");
+    setGenre(existingMusic.genre ?? "");
+    setExistingImageUrl(existingMusic.music_image ?? "");
+    setExistingPreviewUrl(existingMusic.preview_music ?? "");
+    setExistingFullUrl(existingMusic.full_music ?? "");
+  }, [existingMusic?.music_id]);
+
+  const uploadSteps = [
     { id: 1, label: "Basics", icon: <Music size={18} /> },
     { id: 2, label: "Media", icon: <UploadIcon size={18} /> },
     { id: 3, label: "Royalties", icon: <User size={18} /> },
     { id: 4, label: "Review", icon: <Check size={18} /> },
   ];
+  const editSteps = [
+    { id: 1, label: "Basics", icon: <Music size={18} /> },
+    { id: 2, label: "Media", icon: <UploadIcon size={18} /> },
+    { id: 3, label: "Review", icon: <Check size={18} /> },
+  ];
+  const steps = isEditMode ? editSteps : uploadSteps;
+  const totalSteps = steps.length;
   const collaboratorTotal = contributors.reduce(
     (sum, c) => sum + c.percentage,
     0,
@@ -51,11 +81,52 @@ const Upload = () => {
       case 1:
         return title.trim() !== "" && description.trim() !== "" && genre !== "";
       case 2:
+        if (isEditMode) return true;
         return lowQualityFile !== null && imageFile !== null;
       case 3:
+        if (isEditMode) return true;
         return Number(price) > 0 && remaining === 0;
       default:
         return true;
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      let imageUrl = existingImageUrl;
+      let previewUrl = existingPreviewUrl;
+      let fullUrl = existingFullUrl;
+
+      if (imageFile) {
+        const cid = await uploadToPinata(imageFile);
+        imageUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
+      }
+      if (lowQualityFile) {
+        const cid = await uploadToPinata(lowQualityFile);
+        previewUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
+      }
+      if (highQualityFile) {
+        const cid = await uploadToPinata(highQualityFile);
+        fullUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
+      }
+
+      const result = await updateMusic({
+        musicId: id,
+        title,
+        description,
+        genre,
+        musicImage: imageUrl,
+        previewMusic: previewUrl,
+        fullMusic: fullUrl || null,
+      });
+
+      if (result) navigate(`/play/${id}`);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -104,10 +175,11 @@ const Upload = () => {
       <BlackCard className={styles.uploadHeader}>
         <div className={styles.headerContent}>
           <div>Creator Studio</div>
-          <h1>Release New Music</h1>
+          <h1>{isEditMode ? "Edit Track" : "Release New Music"}</h1>
           <p>
-            Upload your latest masterpiece and define how the world supports
-            you.
+            {isEditMode
+              ? "Update your track details below. Media files are optional — only upload if replacing."
+              : "Upload your latest masterpiece and define how the world supports you."}
           </p>
         </div>
 
@@ -122,7 +194,7 @@ const Upload = () => {
             >
               <div className={styles.stepIcon}>{step.icon}</div>
               <span className={styles.stepLabel}>{step.label}</span>
-              {step.id < 4 && <div className={styles.stepLine} />}
+              {step.id < totalSteps && <div className={styles.stepLine} />}
             </div>
           ))}
         </div>
@@ -196,7 +268,47 @@ const Upload = () => {
                 </>
               )}
 
-              {activeStep === 2 && (
+              {activeStep === 2 && isEditMode && (
+                <div className={styles.editMediaGrid}>
+                  <div className={styles.editMediaField}>
+                    <label className={styles["form-label"]}>Cover Image</label>
+                    {existingImageUrl && !imageFile && (
+                      <img src={existingImageUrl} alt="current cover" className={styles.editMediaPreview} />
+                    )}
+                    <label htmlFor="editImageFile" className={`${styles.mediaLabel} ${imageFile ? styles.mediaLabelSelected : ""}`}>
+                      {imageFile ? <CheckCircle2 size={32} className={styles.mediaSelectedIcon} /> : <UploadIcon size={32} />}
+                      {imageFile ? imageFile.name : "Replace cover image"}
+                      <input type="file" id="editImageFile" accept="image/*" onChange={(e) => { if (e.target.files[0]) setImageFile(e.target.files[0]); }} />
+                    </label>
+                  </div>
+
+                  <div className={styles.editMediaField}>
+                    <label className={styles["form-label"]}>Standard Quality Track</label>
+                    {existingPreviewUrl && !lowQualityFile && (
+                      <p className={styles.editMediaUrl}>Current: {existingPreviewUrl.split("/").pop()}</p>
+                    )}
+                    <label htmlFor="editLowFile" className={`${styles.mediaLabel} ${lowQualityFile ? styles.mediaLabelSelected : ""}`}>
+                      {lowQualityFile ? <CheckCircle2 size={32} className={styles.mediaSelectedIcon} /> : <UploadIcon size={32} />}
+                      {lowQualityFile ? lowQualityFile.name : "Replace standard audio"}
+                      <input type="file" id="editLowFile" accept="audio/*" onChange={(e) => { if (e.target.files[0]) setLowQualityFile(e.target.files[0]); }} />
+                    </label>
+                  </div>
+
+                  <div className={styles.editMediaField}>
+                    <label className={styles["form-label"]}>Premium Quality Track</label>
+                    {existingFullUrl && !highQualityFile && (
+                      <p className={styles.editMediaUrl}>Current: {existingFullUrl.split("/").pop()}</p>
+                    )}
+                    <label htmlFor="editHighFile" className={`${styles.mediaLabel} ${highQualityFile ? styles.mediaLabelSelected : ""}`}>
+                      {highQualityFile ? <CheckCircle2 size={32} className={styles.mediaSelectedIcon} /> : <UploadIcon size={32} />}
+                      {highQualityFile ? highQualityFile.name : "Replace premium audio (optional)"}
+                      <input type="file" id="editHighFile" accept="audio/*" onChange={(e) => { if (e.target.files[0]) setHighQualityFile(e.target.files[0]); }} />
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {activeStep === 2 && !isEditMode && (
                 <div className={styles.mediaGrid}>
                   <div className={styles.musicQuality}>
                     <label
@@ -305,7 +417,7 @@ const Upload = () => {
                 </div>
               )}
 
-              {activeStep === 3 && (
+              {activeStep === 3 && !isEditMode && (
                 <>
                   {/* Revenue Distribution */}
                   <div className={styles.inputGroup}>
@@ -512,15 +624,14 @@ const Upload = () => {
                 </>
               )}
 
-              {activeStep === 4 && (
+              {activeStep === totalSteps && (
                 <div className={styles.review}>
                   <div className={styles.reviewImage}>
-                    {imageFile && (
-                      <img
-                        src={URL.createObjectURL(imageFile)}
-                        alt="cover art"
-                      />
-                    )}
+                    {imageFile ? (
+                      <img src={URL.createObjectURL(imageFile)} alt="cover art" />
+                    ) : existingImageUrl ? (
+                      <img src={existingImageUrl} alt="cover art" />
+                    ) : null}
                   </div>
                   <div className={styles.reviewDetails}>
                     <p>
@@ -591,7 +702,7 @@ const Upload = () => {
                     Back
                   </Button>
                 )}
-                {activeStep < 4 ? (
+                {activeStep < totalSteps ? (
                   <Button
                     type="button"
                     onClick={() => setActiveStep(activeStep + 1)}
@@ -600,6 +711,16 @@ const Upload = () => {
                     disabled={!canProceed()}
                   >
                     Continue
+                  </Button>
+                ) : isEditMode ? (
+                  <Button
+                    type="button"
+                    disabled={isSubmitting}
+                    variant="btn-primary"
+                    className={styles.submitButton}
+                    onClick={handleEditSubmit}
+                  >
+                    {isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>
                 ) : (
                   <Button

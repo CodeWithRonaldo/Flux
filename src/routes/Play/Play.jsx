@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Play.module.css";
 import ArtistCard from "../../components/ArtistCard/ArtistCard";
 import Button from "../../components/Button/Button";
@@ -18,6 +18,7 @@ import BoostModal from "../../components/BoostModal/BoostModal";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
+import { useFetchLikes } from "../../hooks/useFetchLikes";
 import { formatPrice } from "../../util/helper";
 import { useIota } from "../../hooks/useIota";
 
@@ -25,7 +26,7 @@ const Play = () => {
   const { id } = useParams();
   const registeredUsers = useOutletContext();
   const navigate = useNavigate();
-  const { currentTrack, playTrack, updateCurrentSrc, currentTime } = useAudio();
+  const { currentTrack, playTrack, updateCurrentSrc } = useAudio();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,11 +36,32 @@ const Play = () => {
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
   const { musics } = useFetchMusic();
   const { address } = useIota();
-  const { subscription, isSubscribed } = useFetchSubscription();
-  const { streamMusic } = useVibetraxHook();
-  const streamedRef = useRef(new Set());
+  const { isSubscribed } = useFetchSubscription();
+  const { likeMusic, toggleSale, deleteMusic } = useVibetraxHook();
+  const { likedIds } = useFetchLikes();
+  const [optimisticLikes, setOptimisticLikes] = useState(new Set());
 
   const currentUser = registeredUsers?.filter((user) => user.owner === address);
+
+  // Merge on-chain likes with optimistic additions for immediate UI feedback
+  const effectiveLikedIds = new Set([...likedIds, ...optimisticLikes]);
+
+  const handleLike = async () => {
+    if (!songToShow || !address) return;
+    const musicId = songToShow.music_id;
+    if (effectiveLikedIds.has(musicId)) return;
+    const name = currentUser?.[0]?.username || currentUser?.[0]?.role || "user";
+    const role = currentUser?.[0]?.role || "listener";
+    setOptimisticLikes((prev) => new Set([...prev, musicId]));
+    const result = await likeMusic({ musicId, likerName: name, likerRole: role });
+    if (!result) {
+      setOptimisticLikes((prev) => {
+        const next = new Set(prev);
+        next.delete(musicId);
+        return next;
+      });
+    }
+  };
 
   // Sync context with URL param on mount or URL change
   useEffect(() => {
@@ -89,32 +111,6 @@ const Play = () => {
     updateCurrentSrc(src);
   }, [isPremium, isSubscribed, songToShow?.music_id]);
 
-  // The session dedup set intentionally persists across track changes —
-  // once a track is streamed this session it won't fire again even if revisited.
-  // To re-earn on a new session, the page must be refreshed (contract also guards via streaming_table).
-
-  // Record a stream on-chain after 30s of playback — once per track per session
-  useEffect(() => {
-    if (!isSubscribed || !subscription || !songToShow) return;
-    if (currentTime < 30) return;
-
-    const musicId = songToShow.music_id;
-    if (streamedRef.current.has(musicId)) return;
-
-    const name =
-      subscription.subscriber?.name || currentUser?.[0]?.role || "user";
-    const role = currentUser?.[0]?.role || "listener";
-
-    streamedRef.current.add(musicId);
-    streamMusic({
-      musicId,
-      subscriptionId: subscription.id,
-      streamerName: name,
-      streamerRole: role,
-    }).then((result) => {
-      if (!result) streamedRef.current.delete(musicId);
-    });
-  }, [isSubscribed, songToShow?.music_id, subscription?.id, currentTime]);
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);
@@ -174,9 +170,18 @@ const Play = () => {
               </div>
             )}
 
-            <div className={styles.tooltipWrapper}>
-              <Heart size={30} className={styles.icons} />
-              <span className={styles.tooltip}>Like track</span>
+            <div className={styles.tooltipWrapper} onClick={handleLike}>
+              <Heart
+                size={30}
+                className={styles.icons}
+                fill={effectiveLikedIds.has(songToShow?.music_id) ? "currentColor" : "none"}
+                style={{ cursor: effectiveLikedIds.has(songToShow?.music_id) ? "default" : "pointer" }}
+              />
+              <span className={styles.tooltip}>
+                {effectiveLikedIds.has(songToShow?.music_id)
+                  ? `${(Number(songToShow?.likes ?? 0) + 1).toLocaleString()} likes`
+                  : `${Number(songToShow?.likes ?? 0).toLocaleString()} likes`}
+              </span>
             </div>
 
             <div className={styles.tooltipWrapper}>
@@ -199,10 +204,17 @@ const Play = () => {
           {isMenuOpen && (
             <BlackCard className={styles.menuCard}>
               <ul>
-                <li>Edit Track</li>
-                <li>Remove From Sale</li>
-                <li onClick={() => setIsBoostModalOpen(true)}>Boost Music</li>
-                <li>Delete Track</li>
+                <li onClick={() => { setIsMenuOpen(false); navigate(`/upload/${songToShow?.music_id}`); }}>Edit Track</li>
+                <li onClick={async () => { setIsMenuOpen(false); await toggleSale(songToShow?.music_id); }}>
+                  {songToShow?.for_sale ? "Remove From Sale" : "Put on Sale"}
+                </li>
+                <li onClick={() => { setIsMenuOpen(false); setIsBoostModalOpen(true); }}>Boost Music</li>
+                <li onClick={async () => {
+                  if (!window.confirm("Delete this track? This cannot be undone.")) return;
+                  setIsMenuOpen(false);
+                  const result = await deleteMusic(songToShow?.music_id);
+                  if (result) navigate("/");
+                }}>Delete Track</li>
               </ul>
             </BlackCard>
           )}

@@ -343,6 +343,130 @@ export const useVibetraxHook = () => {
     }
   };
 
-  return { registerUser, buyMusic, subscribe, renewSubscription, tipArtist, boostMusic, streamMusic, claimRewards, loading };
+  const likeMusic = async (likeData) => {
+    if (!keypair) return null;
+    try {
+      setLoading(true);
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::like_music`,
+        arguments: [
+          tx.object(likeData.musicId),
+          tx.pure.string(likeData.likerName),
+          tx.pure.string(likeData.likerRole),
+        ],
+      });
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+      console.log("Like result", result);
+      if (result.effects?.status?.status !== "success") {
+        console.log("Like failed:", result.effects?.status);
+        return null;
+      }
+      return result;
+    } catch (e) {
+      console.log("Error:", e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateMusic = async (updateData) => {
+    if (!keypair) return null;
+    try {
+      setLoading(true);
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::update_music`,
+        arguments: [
+          tx.object(updateData.musicId),
+          tx.pure.option("string", updateData.title ?? null),
+          tx.pure.option("string", updateData.description ?? null),
+          tx.pure.option("string", updateData.genre ?? null),
+          tx.pure.option("string", updateData.musicImage ?? null),
+          tx.pure.option("string", updateData.previewMusic ?? null),
+          tx.pure.option("string", updateData.fullMusic ?? null),
+        ],
+      });
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+      console.log("Update result", result);
+      if (result.effects?.status?.status !== "success") {
+        console.log("Update failed:", result.effects?.status);
+        return null;
+      }
+      return result;
+    } catch (e) {
+      console.log("Error:", e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleSale = async (musicId) => {
+    if (!keypair) return null;
+    try {
+      setLoading(true);
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::toggle_sale`,
+        arguments: [tx.object(musicId)],
+      });
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+      console.log("Toggle sale result", result);
+      if (result.effects?.status?.status !== "success") {
+        console.log("Toggle sale failed:", result.effects?.status);
+        return null;
+      }
+      return result;
+    } catch (e) {
+      console.log("Error:", e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteMusic = async (musicId) => {
+    if (!keypair) return null;
+    try {
+      setLoading(true);
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::delete_music`,
+        arguments: [tx.object(musicId)],
+      });
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+      console.log("Delete result", result);
+      if (result.effects?.status?.status !== "success") {
+        console.log("Delete failed:", result.effects?.status);
+        return null;
+      }
+      return result;
+    } catch (e) {
+      console.log("Error:", e);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { registerUser, buyMusic, subscribe, renewSubscription, tipArtist, boostMusic, streamMusic, claimRewards, likeMusic, updateMusic, toggleSale, deleteMusic, loading };
 
 };

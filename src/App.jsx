@@ -9,6 +9,7 @@ import RoleSelectionModal from "./components/RoleSelectionModal/RoleSelectionMod
 import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useNetworkVariables } from "./config/networkConfig";
 import { useIota } from "./hooks/useIota";
+import StreamEarnTracker from "./components/StreamEarnTracker/StreamEarnTracker";
 
 function App() {
   const location = useLocation();
@@ -17,9 +18,10 @@ function App() {
 
   const isHome = location.pathname === "/";
   const isPlay = location.pathname.startsWith("/play");
+  const isLibrary = location.pathname.startsWith("/library");
 
   const shouldShowBottomPlayer =
-    isBottomPlayerVisible && currentTrack && !isHome && !isPlay;
+    isBottomPlayerVisible && currentTrack && !isHome && !isPlay && !isLibrary;
 
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const { address } = useIota();
@@ -60,6 +62,7 @@ function App() {
       </div>
       <SideBar currentUser={currentUser} />
       {shouldShowBottomPlayer && <BottomPlayer />}
+      <StreamEarnTracker currentUser={currentUser} />
 
       <RoleSelectionModal
         isOpen={isSelectRole}

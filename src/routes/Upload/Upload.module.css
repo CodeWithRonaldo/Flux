@@ -218,6 +218,34 @@
   color: white;
 }
 
+.editMediaGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.editMediaField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.editMediaPreview {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.editMediaUrl {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  word-break: break-all;
+  margin: 0;
+}
+
 .mediaGrid {
   display: flex;
   flex-wrap: wrap;
