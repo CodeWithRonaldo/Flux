@@ -18,9 +18,10 @@ import BoostModal from "../../components/BoostModal/BoostModal";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
-import { useFetchLikes } from "../../hooks/useFetchLikes";
 import { formatPrice } from "../../util/helper";
 import { useIota } from "../../hooks/useIota";
+import { useWeb3AuthUser } from "@web3auth/modal/react";
+import { useFetchLikes } from "../../hooks/useFetchLikes";
 
 const Play = () => {
   const { id } = useParams();
@@ -38,30 +39,10 @@ const Play = () => {
   const { address } = useIota();
   const { isSubscribed } = useFetchSubscription();
   const { likeMusic, toggleSale, deleteMusic } = useVibetraxHook();
-  const { likedIds } = useFetchLikes();
-  const [optimisticLikes, setOptimisticLikes] = useState(new Set());
+  const { liked, isLikeLoading } = useFetchLikes();
+  const { userInfo } = useWeb3AuthUser();
 
   const currentUser = registeredUsers?.filter((user) => user.owner === address);
-
-  // Merge on-chain likes with optimistic additions for immediate UI feedback
-  const effectiveLikedIds = new Set([...likedIds, ...optimisticLikes]);
-
-  const handleLike = async () => {
-    if (!songToShow || !address) return;
-    const musicId = songToShow.music_id;
-    if (effectiveLikedIds.has(musicId)) return;
-    const name = currentUser?.[0]?.username || currentUser?.[0]?.role || "user";
-    const role = currentUser?.[0]?.role || "listener";
-    setOptimisticLikes((prev) => new Set([...prev, musicId]));
-    const result = await likeMusic({ musicId, likerName: name, likerRole: role });
-    if (!result) {
-      setOptimisticLikes((prev) => {
-        const next = new Set(prev);
-        next.delete(musicId);
-        return next;
-      });
-    }
-  };
 
   // Sync context with URL param on mount or URL change
   useEffect(() => {
@@ -85,7 +66,29 @@ const Play = () => {
   const moreSongs = musics?.slice(0, 4);
   const songToShow = currentTrack || musics?.[0];
 
-  // console.log("songToShow", songToShow);
+  const hasLiked =
+    liked
+      ?.filter((like) => like.music_id === songToShow?.music_id)
+      .map((like) => like.music_id) || [];
+
+  const handleLike = async () => {
+    if (!songToShow || !address || isLikeLoading) return;
+
+    if (hasLiked.length > 0) return;
+    const name = currentUser?.[0]?.username || userInfo?.name;
+    const role = currentUser?.[0]?.role || "listener";
+
+    const result = await likeMusic({
+      musicId,
+      likerName: name,
+      likerRole: role,
+    });
+    if (!result?.digest) {
+      console.error("Failed to like music");
+      return;
+    }
+    console.log("Liked music successfully:", result);
+  };
 
   const forSale = songToShow?.for_sale === true;
 
@@ -93,7 +96,7 @@ const Play = () => {
     address === songToShow?.current_owner?.user_address ||
     address === songToShow?.artist?.user_address ||
     songToShow?.collaborators.some(
-      (collaborator) => collaborator.user_address === address,
+      (collaborator) => collaborator.user_address === address
     );
 
   const showEditButton =
@@ -110,7 +113,6 @@ const Play = () => {
         : songToShow.preview_music;
     updateCurrentSrc(src);
   }, [isPremium, isSubscribed, songToShow?.music_id]);
-
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);
@@ -174,14 +176,12 @@ const Play = () => {
               <Heart
                 size={30}
                 className={styles.icons}
-                fill={effectiveLikedIds.has(songToShow?.music_id) ? "currentColor" : "none"}
-                style={{ cursor: effectiveLikedIds.has(songToShow?.music_id) ? "default" : "pointer" }}
+                fill={hasLiked.length > 0 ? "currentColor" : "none"}
+                style={{
+                  cursor: hasLiked.length > 0 ? "default" : "pointer",
+                }}
               />
-              <span className={styles.tooltip}>
-                {effectiveLikedIds.has(songToShow?.music_id)
-                  ? `${(Number(songToShow?.likes ?? 0) + 1).toLocaleString()} likes`
-                  : `${Number(songToShow?.likes ?? 0).toLocaleString()} likes`}
-              </span>
+              <span className={styles.tooltip}>{songToShow?.likes} likes</span>
             </div>
 
             <div className={styles.tooltipWrapper}>
@@ -204,17 +204,45 @@ const Play = () => {
           {isMenuOpen && (
             <BlackCard className={styles.menuCard}>
               <ul>
-                <li onClick={() => { setIsMenuOpen(false); navigate(`/upload/${songToShow?.music_id}`); }}>Edit Track</li>
-                <li onClick={async () => { setIsMenuOpen(false); await toggleSale(songToShow?.music_id); }}>
+                <li
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate(`/upload/${songToShow?.music_id}`);
+                  }}
+                >
+                  Edit Track
+                </li>
+                <li
+                  onClick={async () => {
+                    setIsMenuOpen(false);
+                    await toggleSale(songToShow?.music_id);
+                  }}
+                >
                   {songToShow?.for_sale ? "Remove From Sale" : "Put on Sale"}
                 </li>
-                <li onClick={() => { setIsMenuOpen(false); setIsBoostModalOpen(true); }}>Boost Music</li>
-                <li onClick={async () => {
-                  if (!window.confirm("Delete this track? This cannot be undone.")) return;
-                  setIsMenuOpen(false);
-                  const result = await deleteMusic(songToShow?.music_id);
-                  if (result) navigate("/");
-                }}>Delete Track</li>
+                <li
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsBoostModalOpen(true);
+                  }}
+                >
+                  Boost Music
+                </li>
+                <li
+                  onClick={async () => {
+                    if (
+                      !window.confirm(
+                        "Delete this track? This cannot be undone."
+                      )
+                    )
+                      return;
+                    setIsMenuOpen(false);
+                    const result = await deleteMusic(songToShow?.music_id);
+                    if (result) navigate("/");
+                  }}
+                >
+                  Delete Track
+                </li>
               </ul>
             </BlackCard>
           )}

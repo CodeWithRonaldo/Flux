@@ -6,28 +6,21 @@ export const useFetchLikes = () => {
   const vibeTraxPackageId = useNetworkVariable("vibeTraxPackageId");
   const { address } = useIota();
 
-  const { data: likedIds, isLoading } = useIotaClientQuery(
+  const { data: liked, isLoading } = useIotaClientQuery(
     "queryEvents",
     {
       query: {
-        And: [
-          {
-            MoveEventType: `${vibeTraxPackageId}::vibetrax::MusicLiked`,
-          },
-          {
-            Sender: address ?? "",
-          },
-        ],
+        MoveEventType: `${vibeTraxPackageId}::vibetrax::MusicLiked`,
       },
-      limit: 1000,
     },
     {
-      enabled: !!address,
       select: (data) =>
-        new Set(data.data.map((e) => e.parsedJson?.music_id).filter(Boolean)),
+        data.data
+          .flatMap((x) => x.parsedJson)
+          .filter((y) => y.liker.user_address === address),
       refetchInterval: 3000,
-    },
+    }
   );
 
-  return { likedIds: likedIds ?? new Set(), isLoading };
+  return { liked, isLikeLoading: isLoading };
 };

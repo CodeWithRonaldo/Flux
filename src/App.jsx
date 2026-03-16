@@ -37,7 +37,7 @@ function App() {
       select: (data) => data.data.flatMap((x) => x.parsedJson),
       // .filter((y) => y.owner === address),
       refetchInterval: 3000,
-    },
+    }
   );
 
   const currentUser = registeredUsers?.filter((user) => user.owner === address);

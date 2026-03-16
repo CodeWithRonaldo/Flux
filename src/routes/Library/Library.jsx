@@ -28,8 +28,7 @@ const Library = () => {
   const registeredUsers = useOutletContext();
   const navigate = useNavigate();
   const { likeMusic, toggleSale, deleteMusic } = useVibetraxHook();
-  const { likedIds } = useFetchLikes();
-  const [optimisticLikes, setOptimisticLikes] = useState(new Set());
+  const { liked, isLikeLoading } = useFetchLikes();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddToPlaylistOpen, setIsAddToPlaylistOpen] = useState(false);
@@ -38,7 +37,6 @@ const Library = () => {
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
 
   const currentUser = registeredUsers?.filter((user) => user.owner === address);
-  const effectiveLikedIds = new Set([...likedIds, ...optimisticLikes]);
 
   const featuredSongs = musics?.slice(0, 3);
 
@@ -52,24 +50,32 @@ const Library = () => {
   const currentFeatured = featuredSongs[currentFeaturedIndex];
 
   const showEditButton =
-    currentFeatured?.current_owner?.user_address === currentFeatured?.artist?.user_address &&
+    currentFeatured?.current_owner?.user_address ===
+      currentFeatured?.artist?.user_address &&
     currentFeatured?.current_owner?.user_address === address;
 
+  const hasLiked =
+    liked
+      ?.filter((like) => like.music_id === currentFeatured?.music_id)
+      .map((like) => like.music_id) || [];
+
   const handleLike = async () => {
-    if (!currentFeatured || !address) return;
-    const musicId = currentFeatured.music_id;
-    if (effectiveLikedIds.has(musicId)) return;
-    const name = currentUser?.[0]?.username || currentUser?.[0]?.role || "user";
+    if (!currentFeatured || !address || isLikeLoading) return;
+
+    if (hasLiked.length > 0) return;
+    const name = currentUser?.[0]?.username || userInfo?.name;
     const role = currentUser?.[0]?.role || "listener";
-    setOptimisticLikes((prev) => new Set([...prev, musicId]));
-    const result = await likeMusic({ musicId, likerName: name, likerRole: role });
-    if (!result) {
-      setOptimisticLikes((prev) => {
-        const next = new Set(prev);
-        next.delete(musicId);
-        return next;
-      });
+
+    const result = await likeMusic({
+      musicId,
+      likerName: name,
+      likerRole: role,
+    });
+    if (!result?.digest) {
+      console.error("Failed to like music");
+      return;
     }
+    console.log("Liked music successfully:", result);
   };
 
   const handleCreatePlaylistFromModal = () => {
@@ -139,13 +145,13 @@ const Library = () => {
                     <Heart
                       size={30}
                       className={styles.icons}
-                      fill={effectiveLikedIds.has(currentFeatured?.music_id) ? "currentColor" : "none"}
-                      style={{ cursor: effectiveLikedIds.has(currentFeatured?.music_id) ? "default" : "pointer" }}
+                      fill={hasLiked.length > 0 ? "currentColor" : "none"}
+                      style={{
+                        cursor: hasLiked.length > 0 ? "default" : "pointer",
+                      }}
                     />
                     <span className={styles.tooltip}>
-                      {effectiveLikedIds.has(currentFeatured?.music_id)
-                        ? `${(Number(currentFeatured?.likes ?? 0) + 1).toLocaleString()} likes`
-                        : `${Number(currentFeatured?.likes ?? 0).toLocaleString()} likes`}
+                      {currentFeatured?.likes} likes
                     </span>
                   </div>
                   <div className={styles.tooltipWrapper}>
@@ -166,17 +172,49 @@ const Library = () => {
                   {isMenuOpen && (
                     <BlackCard className={styles.menuCard}>
                       <ul>
-                        <li onClick={() => { setIsMenuOpen(false); navigate(`/upload/${currentFeatured?.music_id}`); }}>Edit Track</li>
-                        <li onClick={async () => { setIsMenuOpen(false); await toggleSale(currentFeatured?.music_id); }}>
-                          {currentFeatured?.for_sale ? "Remove From Sale" : "Put on Sale"}
+                        <li
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            navigate(`/upload/${currentFeatured?.music_id}`);
+                          }}
+                        >
+                          Edit Track
                         </li>
-                        <li onClick={() => { setIsMenuOpen(false); setIsBoostModalOpen(true); }}>Boost Music</li>
-                        <li onClick={async () => {
-                          if (!window.confirm("Delete this track? This cannot be undone.")) return;
-                          setIsMenuOpen(false);
-                          const result = await deleteMusic(currentFeatured?.music_id);
-                          if (result) navigate("/");
-                        }}>Delete Track</li>
+                        <li
+                          onClick={async () => {
+                            setIsMenuOpen(false);
+                            await toggleSale(currentFeatured?.music_id);
+                          }}
+                        >
+                          {currentFeatured?.for_sale
+                            ? "Remove From Sale"
+                            : "Put on Sale"}
+                        </li>
+                        <li
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            setIsBoostModalOpen(true);
+                          }}
+                        >
+                          Boost Music
+                        </li>
+                        <li
+                          onClick={async () => {
+                            if (
+                              !window.confirm(
+                                "Delete this track? This cannot be undone."
+                              )
+                            )
+                              return;
+                            setIsMenuOpen(false);
+                            const result = await deleteMusic(
+                              currentFeatured?.music_id
+                            );
+                            if (result) navigate("/");
+                          }}
+                        >
+                          Delete Track
+                        </li>
                       </ul>
                     </BlackCard>
                   )}
