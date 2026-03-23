@@ -95,6 +95,16 @@
   cursor: pointer;
 }
 
+@keyframes likePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+.likeLoading {
+  animation: likePulse 0.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .tooltipWrapper {
   position: relative;
   display: inline-flex;

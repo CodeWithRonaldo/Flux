@@ -21,6 +21,7 @@ export const useFetchSubscription = () => {
     },
     {
       enabled: !!address,
+      refetchInterval: 3000,
       select: (data) => {
         const obj = data.data?.[0];
         if (!obj?.data?.content?.fields) return null;

@@ -7,7 +7,8 @@ import Button from "../../components/Button/Button";
 import TrackList from "../../components/TrackList/TrackList";
 import Player from "../../components/Player/Player";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
-import { BanknoteArrowUp, Ellipsis, Heart, Plus } from "lucide-react";
+import { BanknoteArrowUp, Ellipsis, Heart, Plus, Music } from "lucide-react";
+import { LoadingState, EmptyState, ErrorState } from "../../components/StateDisplay/StateDisplay";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
 import { useIota } from "../../hooks/useIota";
 import { useOutletContext, useNavigate } from "react-router-dom";
@@ -35,6 +36,7 @@ const Library = () => {
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
 
   const currentUser = registeredUsers?.filter((user) => user.owner === address);
 
@@ -60,17 +62,19 @@ const Library = () => {
       .map((like) => like.music_id) || [];
 
   const handleLike = async () => {
-    if (!currentFeatured || !address || isLikeLoading) return;
+    if (!currentFeatured || !address || isLiking || hasLiked.length > 0) return;
 
-    if (hasLiked.length > 0) return;
-    const name = currentUser?.[0]?.username || userInfo?.name;
+    const name = currentUser?.[0]?.username;
     const role = currentUser?.[0]?.role || "listener";
 
+    setIsLiking(true);
     const result = await likeMusic({
-      musicId,
+      musicId: currentFeatured.music_id,
       likerName: name,
       likerRole: role,
     });
+    setIsLiking(false);
+
     if (!result?.digest) {
       console.error("Failed to like music");
       return;
@@ -100,11 +104,13 @@ const Library = () => {
     if (searchQuery !== "") return matchesSearch;
 
     if (activeFilter === "All") return true;
-    return music?.type.toLowerCase() === activeFilter.toLowerCase();
+    if (activeFilter === "Premium") return Number(music?.price) > 0;
+    if (activeFilter === "Standard") return Number(music?.price) === 0;
+    return true;
   });
 
   return (
-    <MusicWrapper musics={musics}>
+    <MusicWrapper musics={musics} isPending={isPending}>
       <div className={styles.libraryContainer}>
         <section className={styles.topSection}>
           <div className={styles.header}>
@@ -144,7 +150,7 @@ const Library = () => {
                   <div className={styles.tooltipWrapper} onClick={handleLike}>
                     <Heart
                       size={30}
-                      className={styles.icons}
+                      className={`${styles.icons} ${isLiking ? styles.likeLoading : ""}`}
                       fill={hasLiked.length > 0 ? "currentColor" : "none"}
                       style={{
                         cursor: hasLiked.length > 0 ? "default" : "pointer",
@@ -250,16 +256,43 @@ const Library = () => {
                 </div>
               </div>
 
-              <div className={styles.musicGrid}>
-                {filteredSongs.map((music) => (
-                  <MusicCard key={music?.music_id} music={music} />
-                ))}
-              </div>
+              {isPending && musics.length === 0 ? (
+                <LoadingState message="Loading music..." />
+              ) : isError ? (
+                <ErrorState
+                  title="Failed to load music"
+                  description="Something went wrong fetching tracks. Try again later."
+                />
+              ) : filteredSongs.length === 0 ? (
+                <EmptyState
+                  icon={<Music size={40} />}
+                  title="No tracks found"
+                  description={
+                    activeFilter !== "All"
+                      ? `No ${activeFilter.toLowerCase()} tracks available.`
+                      : "No music has been uploaded yet."
+                  }
+                />
+              ) : (
+                <div className={styles.musicGrid}>
+                  {filteredSongs.map((music) => (
+                    <MusicCard key={music?.music_id} music={music} />
+                  ))}
+                </div>
+              )}
             </>
           ) : (
             <div className={styles.searchResults}>
               <h2 className={styles.sectionTitle}>Search Results</h2>
-              <TrackList musics={filteredSongs} />
+              {filteredSongs.length === 0 ? (
+                <EmptyState
+                  icon={<Music size={40} />}
+                  title="No results found"
+                  description={`Nothing matched "${searchQuery}". Try a different search.`}
+                />
+              ) : (
+                <TrackList musics={filteredSongs} isPending={isPending} />
+              )}
             </div>
           )}
         </section>

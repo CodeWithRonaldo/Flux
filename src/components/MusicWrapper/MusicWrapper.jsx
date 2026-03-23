@@ -8,6 +8,7 @@ import { usePlaylist } from "../../hooks/usePlaylist";
 const MusicWrapper = ({
   children,
   musics,
+  isPending = false,
   showTrackList = true,
   showPlaylistSelector = false,
   trackListTitle = "Top 100 Global Songs",
@@ -38,7 +39,7 @@ const MusicWrapper = ({
           <PlayListSelector onCreateClick={() => setShowCreateModal(true)} />
         )}
         {showTrackList && (
-          <TrackList title={trackListTitle} musics={getCurrentSongs()} />
+          <TrackList title={trackListTitle} musics={getCurrentSongs()} isPending={isPending} />
         )}
       </div>
 

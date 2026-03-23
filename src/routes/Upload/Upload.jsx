@@ -3,13 +3,15 @@ import { BlackCard, GlassCard } from "../../components/GlassCard/GlassCard";
 import Form from "../../components/Form/Form";
 import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
-import { Check, Music, UploadIcon, User, X, CheckCircle2 } from "lucide-react";
+import { Check, Music, UploadIcon, User, X, CheckCircle2, CheckCircle } from "lucide-react";
 import { useOutletContext, useParams, useNavigate } from "react-router-dom";
 import { useIota } from "../../hooks/useIota";
 import { uploadToPinata } from "../../util/helper";
 import { useMusicUpload } from "../../hooks/useMusicUpload";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
+import Modal from "../../components/Modal/Modal";
+import modalStyles from "../../components/PurchaseModal/PurchaseModal.module.css";
 
 const Upload = () => {
   const { id } = useParams();
@@ -36,6 +38,7 @@ const Upload = () => {
     hasRoyalty: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadState, setUploadState] = useState({ isOpen: false, step: "", isDone: false });
   const [activeStep, setActiveStep] = useState(1);
   const registeredUsers = useOutletContext();
   const { address } = useIota();
@@ -91,27 +94,31 @@ const Upload = () => {
     }
   };
 
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
+  const handleEditSubmit = async () => {
     setIsSubmitting(true);
+    setUploadState({ isOpen: true, step: "Preparing files", isDone: false });
     try {
       let imageUrl = existingImageUrl;
       let previewUrl = existingPreviewUrl;
       let fullUrl = existingFullUrl;
 
       if (imageFile) {
+        setUploadState((s) => ({ ...s, step: "Uploading cover art to IPFS" }));
         const cid = await uploadToPinata(imageFile);
         imageUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
       }
       if (lowQualityFile) {
+        setUploadState((s) => ({ ...s, step: "Uploading standard quality track" }));
         const cid = await uploadToPinata(lowQualityFile);
         previewUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
       }
       if (highQualityFile) {
+        setUploadState((s) => ({ ...s, step: "Uploading premium quality track" }));
         const cid = await uploadToPinata(highQualityFile);
         fullUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
       }
 
+      setUploadState((s) => ({ ...s, step: "Saving changes to blockchain" }));
       const result = await updateMusic({
         musicId: id,
         title,
@@ -122,9 +129,10 @@ const Upload = () => {
         fullMusic: fullUrl || null,
       });
 
-      if (result) navigate(`/play/${id}`);
+      if (result) setUploadState((s) => ({ ...s, step: "Changes saved!", isDone: true }));
     } catch (e) {
       console.log(e);
+      setUploadState({ isOpen: false, step: "", isDone: false });
     } finally {
       setIsSubmitting(false);
     }
@@ -133,13 +141,20 @@ const Upload = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setUploadState({ isOpen: true, step: "Uploading cover art to IPFS", isDone: false });
     try {
-      const [imageCid, lowQualityCid, highQualityCid] = await Promise.all([
-        uploadToPinata(imageFile),
-        uploadToPinata(lowQualityFile),
-        uploadToPinata(highQualityFile),
-      ]);
+      const imageCid = await uploadToPinata(imageFile);
 
+      setUploadState((s) => ({ ...s, step: "Uploading standard quality track" }));
+      const lowQualityCid = await uploadToPinata(lowQualityFile);
+
+      let highQualityCid = null;
+      if (highQualityFile) {
+        setUploadState((s) => ({ ...s, step: "Uploading premium quality track" }));
+        highQualityCid = await uploadToPinata(highQualityFile);
+      }
+
+      setUploadState((s) => ({ ...s, step: "Publishing track to blockchain" }));
       const musicData = {
         title,
         description,
@@ -147,7 +162,9 @@ const Upload = () => {
         price: Number(price),
         imageFile: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${imageCid}`,
         lowQualityFile: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${lowQualityCid}`,
-        highQualityFile: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${highQualityCid}`,
+        highQualityFile: highQualityCid
+          ? `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${highQualityCid}`
+          : "",
         collaboratorNames: contributors.map((c) => c.name),
         collaboratorAddresses: contributors.map((c) => c.address),
         collaboratorRoles: contributors.map((c) => c.role),
@@ -161,10 +178,12 @@ const Upload = () => {
           artistHasRoyalty,
         },
       };
-      console.log("Music data to submit:", musicData);
-      await uploadMusic(musicData);
+
+      const result = await uploadMusic(musicData);
+      if (result) setUploadState((s) => ({ ...s, step: "Track published successfully!", isDone: true }));
     } catch (e) {
       console.log(e);
+      setUploadState({ isOpen: false, step: "", isDone: false });
     } finally {
       setIsSubmitting(false);
     }
@@ -759,6 +778,42 @@ const Upload = () => {
           </BlackCard>
         </div>
       </div>
+
+      <Modal isOpen={uploadState.isOpen} onClose={() => {}} size="small">
+        {!uploadState.isDone ? (
+          <div className={modalStyles.loadingContainer}>
+            <div className={modalStyles.loadingOrb}>
+              <div className={modalStyles.orbRing} />
+              <div className={modalStyles.orbRing} />
+              <div className={modalStyles.orbRing} />
+              <div className={modalStyles.orbIcon}>
+                <Music size={32} />
+              </div>
+            </div>
+            <h2 className={modalStyles.loadingTitle}>{uploadState.step}</h2>
+            <p className={modalStyles.loadingSubtitle}>
+              Please wait<span className={modalStyles.dots} />
+            </p>
+          </div>
+        ) : (
+          <div className={modalStyles.successContainer}>
+            <div className={modalStyles.successIcon}>
+              <CheckCircle size={56} />
+            </div>
+            <h2 className={modalStyles.successTitle}>{uploadState.step}</h2>
+            <Button
+              // className={modalStyles.actions}
+              // style={{ background: "var(--color-primary)", color: "#fff", border: "none", borderRadius: "8px", padding: "10px 32px", fontSize: "14px", cursor: "pointer", marginTop: "8px" }}
+              onClick={() => {
+                setUploadState({ isOpen: false, step: "", isDone: false });
+                navigate(isEditMode ? `/play/${id}` : "/");
+              }}
+            >
+              Done
+            </Button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

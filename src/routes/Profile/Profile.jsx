@@ -2,6 +2,7 @@ import styles from "./Profile.module.css";
 import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 import Button from "../../components/Button/Button";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
+import { LoadingState, EmptyState, ErrorState } from "../../components/StateDisplay/StateDisplay";
 import {
   Copy,
   User2,
@@ -11,6 +12,7 @@ import {
   Users,
   Coins,
   Plus,
+  WifiOff,
 } from "lucide-react";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import MusicCard from "../../components/MusicCard/MusicCard";
@@ -104,6 +106,25 @@ const Profile = () => {
       console.error("Failed to copy:", err);
     }
   };
+
+  if (!address) {
+    return (
+      <MusicWrapper musics={[]} showTrackList={false}>
+        <ErrorState
+          title="Wallet not connected"
+          description="Connect your wallet to view your profile, tracks, and rewards."
+        />
+      </MusicWrapper>
+    );
+  }
+
+  if (isPending) {
+    return (
+      <MusicWrapper musics={[]} showTrackList={false}>
+        <LoadingState message="Loading your profile..." />
+      </MusicWrapper>
+    );
+  }
 
   return (
     <MusicWrapper
@@ -210,12 +231,18 @@ const Profile = () => {
 
       <section className={styles.section}>
         <h2>Your Tracks</h2>
-        {userMusics?.length > 0 && (
+        {userMusics?.length > 0 ? (
           <div className={styles.musicGrid}>
             {userMusics.map((music) => (
               <MusicCard key={music?.music_id} music={music} />
             ))}
           </div>
+        ) : (
+          <EmptyState
+            icon={<Music size={40} />}
+            title="No tracks yet"
+            description="Upload your first track to get started."
+          />
         )}
       </section>
     </MusicWrapper>

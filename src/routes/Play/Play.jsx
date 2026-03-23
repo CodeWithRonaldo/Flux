@@ -35,7 +35,8 @@ const Play = () => {
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
-  const { musics } = useFetchMusic();
+  const [isLiking, setIsLiking] = useState(false);
+  const { musics, isPending } = useFetchMusic();
   const { address } = useIota();
   const { isSubscribed } = useFetchSubscription();
   const { likeMusic, toggleSale, deleteMusic } = useVibetraxHook();
@@ -72,17 +73,19 @@ const Play = () => {
       .map((like) => like.music_id) || [];
 
   const handleLike = async () => {
-    if (!songToShow || !address || isLikeLoading) return;
+    if (!songToShow || !address || isLiking || hasLiked.length > 0) return;
 
-    if (hasLiked.length > 0) return;
     const name = currentUser?.[0]?.username || userInfo?.name;
     const role = currentUser?.[0]?.role || "listener";
 
+    setIsLiking(true);
     const result = await likeMusic({
-      musicId,
+      musicId: songToShow.music_id,
       likerName: name,
       likerRole: role,
     });
+    setIsLiking(false);
+
     if (!result?.digest) {
       console.error("Failed to like music");
       return;
@@ -136,6 +139,7 @@ const Play = () => {
   return (
     <MusicWrapper
       musics={moreSongs}
+      isPending={isPending}
       playlist={true}
       trackListTitle={"More From Artist"}
     >
@@ -175,7 +179,7 @@ const Play = () => {
             <div className={styles.tooltipWrapper} onClick={handleLike}>
               <Heart
                 size={30}
-                className={styles.icons}
+                className={`${styles.icons} ${isLiking ? styles.likeLoading : ""}`}
                 fill={hasLiked.length > 0 ? "currentColor" : "none"}
                 style={{
                   cursor: hasLiked.length > 0 ? "default" : "pointer",
@@ -264,7 +268,7 @@ const Play = () => {
       </section>
 
       <section className={styles.recentlyPlayed}>
-        <TrackList title="Recently Played" musics={recentSongs} />
+        <TrackList title="Recently Played" musics={recentSongs} isPending={isPending} />
       </section>
       <section className={styles.section}>
         <h2 className={styles.featuredTitle}>Contributors</h2>

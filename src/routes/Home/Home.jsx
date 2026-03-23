@@ -9,15 +9,25 @@ import { useState } from "react";
 import Subscribe from "../../components/Subscribe/Subscribe";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useOutletContext } from "react-router-dom";
+import { LoadingState, EmptyState } from "../../components/StateDisplay/StateDisplay";
+import { Music } from "lucide-react";
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { musics, isPending, isError } = useFetchMusic();
   const registeredUsers = useOutletContext();
 
   // console.log(musics);
 
   const { currentTrack } = useAudio();
+
+  const filteredMusics = musics?.filter(
+    (music) =>
+      music?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      music?.artist.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className={styles.homeContainer}>
       <Subscribe isOpen={isOpen} OnClose={() => setIsOpen(false)} />
@@ -35,7 +45,11 @@ const Home = () => {
             Velit veritatis asperiores aperiam quae temporibus, nihil voluptatum
             rerum alias illum, corporis, doloremque.
           </p>
-          <SearchBar className={styles.searchBar} />
+          <SearchBar
+            className={styles.searchBar}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
         <div className={styles.right}>
           <div className={styles.music}>
@@ -50,11 +64,25 @@ const Home = () => {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>New Releases</h2>
-        <div className={styles.musicGrid}>
-          {musics.map((music) => (
-            <MusicCard key={music.music_id} music={music} />
-          ))}
-        </div>
+        {isPending && musics.length === 0 ? (
+          <LoadingState message="Loading tracks..." />
+        ) : filteredMusics.length === 0 ? (
+          <EmptyState
+            icon={<Music size={40} />}
+            title={searchQuery ? "No results found" : "No tracks yet"}
+            description={
+              searchQuery
+                ? `Nothing matched "${searchQuery}". Try a different search.`
+                : "No music has been uploaded yet."
+            }
+          />
+        ) : (
+          <div className={styles.musicGrid}>
+            {filteredMusics.map((music) => (
+              <MusicCard key={music.music_id} music={music} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className={styles.section}>
