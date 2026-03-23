@@ -75,6 +75,8 @@ const Play = () => {
   const handleLike = async () => {
     if (!songToShow || !address || isLiking || hasLiked.length > 0) return;
 
+    if (hasLiked.length > 0) return;
+    const musicId = songToShow.music_id;
     const name = currentUser?.[0]?.username || userInfo?.name;
     const role = currentUser?.[0]?.role || "listener";
 
@@ -99,7 +101,7 @@ const Play = () => {
     address === songToShow?.current_owner?.user_address ||
     address === songToShow?.artist?.user_address ||
     songToShow?.collaborators.some(
-      (collaborator) => collaborator.user_address === address
+      (collaborator) => collaborator.user_address === address,
     );
 
   const showEditButton =
@@ -236,7 +238,7 @@ const Play = () => {
                   onClick={async () => {
                     if (
                       !window.confirm(
-                        "Delete this track? This cannot be undone."
+                        "Delete this track? This cannot be undone.",
                       )
                     )
                       return;
@@ -268,7 +270,11 @@ const Play = () => {
       </section>
 
       <section className={styles.recentlyPlayed}>
-        <TrackList title="Recently Played" musics={recentSongs} isPending={isPending} />
+        <TrackList
+          title="Recently Played"
+          musics={recentSongs}
+          isPending={isPending}
+        />
       </section>
       <section className={styles.section}>
         <h2 className={styles.featuredTitle}>Contributors</h2>

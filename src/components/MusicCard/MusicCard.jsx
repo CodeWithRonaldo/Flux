@@ -29,13 +29,15 @@ const MusicCard = ({ music }) => {
 
   return (
     <div className={styles.musicCard} onClick={handleCardClick}>
-      <div className={styles.imageContainer}>
-        <img
-          src={music.music_image}
-          alt={music.title}
-          className={styles.musicImg}
-        />
-
+      <div
+        className={styles.imageContainer}
+        style={{
+          backgroundImage: `url(${music.music_image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
         <div className={styles.playOverlay}>
           <button className={styles.playIconBtn} onClick={handlePlayToggle}>
             {isPlayingCurrent ? (

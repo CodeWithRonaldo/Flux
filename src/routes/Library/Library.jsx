@@ -64,7 +64,9 @@ const Library = () => {
   const handleLike = async () => {
     if (!currentFeatured || !address || isLiking || hasLiked.length > 0) return;
 
-    const name = currentUser?.[0]?.username;
+    if (hasLiked.length > 0) return;
+    const musicId = currentFeatured.music_id;
+    const name = currentUser?.[0]?.username || userInfo?.name;
     const role = currentUser?.[0]?.role || "listener";
 
     setIsLiking(true);
