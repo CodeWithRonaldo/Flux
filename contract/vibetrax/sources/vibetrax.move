@@ -110,6 +110,7 @@ public struct UserProfile has key {
     username: Option<String>,
     bio: Option<String>,
     genres: Option<vector<String>>,
+    image_url: Option<String>,
 }
 
 // === Events ===
@@ -230,6 +231,7 @@ public struct UserRegistered has copy, drop {
     username: Option<String>,
     bio: Option<String>,
     genres: vector<String>,
+    image_url: Option<String>,
 }
 
 public struct UserProfileUpdated has copy, drop {
@@ -239,6 +241,7 @@ public struct UserProfileUpdated has copy, drop {
     username: Option<String>,
     bio: Option<String>,
     genres: vector<String>,
+    image_url: Option<String>,
 }
 
 // === Method Aliases ===
@@ -746,6 +749,7 @@ public fun register_user(
     username: Option<String>,
     bio: Option<String>,
     genres: Option<vector<String>>,
+    image_url: Option<String>,
     ctx: &mut TxContext,
 ) {
     let owner = ctx.sender();
@@ -753,7 +757,7 @@ public fun register_user(
     let profile_id = profile_uid.to_inner();
     let genres_vec = option::destroy_with_default(genres, vector::empty());
 
-    event::emit(UserRegistered { profile_id, owner, role, username, bio, genres: genres_vec });
+    event::emit(UserRegistered { profile_id, owner, role, username, bio, genres: genres_vec, image_url });
 
     transfer::transfer(
         UserProfile {
@@ -763,6 +767,7 @@ public fun register_user(
             username,
             bio,
             genres: option::some(genres_vec),
+            image_url,
         },
         owner,
     );
@@ -775,12 +780,14 @@ public fun update_profile(
     username: Option<String>,
     bio: Option<String>,
     genres: Option<vector<String>>,
+    image_url: Option<String>,
     ctx: &mut TxContext,
 ) {
     assert!(profile.owner == ctx.sender(), EUNAUTHORIZED);
     if (username.is_some()) { profile.username = username };
     if (bio.is_some()) { profile.bio = bio };
     if (genres.is_some()) { profile.genres = genres };
+    if (image_url.is_some()) { profile.image_url = image_url };
 
     let genres_vec = if (profile.genres.is_some()) { *profile.genres.borrow() } else {
         vector::empty()
@@ -792,6 +799,7 @@ public fun update_profile(
         username: profile.username,
         bio: profile.bio,
         genres: genres_vec,
+        image_url: profile.image_url,
     });
 }
 
