@@ -7,7 +7,7 @@ const ArtistCard = ({ artist }) => {
     <div className={styles.artistCard}>
       <Jazzicon
         diameter={100}
-        seed={jsNumberForAddress(artist?.user_address || "0x6")}
+        seed={jsNumberForAddress(artist?.owner || "0x6")}
       />
       {/* <div className={styles.imageContainer}>
         <img src={artist?.image} alt={artist?.name} />

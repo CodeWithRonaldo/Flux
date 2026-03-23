@@ -75,6 +75,7 @@ const Play = () => {
     if (!songToShow || !address || isLikeLoading) return;
 
     if (hasLiked.length > 0) return;
+    const musicId = songToShow.music_id;
     const name = currentUser?.[0]?.username || userInfo?.name;
     const role = currentUser?.[0]?.role || "listener";
 
