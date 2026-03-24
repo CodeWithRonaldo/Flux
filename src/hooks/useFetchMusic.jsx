@@ -19,7 +19,7 @@ export const useFetchMusic = () => {
     },
     {
       select: (data) => data.data.map((x) => x.parsedJson.music_id),
-    },
+    }
   );
 
   const musicIds = data || [];
@@ -58,11 +58,11 @@ export const useFetchMusic = () => {
                 artist: f.artist?.fields ?? f.artist,
                 current_owner: f.current_owner?.fields ?? f.current_owner,
                 collaborators: (f.collaborators ?? []).map(
-                  (c) => c.fields ?? c,
+                  (c) => c.fields ?? c
                 ),
               };
             }),
-      },
+      }
     );
 
   useEffect(() => {
@@ -71,9 +71,11 @@ export const useFetchMusic = () => {
     }
   }, [musicObjects, isEventsPending]);
 
+  const hasMusicIds = musicIds.length > 0;
+
   return {
     musics: musics ?? [],
-    isPending: isEventsPending || isObjectsPending,
+    isPending: isEventsPending || (hasMusicIds && isObjectsPending),
     isError,
   };
 };
