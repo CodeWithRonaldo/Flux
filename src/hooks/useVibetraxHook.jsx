@@ -26,6 +26,7 @@ export const useVibetraxHook = () => {
           tx.pure.option("string", userData.artistName),
           tx.pure.option("string", userData.bio),
           tx.pure.option("vector<string>", userData.genre),
+          tx.pure.option("string", userData.imageUrl ?? null),
         ],
       });
 

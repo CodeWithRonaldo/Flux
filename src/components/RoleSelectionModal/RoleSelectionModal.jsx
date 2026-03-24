@@ -23,6 +23,7 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
       artistName: data.artistName || userInfo?.name,
       bio: data.bio || "",
       genre: data.genres || [],
+      imageUrl: userInfo?.profileImage ?? null,
     };
 
     const result = await registerUser(userData);

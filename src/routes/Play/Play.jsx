@@ -75,8 +75,7 @@ const Play = () => {
   const handleLike = async () => {
     if (!songToShow || !address || isLiking || hasLiked.length > 0) return;
 
-    if (hasLiked.length > 0) return;
-    const musicId = songToShow.music_id;
+   
     const name = currentUser?.[0]?.username || userInfo?.name;
     const role = currentUser?.[0]?.role || "listener";
 
