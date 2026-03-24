@@ -65,7 +65,7 @@ export function IotaProvider({ children }) {
 
   return (
     <WalletContext.Provider
-      value={{ keypair, address, balance, loading: isPending }}
+      value={{ keypair, address, balance, balanceLoading: isPending }}
     >
       {children}
     </WalletContext.Provider>

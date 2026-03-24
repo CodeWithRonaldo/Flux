@@ -2,7 +2,11 @@ import styles from "./Profile.module.css";
 import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 import Button from "../../components/Button/Button";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
-import { LoadingState, EmptyState, ErrorState } from "../../components/StateDisplay/StateDisplay";
+import {
+  LoadingState,
+  EmptyState,
+  ErrorState,
+} from "../../components/StateDisplay/StateDisplay";
 import {
   Copy,
   User2,
@@ -27,7 +31,7 @@ import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 
 const Profile = () => {
-  const { balance, address } = useIota();
+  const { balance, address, balanceLoading } = useIota();
   const { disconnect, loading: isDisconnecting } = useWeb3AuthDisconnect();
   const registeredUsers = useOutletContext();
   const { musics, isPending, isError } = useFetchMusic();
@@ -43,21 +47,22 @@ const Profile = () => {
   const { claimRewards, loading: isClaiming } = useVibetraxHook();
   const userProfile = registeredUsers?.filter((user) => user.owner === address);
 
-  const { data: vibeBalanceData } = useIotaClientQuery(
-    "getBalance",
-    {
-      owner: address ?? "",
-      coinType: `${vibeTraxPackageId}::vibe_token::VIBE_TOKEN`,
-    },
-    { enabled: !!address },
-  );
+  const { data: vibeBalanceData, isPending: vibeBalanceLoading } =
+    useIotaClientQuery(
+      "getBalance",
+      {
+        owner: address ?? "",
+        coinType: `${vibeTraxPackageId}::vibe_token::VIBE_TOKEN`,
+      },
+      { enabled: !!address }
+    );
 
   const vibeBalance = vibeBalanceData
     ? (Number(vibeBalanceData.totalBalance) / 1_000_000).toLocaleString(
         undefined,
         {
           maximumFractionDigits: 2,
-        },
+        }
       )
     : "0";
 
@@ -66,9 +71,11 @@ const Profile = () => {
       music?.artist?.user_address === address ||
       music?.current_owner?.user_address === address ||
       music?.collaborators.some(
-        (collaborator) => collaborator?.user_address === address,
-      ),
+        (collaborator) => collaborator?.user_address === address
+      )
   );
+
+  const profileLoading = balanceLoading || vibeBalanceLoading;
 
   const stats = [
     {
@@ -118,7 +125,7 @@ const Profile = () => {
     );
   }
 
-  if (isPending) {
+  if (profileLoading) {
     return (
       <MusicWrapper musics={[]} showTrackList={false}>
         <LoadingState message="Loading your profile..." />
@@ -207,7 +214,7 @@ const Profile = () => {
                   <strong>
                     {(subscription.pending_vibe / 1_000_000).toLocaleString(
                       undefined,
-                      { maximumFractionDigits: 2 },
+                      { maximumFractionDigits: 2 }
                     )}{" "}
                     VIBE
                   </strong>{" "}
@@ -231,7 +238,9 @@ const Profile = () => {
 
       <section className={styles.section}>
         <h2>Your Tracks</h2>
-        {userMusics?.length > 0 ? (
+        {isPending ? (
+          <LoadingState message="Loading your tracks..." />
+        ) : userMusics?.length > 0 ? (
           <div className={styles.musicGrid}>
             {userMusics.map((music) => (
               <MusicCard key={music?.music_id} music={music} />

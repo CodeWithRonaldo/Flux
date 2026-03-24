@@ -9,7 +9,10 @@ import { useState } from "react";
 import Subscribe from "../../components/Subscribe/Subscribe";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useOutletContext } from "react-router-dom";
-import { LoadingState, EmptyState } from "../../components/StateDisplay/StateDisplay";
+import {
+  LoadingState,
+  EmptyState,
+} from "../../components/StateDisplay/StateDisplay";
 import { Music } from "lucide-react";
 
 const Home = () => {
@@ -17,8 +20,6 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { musics, isPending, isError } = useFetchMusic();
   const registeredUsers = useOutletContext();
-
-  // console.log(musics);
 
   const { currentTrack } = useAudio();
 
