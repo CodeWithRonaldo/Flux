@@ -3,7 +3,7 @@ import styles from "./ArtistCard.module.css";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 
 const ArtistCard = ({ artist }) => {
-  console.log("Artist Image URL:", artist?.image_url);
+  // console.log("Artist Image URL:", artist?.image_url);
   return (
     <div className={styles.artistCard}>
       {/* <Jazzicon

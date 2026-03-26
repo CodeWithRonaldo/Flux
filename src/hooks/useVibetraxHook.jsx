@@ -3,21 +3,34 @@ import { useIotaClient } from "@iota/dapp-kit";
 import { useIota } from "./useIota";
 import { useState } from "react";
 import { useNetworkVariables } from "../config/networkConfig";
+import { getContractError } from "../util/helper";
 
 export const useVibetraxHook = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const client = useIotaClient();
-  const { keypair } = useIota();
+  const { keypair, balance, balanceLoading, vibeTokenBalance } = useIota();
   const { vibeTraxPackageId, vibeTraxTreasuryId, vibeTraxCoinManagerId } =
-    useNetworkVariables("vibeTraxPackageId", "vibeTraxTreasuryId", "vibeTraxCoinManagerId");
+    useNetworkVariables(
+      "vibeTraxPackageId",
+      "vibeTraxTreasuryId",
+      "vibeTraxCoinManagerId",
+    );
 
   const registerUser = async (userData) => {
     if (!keypair) {
-      console.log("Wallet not connected");
+      setError("Wallet not connected");
       return;
     }
     try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (!balance || balance <= 0) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+      }
       const tx = new Transaction();
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::register_user`,
@@ -36,28 +49,35 @@ export const useVibetraxHook = () => {
         options: { showEffects: true },
       });
 
-      console.log("Transaction result", result);
-
       if (result.effects?.status?.status !== "success") {
-        console.log("Transaction failed:", result.effects?.status);
+        setError("Registration failed. Please try again.");
         return null;
       }
 
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
     }
   };
+
   const buyMusic = async (musicData) => {
-    if (!keypair){
-      console.log("Wallet not connected");
+    if (!keypair) {
+      setError("Wallet not connected");
       return;
     }
-    try{
+    try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (!balance || balance <= musicData.amount) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+      }
       const tx = new Transaction();
       const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(musicData.amount)]);
       tx.moveCall({
@@ -75,29 +95,36 @@ export const useVibetraxHook = () => {
         options: { showEffects: true },
       });
 
-      console.log("Transaction result", result);
       if (result.effects?.status?.status !== "success") {
-        console.log("Transaction failed:", result.effects?.status);
+        setError("Purchase failed. Please try again.");
         return null;
       }
       return result;
-
-    } catch (e){
-      console.log("Error:", e);
+    } catch (e) {
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
     }
-
-    
   };
+
   const subscribe = async (subData) => {
     if (!keypair) {
-      console.log("Wallet not connected");
+      setError("Wallet not connected");
       return;
     }
     try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (balance && balance <= 5) {
+          setError(
+            "Insufficient balance. You need at least 5 IOTA to subscribe.",
+          );
+          return;
+        }
+      }
       const tx = new Transaction();
       const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(5_000_000_000)]);
       tx.moveCall({
@@ -114,14 +141,15 @@ export const useVibetraxHook = () => {
         signer: keypair,
         options: { showEffects: true },
       });
-      console.log("Transaction result", result);
+
       if (result.effects?.status?.status !== "success") {
-        console.log("Transaction failed:", result.effects?.status);
+        setError("Subscription failed. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -130,34 +158,40 @@ export const useVibetraxHook = () => {
 
   const renewSubscription = async (subData) => {
     if (!keypair) {
-      console.log("Wallet not connected");
+      setError("Wallet not connected");
       return;
     }
     try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (balance && balance <= 5) {
+          setError(
+            "Insufficient balance. You need at least 5 IOTA to renew your subscription.",
+          );
+          return;
+        }
+      }
       const tx = new Transaction();
       const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(5_000_000_000)]);
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::renew_subscription`,
-        arguments: [
-          tx.object(subData.subscriptionId),
-          coin,
-          tx.object("0x6"),
-        ],
+        arguments: [tx.object(subData.subscriptionId), coin, tx.object("0x6")],
       });
       const result = await client.signAndExecuteTransaction({
         transaction: tx,
         signer: keypair,
         options: { showEffects: true },
       });
-      console.log("Transaction result", result);
+
       if (result.effects?.status?.status !== "success") {
-        console.log("Transaction failed:", result.effects?.status);
+        setError("Subscription renewal failed. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -166,18 +200,25 @@ export const useVibetraxHook = () => {
 
   const tipArtist = async (tipData) => {
     if (!keypair) {
-      console.log("Wallet not connected");
+      setError("Wallet not connected");
       return;
     }
     try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (!balance || balance <= 0) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+      }
       const coins = await client.getCoins({
         owner: keypair.toIotaAddress(),
         coinType: `${vibeTraxPackageId}::vibe_token::VIBE_TOKEN`,
       });
 
       if (!coins.data.length) {
-        console.log("No VIBE tokens found");
+        setError("No VIBE tokens found");
         return null;
       }
 
@@ -187,7 +228,10 @@ export const useVibetraxHook = () => {
       const primaryCoin = tx.object(coinIds[0]);
 
       if (coinIds.length > 1) {
-        tx.mergeCoins(primaryCoin, coinIds.slice(1).map((id) => tx.object(id)));
+        tx.mergeCoins(
+          primaryCoin,
+          coinIds.slice(1).map((id) => tx.object(id)),
+        );
       }
 
       const [tipCoin] = tx.splitCoins(primaryCoin, [tx.pure.u64(amountInBase)]);
@@ -203,14 +247,14 @@ export const useVibetraxHook = () => {
         options: { showEffects: true },
       });
 
-      console.log("Transaction result", result);
       if (result.effects?.status?.status !== "success") {
-        console.log("Transaction failed:", result.effects?.status);
+        setError("Unable to tip artist. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -221,18 +265,20 @@ export const useVibetraxHook = () => {
 
   const boostMusic = async (boostData) => {
     if (!keypair) {
-      console.log("Wallet not connected");
+      setError("Wallet not connected");
       return;
     }
     try {
       setLoading(true);
+      setError("");
+
       const coins = await client.getCoins({
         owner: keypair.toIotaAddress(),
         coinType: `${vibeTraxPackageId}::vibe_token::VIBE_TOKEN`,
       });
 
       if (!coins.data.length) {
-        console.log("No VIBE tokens found");
+        setError("No VIBE tokens found");
         return null;
       }
 
@@ -241,11 +287,31 @@ export const useVibetraxHook = () => {
       const coinIds = coins.data.map((c) => c.coinObjectId);
       const primaryCoin = tx.object(coinIds[0]);
 
-      if (coinIds.length > 1) {
-        tx.mergeCoins(primaryCoin, coinIds.slice(1).map((id) => tx.object(id)));
+      if (!balanceLoading) {
+        if (!balance || balance <= 0) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+        
+        if (
+          vibeTokenBalance &&
+          vibeTokenBalance < Number(requiredAmount / 1_000_000n)
+        ) {
+          setError("Insufficient VIBE balance");
+          return;
+        }
       }
 
-      const [boostCoin] = tx.splitCoins(primaryCoin, [tx.pure.u64(requiredAmount)]);
+      if (coinIds.length > 1) {
+        tx.mergeCoins(
+          primaryCoin,
+          coinIds.slice(1).map((id) => tx.object(id)),
+        );
+      }
+
+      const [boostCoin] = tx.splitCoins(primaryCoin, [
+        tx.pure.u64(requiredAmount),
+      ]);
 
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::boost_music`,
@@ -265,14 +331,14 @@ export const useVibetraxHook = () => {
         options: { showEffects: true },
       });
 
-      console.log("Transaction result", result);
       if (result.effects?.status?.status !== "success") {
-        console.log("Transaction failed:", result.effects?.status);
+        setError("Unable to boost music. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -294,19 +360,22 @@ export const useVibetraxHook = () => {
           tx.object("0x6"),
         ],
       });
-      const result = await client.signAndExecuteTransaction({
-        transaction: tx,
-        signer: keypair,
-        options: { showEffects: true },
-      });
-      console.log("Stream result", result);
+      const result = await client.signAndExecuteTransaction(
+        {
+          transaction: tx,
+          signer: keypair,
+          options: { showEffects: true },
+        },
+        {},
+      );
       if (result.effects?.status?.status !== "success") {
         console.log("Stream failed:", result.effects?.status);
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      console.log("Error:", errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -314,30 +383,37 @@ export const useVibetraxHook = () => {
   };
 
   const claimRewards = async (subscriptionId) => {
-    if (!keypair) return null;
+    if (!keypair) {
+      setError("Wallet not connected");
+      return;
+    }
     try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (!balance || balance <= 0) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+      }
       const tx = new Transaction();
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::claim_rewards`,
-        arguments: [
-          tx.object(subscriptionId),
-          tx.object(vibeTraxTreasuryId),
-        ],
+        arguments: [tx.object(subscriptionId), tx.object(vibeTraxTreasuryId)],
       });
       const result = await client.signAndExecuteTransaction({
         transaction: tx,
         signer: keypair,
         options: { showEffects: true },
       });
-      console.log("Claim result", result);
       if (result.effects?.status?.status !== "success") {
-        console.log("Claim failed:", result.effects?.status);
+        setError("Unable to claim rewards. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -345,9 +421,13 @@ export const useVibetraxHook = () => {
   };
 
   const likeMusic = async (likeData) => {
-    if (!keypair) return null;
+    if (!keypair) {
+      setError("Wallet not connected.");
+      return;
+    }
     try {
       setLoading(true);
+      setError("");
       const tx = new Transaction();
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::like_music`,
@@ -362,14 +442,15 @@ export const useVibetraxHook = () => {
         signer: keypair,
         options: { showEffects: true },
       });
-      console.log("Like result", result);
+
       if (result.effects?.status?.status !== "success") {
-        console.log("Like failed:", result.effects?.status);
+        setError("Unable to like music. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -377,9 +458,19 @@ export const useVibetraxHook = () => {
   };
 
   const updateMusic = async (updateData) => {
-    if (!keypair) return null;
+    if (!keypair) {
+      setError("Wallet not connected.");
+      return;
+    }
     try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (!balance || balance <= 0) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+      }
       const tx = new Transaction();
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::update_music`,
@@ -398,14 +489,15 @@ export const useVibetraxHook = () => {
         signer: keypair,
         options: { showEffects: true },
       });
-      console.log("Update result", result);
       if (result.effects?.status?.status !== "success") {
         console.log("Update failed:", result.effects?.status);
+        setError("Unable to update music. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -413,9 +505,19 @@ export const useVibetraxHook = () => {
   };
 
   const toggleSale = async (musicId) => {
-    if (!keypair) return null;
+    if (!keypair) {
+      setError("Wallet not connected.");
+      return;
+    }
     try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (!balance || balance <= 0) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+      }
       const tx = new Transaction();
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::toggle_sale`,
@@ -426,14 +528,14 @@ export const useVibetraxHook = () => {
         signer: keypair,
         options: { showEffects: true },
       });
-      console.log("Toggle sale result", result);
       if (result.effects?.status?.status !== "success") {
-        console.log("Toggle sale failed:", result.effects?.status);
+        setError("Unable to toggle sale. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -441,9 +543,19 @@ export const useVibetraxHook = () => {
   };
 
   const deleteMusic = async (musicId) => {
-    if (!keypair) return null;
+    if (!keypair) {
+      setError("Wallet not connected.");
+      return;
+    }
     try {
       setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (!balance || balance <= 0) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+      }
       const tx = new Transaction();
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::delete_music`,
@@ -454,20 +566,35 @@ export const useVibetraxHook = () => {
         signer: keypair,
         options: { showEffects: true },
       });
-      console.log("Delete result", result);
+
       if (result.effects?.status?.status !== "success") {
-        console.log("Delete failed:", result.effects?.status);
+        setError("Unable to delete music. Please try again.");
         return null;
       }
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
     }
   };
 
-  return { registerUser, buyMusic, subscribe, renewSubscription, tipArtist, boostMusic, streamMusic, claimRewards, likeMusic, updateMusic, toggleSale, deleteMusic, loading };
-
+  return {
+    registerUser,
+    buyMusic,
+    subscribe,
+    renewSubscription,
+    tipArtist,
+    boostMusic,
+    streamMusic,
+    claimRewards,
+    likeMusic,
+    updateMusic,
+    toggleSale,
+    deleteMusic,
+    loading,
+    error,
+  };
 };

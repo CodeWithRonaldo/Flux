@@ -14,7 +14,7 @@ import { useState } from "react";
 import { formatPrice } from "../../util/helper";
 
 const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
-  const { buyMusic, loading } = useVibetraxHook();
+  const { buyMusic, loading, error } = useVibetraxHook();
   const [done, setDone] = useState(false);
 
   if (!music) return null;
@@ -94,6 +94,12 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
               <span>{formatPrice(music?.price)} IOTA</span>
             </div>
           </div>
+
+          {error && (
+            <div className={styles.errorContainer}>
+              <p className={styles.errorMessage}>{error}</p>
+            </div>
+          )}
 
           <div className={styles.actions}>
             <Button onClick={onClose} variant="btn-ghost">

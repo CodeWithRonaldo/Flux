@@ -11,7 +11,7 @@ const QUICK_AMOUNTS = [5, 10, 25, 50];
 const TipModal = ({ isOpen, onClose, music }) => {
   const [amount, setAmount] = useState("");
   const [done, setDone] = useState(false);
-  const { tipArtist, loading } = useVibetraxHook();
+  const { tipArtist, loading,error } = useVibetraxHook();
 
   const handleTip = async () => {
     if (!amount || Number(amount) <= 0 || !music) return;
@@ -71,6 +71,12 @@ const TipModal = ({ isOpen, onClose, music }) => {
             />
           </div>
 
+          {error && (
+            <div className={purchaseStyles.errorContainer}>
+              <p className={purchaseStyles.errorMessage}>{error}</p>
+            </div>
+          )}
+
           <div className={styles.actions}>
             <Button variant="btn-ghost" onClick={handleClose}>
               Cancel
@@ -111,6 +117,7 @@ const TipModal = ({ isOpen, onClose, music }) => {
           <h2 className={purchaseStyles.successTitle}>Tip sent!</h2>
         </div>
       )}
+
     </Modal>
   );
 };

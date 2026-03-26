@@ -157,3 +157,11 @@
 .menuCard ul li:last-child {
   color: #f87171;
 }
+
+.actionError {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: #f87171;
+  padding: 0.25rem 1rem 0.25rem 3rem;
+  margin: 0;
+}

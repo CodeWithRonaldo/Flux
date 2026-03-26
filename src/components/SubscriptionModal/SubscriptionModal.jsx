@@ -10,7 +10,7 @@ const SUBSCRIPTION_PRICE = "5.00";
 
 const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
   const { userInfo } = useWeb3AuthUser();
-  const { subscribe, renewSubscription, loading } = useVibetraxHook();
+  const { subscribe, renewSubscription, loading, error } = useVibetraxHook();
   const [done, setDone] = useState(false);
 
   const isRenewal = !!subscription;
@@ -82,6 +82,12 @@ const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
               <span>{SUBSCRIPTION_PRICE} IOTA / 30 days</span>
             </div>
           </div>
+
+          {error && (
+            <div className={styles.errorContainer}>
+              <p className={styles.errorMessage}>{error}</p>
+            </div>
+          )}
 
           <div className={styles.actions}>
             <Button onClick={onClose} variant="btn-ghost">

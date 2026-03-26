@@ -18,7 +18,7 @@ const TrackItem = ({ music, rank }) => {
   const registeredUsers = useOutletContext();
   const navigate = useNavigate();
   const { liked } = useFetchLikes();
-  const { likeMusic, toggleSale, deleteMusic } = useVibetraxHook();
+  const { likeMusic, toggleSale, deleteMusic, error: actionError } = useVibetraxHook();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
@@ -132,6 +132,10 @@ const TrackItem = ({ music, rank }) => {
           </div>
         )}
       </div>
+
+      {actionError && (
+        <p className={styles.actionError}>{actionError}</p>
+      )}
 
       <BoostModal
         isOpen={isBoostModalOpen}

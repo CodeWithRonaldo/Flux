@@ -7,7 +7,7 @@ import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import purchaseStyles from "../PurchaseModal/PurchaseModal.module.css";
 
 const EditTrackModal = ({ isOpen, onClose, music, onSuccess }) => {
-  const { updateMusic, loading } = useVibetraxHook();
+  const { updateMusic, loading, error } = useVibetraxHook();
   const [done, setDone] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -138,6 +138,12 @@ const EditTrackModal = ({ isOpen, onClose, music, onSuccess }) => {
               />
             </div>
           </div>
+
+          {error && (
+            <div className={purchaseStyles.errorContainer}>
+              <p className={purchaseStyles.errorMessage}>{error}</p>
+            </div>
+          )}
 
           <div className={styles.actions}>
             <Button variant="btn-ghost" onClick={handleClose}>

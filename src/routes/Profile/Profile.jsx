@@ -31,7 +31,7 @@ import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 
 const Profile = () => {
-  const { balance, address, balanceLoading } = useIota();
+  const { balance, address, balanceLoading, vibeTokenBalance } = useIota();
   const { disconnect, loading: isDisconnecting } = useWeb3AuthDisconnect();
   const registeredUsers = useOutletContext();
   const { musics, isPending, isError } = useFetchMusic();
@@ -44,27 +44,10 @@ const Profile = () => {
     isSubscribed,
     refetch: refetchSubscription,
   } = useFetchSubscription();
-  const { claimRewards, loading: isClaiming } = useVibetraxHook();
+  const { claimRewards, loading: isClaiming, error: claimError } = useVibetraxHook();
   const userProfile = registeredUsers?.filter((user) => user.owner === address);
 
-  const { data: vibeBalanceData, isPending: vibeBalanceLoading } =
-    useIotaClientQuery(
-      "getBalance",
-      {
-        owner: address ?? "",
-        coinType: `${vibeTraxPackageId}::vibe_token::VIBE_TOKEN`,
-      },
-      { enabled: !!address }
-    );
-
-  const vibeBalance = vibeBalanceData
-    ? (Number(vibeBalanceData.totalBalance) / 1_000_000).toLocaleString(
-        undefined,
-        {
-          maximumFractionDigits: 2,
-        }
-      )
-    : "0";
+ 
 
   const userMusics = musics?.filter(
     (music) =>
@@ -75,7 +58,7 @@ const Profile = () => {
       )
   );
 
-  const profileLoading = balanceLoading || vibeBalanceLoading;
+  const profileLoading = balanceLoading ;
 
   const stats = [
     {
@@ -86,7 +69,7 @@ const Profile = () => {
     {
       icon: <Coins size={18} absoluteStrokeWidth />,
       label: "Vibe Balance",
-      value: `${vibeBalance} VIBE`,
+      value: `${vibeTokenBalance} VIBE`,
     },
     {
       icon: <Music size={18} absoluteStrokeWidth />,
@@ -231,6 +214,11 @@ const Profile = () => {
               >
                 {isClaiming ? "Claiming..." : "Claim VIBE"}
               </Button>
+              {claimError && (
+                <p style={{ color: "#f87171", fontSize: "0.8rem", marginTop: "0.5rem", width: "100%" }}>
+                  {claimError}
+                </p>
+              )}
             </div>
           )}
         </div>

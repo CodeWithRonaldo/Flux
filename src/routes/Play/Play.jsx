@@ -39,7 +39,7 @@ const Play = () => {
   const { musics, isPending } = useFetchMusic();
   const { address } = useIota();
   const { isSubscribed } = useFetchSubscription();
-  const { likeMusic, toggleSale, deleteMusic } = useVibetraxHook();
+  const { likeMusic, toggleSale, deleteMusic, error: actionError } = useVibetraxHook();
   const { liked, isLikeLoading } = useFetchLikes();
   const { userInfo } = useWeb3AuthUser();
 
@@ -206,6 +206,12 @@ const Play = () => {
               <span className={styles.tooltip}>Tip Artist</span>
             </div>
           </div>
+          {actionError && (
+            <p style={{ color: "#f87171", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+              {actionError}
+            </p>
+          )}
+
           {isMenuOpen && (
             <BlackCard className={styles.menuCard}>
               <ul>

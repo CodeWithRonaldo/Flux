@@ -4,12 +4,14 @@ import { useWeb3Auth } from "@web3auth/modal/react";
 
 import { useIotaClientQuery } from "@iota/dapp-kit";
 import { WalletContext } from "./WalletContext";
+import { VIBETRAX_PACKAGE_ID } from "../config/constant";
 
 export function IotaProvider({ children }) {
   const web3Auth = useWeb3Auth();
   const [keypair, setKeypair] = useState(null);
   const [address, setAddress] = useState("");
   const [balance, setBalance] = useState("");
+  const [vibeTokenBalance, setVibeTokenBalance] = useState("")
 
   useEffect(() => {
     const getAddress = async () => {
@@ -56,16 +58,40 @@ export function IotaProvider({ children }) {
     }
   );
 
+  const { data: vibeBalanceData, isPending: vibeBalanceLoading } =
+    useIotaClientQuery(
+      "getBalance",
+      {
+        owner: address ?? "",
+        coinType: `${VIBETRAX_PACKAGE_ID}::vibe_token::VIBE_TOKEN`,
+      },
+      { enabled: !!address }
+    );
+
+  
+   
+
   useEffect(() => {
     if (data) {
       const balance = (+data.totalBalance / 1_000_000_000).toFixed(2);
       setBalance(balance);
+       
+
     }
   }, [data]);
 
+  useEffect(() => {
+    if (vibeBalanceData) {
+      const balance = (+vibeBalanceData.totalBalance / 1_000_000).toFixed(2);
+      setVibeTokenBalance(balance);
+    }
+  }, [vibeBalanceData]);
+
+
+
   return (
     <WalletContext.Provider
-      value={{ keypair, address, balance, balanceLoading: isPending }}
+      value={{ keypair, address, balance,vibeTokenBalance, balanceLoading: isPending || vibeBalanceLoading }}
     >
       {children}
     </WalletContext.Provider>

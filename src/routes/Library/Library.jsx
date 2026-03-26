@@ -28,7 +28,7 @@ const Library = () => {
   const { address } = useIota();
   const registeredUsers = useOutletContext();
   const navigate = useNavigate();
-  const { likeMusic, toggleSale, deleteMusic } = useVibetraxHook();
+  const { likeMusic, toggleSale, deleteMusic, error: actionError } = useVibetraxHook();
   const { liked, isLikeLoading } = useFetchLikes();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -176,6 +176,12 @@ const Library = () => {
                     <BanknoteArrowUp size={30} className={styles.icons} />
                     <span className={styles.tooltip}>Tip Artist</span>
                   </div>
+                  {actionError && (
+                    <p style={{ color: "#f87171", fontSize: "0.8rem", marginTop: "0.5rem", width: "100%" }}>
+                      {actionError}
+                    </p>
+                  )}
+
                   {isMenuOpen && (
                     <BlackCard className={styles.menuCard}>
                       <ul>

@@ -11,7 +11,7 @@ import { useWeb3AuthUser } from "@web3auth/modal/react";
 const RoleSelectionModal = ({ isOpen, onClose }) => {
   const [role, setRole] = useState("");
   const [done, setDone] = useState(false);
-  const { registerUser, loading } = useVibetraxHook();
+  const { registerUser, loading, error } = useVibetraxHook();
   const { userInfo } = useWeb3AuthUser();
 
   const onListener = () => setRole("listener");
@@ -110,6 +110,12 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
             Welcome to Flux as a{role === "artist" ? "n" : ""}{" "}
             <strong>{role}</strong>
           </p>
+        </div>
+      )}
+
+      {error && !loading && !done && (
+        <div className={styles.errorContainer}>
+          <p className={styles.errorMessage}>{error}</p>
         </div>
       )}
     </Modal>

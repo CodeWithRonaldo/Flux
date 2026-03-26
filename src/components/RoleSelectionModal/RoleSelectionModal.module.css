@@ -242,6 +242,22 @@
   font-weight: 600;
 }
 
+.errorContainer {
+  margin-top: 1.5rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  text-align: center;
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  color: #f87171;
+  margin: 0;
+  font-family: var(--font);
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

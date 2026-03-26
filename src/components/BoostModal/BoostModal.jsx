@@ -15,7 +15,7 @@ const PLANS = [
 const BoostModal = ({ isOpen, onClose, music }) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [done, setDone] = useState(false);
-  const { boostMusic, loading } = useVibetraxHook();
+  const { boostMusic, loading, error } = useVibetraxHook();
 
   const handleBoost = async () => {
     if (selectedPlan === null || !music) return;
@@ -63,6 +63,12 @@ const BoostModal = ({ isOpen, onClose, music }) => {
               </div>
             ))}
           </div>
+
+          {error && (
+            <div className={purchaseStyles.errorContainer}>
+              <p className={purchaseStyles.errorMessage}>{error}</p>
+            </div>
+          )}
 
           <div className={styles.actions}>
             <Button variant="btn-ghost" onClick={handleClose}>

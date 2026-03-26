@@ -4,5 +4,6 @@ export const WalletContext = createContext({
   keypair: null,
   address: "",
   balance: "",
+  vibeTokenBalance: "",
   loading: false,
 });
