@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import Modal from "../Modal/Modal";
 import Button from "../Button/Button";
 import styles from "./EditTrackModal.module.css";
-import { Pencil, Music, CheckCircle } from "lucide-react";
+import { Pencil, CheckCircle } from "lucide-react";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import purchaseStyles from "../PurchaseModal/PurchaseModal.module.css";
+import TransactionLoader from "../TransactionLoader/TransactionLoader";
 
 const EditTrackModal = ({ isOpen, onClose, music, onSuccess }) => {
   const { updateMusic, loading, error } = useVibetraxHook();
@@ -154,23 +155,7 @@ const EditTrackModal = ({ isOpen, onClose, music, onSuccess }) => {
         </div>
       )}
 
-      {loading && (
-        <div className={purchaseStyles.loadingContainer}>
-          <div className={purchaseStyles.loadingOrb}>
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbIcon}>
-              <Music size={32} />
-            </div>
-          </div>
-          <h2 className={purchaseStyles.loadingTitle}>Saving changes</h2>
-          <p className={purchaseStyles.loadingSubtitle}>
-            Confirming on IOTA blockchain
-            <span className={purchaseStyles.dots} />
-          </p>
-        </div>
-      )}
+      {loading && <TransactionLoader title="Saving changes" />}
 
       {done && (
         <div className={purchaseStyles.successContainer}>

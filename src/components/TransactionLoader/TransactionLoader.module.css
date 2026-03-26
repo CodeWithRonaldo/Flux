@@ -1,0 +1,90 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 4rem 2rem;
+  min-height: 320px;
+}
+
+.orb {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: spin 1.2s linear infinite;
+}
+
+.ring:nth-child(1) {
+  width: 120px;
+  height: 120px;
+  border-top-color: var(--color-primary);
+  animation-duration: 1.2s;
+}
+
+.ring:nth-child(2) {
+  width: 90px;
+  height: 90px;
+  border-top-color: var(--color-secondary);
+  animation-duration: 0.9s;
+  animation-direction: reverse;
+}
+
+.ring:nth-child(3) {
+  width: 60px;
+  height: 60px;
+  border-top-color: rgba(255, 255, 255, 0.3);
+  animation-duration: 1.5s;
+}
+
+.icon {
+  color: white;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  margin: 0;
+  font-family: var(--font);
+  letter-spacing: -0.3px;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  font-family: var(--font);
+}
+
+.dots::after {
+  content: "";
+  animation: ellipsis 1.4s steps(4, end) infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.9); }
+}
+
+@keyframes ellipsis {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+}

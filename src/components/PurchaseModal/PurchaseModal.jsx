@@ -6,12 +6,12 @@ import {
   TrendingUp,
   Coins,
   ShieldCheck,
-  Music,
   CheckCircle,
 } from "lucide-react";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useState } from "react";
 import { formatPrice } from "../../util/helper";
+import TransactionLoader from "../TransactionLoader/TransactionLoader";
 
 const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
   const { buyMusic, loading, error } = useVibetraxHook();
@@ -111,23 +111,7 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
           </div>
         </div>
       )}
-      {loading && (
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingOrb}>
-            <div className={styles.orbRing} />
-            <div className={styles.orbRing} />
-            <div className={styles.orbRing} />
-            <div className={styles.orbIcon}>
-              <Music size={32} />
-            </div>
-          </div>
-          <h2 className={styles.loadingTitle}>Processing your purchase</h2>
-          <p className={styles.loadingSubtitle}>
-            Confirming on IOTA blockchain
-            <span className={styles.dots} />
-          </p>
-        </div>
-      )}
+      {loading && <TransactionLoader title="Processing your purchase" />}
 
       {done && (
         <div className={styles.successContainer}>

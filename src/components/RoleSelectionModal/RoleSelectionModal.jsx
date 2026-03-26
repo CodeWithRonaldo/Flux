@@ -7,6 +7,7 @@ import ListenerOnboarding from "../ListenerOnboarding/ListenerOnboarding";
 import ArtistOnboarding from "../ArtistOnboarding/ArtistOnboarding";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
+import TransactionLoader from "../TransactionLoader/TransactionLoader";
 
 const RoleSelectionModal = ({ isOpen, onClose }) => {
   const [role, setRole] = useState("");
@@ -79,25 +80,10 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
         ))}
 
       {loading && (
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingOrb}>
-            <div className={styles.orbRing} />
-            <div className={styles.orbRing} />
-            <div className={styles.orbRing} />
-            <div className={styles.orbIcon}>
-              {role === "listener" ? (
-                <Headphones size={32} />
-              ) : (
-                <Music size={32} />
-              )}
-            </div>
-          </div>
-          <h2 className={styles.loadingTitle}>Setting up your profile</h2>
-          <p className={styles.loadingSubtitle}>
-            Confirming on IOTA blockchain
-            <span className={styles.dots} />
-          </p>
-        </div>
+        <TransactionLoader
+          icon={role === "listener" ? <Headphones size={32} /> : <Music size={32} />}
+          title="Setting up your profile"
+        />
       )}
 
       {done && (

@@ -3,7 +3,7 @@ import { BlackCard, GlassCard } from "../../components/GlassCard/GlassCard";
 import Form from "../../components/Form/Form";
 import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
-import { Check, Music, UploadIcon, User, X, CheckCircle2, CheckCircle } from "lucide-react";
+import { Check, Music, UploadIcon, User, X, CheckCircle2, CheckCircle, XCircle } from "lucide-react";
 import { useOutletContext, useParams, useNavigate } from "react-router-dom";
 import { useIota } from "../../hooks/useIota";
 import { uploadToPinata } from "../../util/helper";
@@ -12,6 +12,7 @@ import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import Modal from "../../components/Modal/Modal";
 import modalStyles from "../../components/PurchaseModal/PurchaseModal.module.css";
+import TransactionLoader from "../../components/TransactionLoader/TransactionLoader";
 
 const Upload = () => {
   const { id } = useParams();
@@ -38,14 +39,18 @@ const Upload = () => {
     hasRoyalty: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadState, setUploadState] = useState({ isOpen: false, step: "", isDone: false });
+  const [uploadState, setUploadState] = useState({ isOpen: false, step: "", isDone: false, error: "" });
   const [activeStep, setActiveStep] = useState(1);
   const registeredUsers = useOutletContext();
   const { address } = useIota();
   const currentUser = registeredUsers?.filter((user) => user.owner === address);
-  const { uploadMusic } = useMusicUpload();
+  const { uploadMusic, error: uploadError } = useMusicUpload();
   const { updateMusic } = useVibetraxHook();
   const { musics } = useFetchMusic();
+
+  useEffect(() => {
+    if (uploadError) setUploadState((s) => ({ ...s, error: uploadError }));
+  }, [uploadError]);
 
   const existingMusic = isEditMode ? musics?.find((m) => m.music_id === id) : null;
 
@@ -131,8 +136,7 @@ const Upload = () => {
 
       if (result) setUploadState((s) => ({ ...s, step: "Changes saved!", isDone: true }));
     } catch (e) {
-      console.log(e);
-      setUploadState({ isOpen: false, step: "", isDone: false });
+      setUploadState((s) => ({ ...s, error: e.message || "File upload failed. Please try again." }));
     } finally {
       setIsSubmitting(false);
     }
@@ -182,8 +186,7 @@ const Upload = () => {
       const result = await uploadMusic(musicData);
       if (result) setUploadState((s) => ({ ...s, step: "Track published successfully!", isDone: true }));
     } catch (e) {
-      console.log(e);
-      setUploadState({ isOpen: false, step: "", isDone: false });
+      setUploadState((s) => ({ ...s, error: e.message || "File upload failed. Please try again." }));
     } finally {
       setIsSubmitting(false);
     }
@@ -780,21 +783,24 @@ const Upload = () => {
       </div>
 
       <Modal isOpen={uploadState.isOpen} onClose={() => {}} size="small">
-        {!uploadState.isDone ? (
-          <div className={modalStyles.loadingContainer}>
-            <div className={modalStyles.loadingOrb}>
-              <div className={modalStyles.orbRing} />
-              <div className={modalStyles.orbRing} />
-              <div className={modalStyles.orbRing} />
-              <div className={modalStyles.orbIcon}>
-                <Music size={32} />
-              </div>
+        {uploadState.error ? (
+          <div className={modalStyles.successContainer}>
+            <div className={modalStyles.successIcon} style={{ color: "#f87171" }}>
+              <XCircle size={56} />
             </div>
-            <h2 className={modalStyles.loadingTitle}>{uploadState.step}</h2>
-            <p className={modalStyles.loadingSubtitle}>
-              Please wait<span className={modalStyles.dots} />
+            <h2 className={modalStyles.successTitle}>Upload Failed</h2>
+            <p className={modalStyles.successSubtitle} style={{ color: "#f87171", textTransform: "none" }}>
+              {uploadState.error}
             </p>
+            <Button
+              variant="btn-ghost"
+              onClick={() => setUploadState({ isOpen: false, step: "", isDone: false, error: "" })}
+            >
+              Dismiss
+            </Button>
           </div>
+        ) : !uploadState.isDone ? (
+          <TransactionLoader title={uploadState.step} subtitle="Please wait" />
         ) : (
           <div className={modalStyles.successContainer}>
             <div className={modalStyles.successIcon}>
@@ -802,10 +808,8 @@ const Upload = () => {
             </div>
             <h2 className={modalStyles.successTitle}>{uploadState.step}</h2>
             <Button
-              // className={modalStyles.actions}
-              // style={{ background: "var(--color-primary)", color: "#fff", border: "none", borderRadius: "8px", padding: "10px 32px", fontSize: "14px", cursor: "pointer", marginTop: "8px" }}
               onClick={() => {
-                setUploadState({ isOpen: false, step: "", isDone: false });
+                setUploadState({ isOpen: false, step: "", isDone: false, error: "" });
                 navigate(isEditMode ? `/play/${id}` : "/");
               }}
             >

@@ -2,9 +2,10 @@ import { useState } from "react";
 import Modal from "../Modal/Modal";
 import Button from "../Button/Button";
 import styles from "./BoostModal.module.css";
-import { Zap, CheckCircle, Music } from "lucide-react";
+import { Zap, CheckCircle } from "lucide-react";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import purchaseStyles from "../PurchaseModal/PurchaseModal.module.css";
+import TransactionLoader from "../TransactionLoader/TransactionLoader";
 
 const PLANS = [
   { id: 0, name: "Basic", vibe: 100, days: 7, label: "7 days" },
@@ -81,23 +82,7 @@ const BoostModal = ({ isOpen, onClose, music }) => {
         </div>
       )}
 
-      {loading && (
-        <div className={purchaseStyles.loadingContainer}>
-          <div className={purchaseStyles.loadingOrb}>
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbIcon}>
-              <Music size={32} />
-            </div>
-          </div>
-          <h2 className={purchaseStyles.loadingTitle}>Boosting track</h2>
-          <p className={purchaseStyles.loadingSubtitle}>
-            Confirming on IOTA blockchain
-            <span className={purchaseStyles.dots} />
-          </p>
-        </div>
-      )}
+      {loading && <TransactionLoader title="Boosting track" />}
 
       {done && (
         <div className={purchaseStyles.successContainer}>

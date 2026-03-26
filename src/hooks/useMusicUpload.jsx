@@ -3,22 +3,23 @@ import { useIotaClient } from "@iota/dapp-kit";
 import { useIota } from "./useIota";
 import { useState } from "react";
 import { useNetworkVariables } from "../config/networkConfig";
-import { bcs } from "@iota/iota-sdk/bcs";
+import { getContractError } from "../util/helper";
 
 export const useMusicUpload = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const client = useIotaClient();
   const { keypair } = useIota();
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
 
   const uploadMusic = async (musicData) => {
     if (!keypair) {
-      console.log("Wallet not connected");
-      return;
+      setError("Wallet not connected");
+      return null;
     }
-
     try {
       setLoading(true);
+      setError("");
       const tx = new Transaction();
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::upload_music`,
@@ -49,20 +50,20 @@ export const useMusicUpload = () => {
         options: { showEffects: true },
       });
 
-      console.log("Transaction result", result);
-
       if (result.effects?.status?.status !== "success") {
-        console.log("Transaction failed:", result.effects?.status);
+        setError("Upload failed. Please try again.");
         return null;
       }
 
       return result;
     } catch (e) {
-      console.log("Error:", e);
+      const contractError = getContractError(e);
+      setError(contractError !== "Transaction failed. Please try again." ? contractError : e.message);
       return null;
     } finally {
       setLoading(false);
     }
   };
-  return { uploadMusic, loading };
+
+  return { uploadMusic, loading, error };
 };

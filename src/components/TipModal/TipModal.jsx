@@ -2,9 +2,10 @@ import { useState } from "react";
 import Modal from "../Modal/Modal";
 import Button from "../Button/Button";
 import styles from "./TipModal.module.css";
-import { Coins, CheckCircle, Music } from "lucide-react";
+import { Coins, CheckCircle } from "lucide-react";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import purchaseStyles from "../PurchaseModal/PurchaseModal.module.css";
+import TransactionLoader from "../TransactionLoader/TransactionLoader";
 
 const QUICK_AMOUNTS = [5, 10, 25, 50];
 
@@ -91,23 +92,7 @@ const TipModal = ({ isOpen, onClose, music }) => {
         </div>
       )}
 
-      {loading && (
-        <div className={purchaseStyles.loadingContainer}>
-          <div className={purchaseStyles.loadingOrb}>
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbRing} />
-            <div className={purchaseStyles.orbIcon}>
-              <Music size={32} />
-            </div>
-          </div>
-          <h2 className={purchaseStyles.loadingTitle}>Sending tip</h2>
-          <p className={purchaseStyles.loadingSubtitle}>
-            Confirming on IOTA blockchain
-            <span className={purchaseStyles.dots} />
-          </p>
-        </div>
-      )}
+      {loading && <TransactionLoader title="Sending tip" />}
 
       {done && (
         <div className={purchaseStyles.successContainer}>

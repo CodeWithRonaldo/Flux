@@ -1,10 +1,11 @@
 import Modal from "../Modal/Modal";
 import styles from "../PurchaseModal/PurchaseModal.module.css";
 import Button from "../Button/Button";
-import { Zap, Music2, Coins, Radio, CheckCircle, Music } from "lucide-react";
+import { Zap, Music2, Coins, Radio, CheckCircle } from "lucide-react";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useState } from "react";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
+import TransactionLoader from "../TransactionLoader/TransactionLoader";
 
 const SUBSCRIPTION_PRICE = "5.00";
 
@@ -101,23 +102,7 @@ const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
       )}
 
       {loading && (
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingOrb}>
-            <div className={styles.orbRing} />
-            <div className={styles.orbRing} />
-            <div className={styles.orbRing} />
-            <div className={styles.orbIcon}>
-              <Music size={32} />
-            </div>
-          </div>
-          <h2 className={styles.loadingTitle}>
-            {isRenewal ? "Renewing subscription" : "Processing subscription"}
-          </h2>
-          <p className={styles.loadingSubtitle}>
-            Confirming on IOTA blockchain
-            <span className={styles.dots} />
-          </p>
-        </div>
+        <TransactionLoader title={isRenewal ? "Renewing subscription" : "Processing subscription"} />
       )}
 
       {done && (
