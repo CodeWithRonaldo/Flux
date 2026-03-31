@@ -1,0 +1,83 @@
+.searchPage {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.searchBar {
+  pointer-events: auto !important;
+  cursor: text !important;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recentSearches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.recentTag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.recentTag:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.resultsTitle {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.songList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.trackNavWrapper {
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 8px;
+}
+.trackNavWrapper:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (max-width: 768px) {
+  .searchPage {
+    padding: 1rem;
+    padding-bottom: 80px;
+  }
+}

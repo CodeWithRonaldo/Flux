@@ -5,6 +5,7 @@ import Play from "./routes/Play/Play";
 import Library from "./routes/Library/Library";
 import Upload from "./routes/Upload/Upload";
 import Profile from "./routes/Profile/Profile";
+import Search from "./routes/Search/Search";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: <Profile />,
+      },
+      {
+        path: "search",
+        element: <Search />,
       },
     ],
   },

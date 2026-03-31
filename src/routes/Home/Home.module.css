@@ -14,6 +14,10 @@
   justify-content: space-between;
   gap: 2rem;
   flex-wrap: wrap-reverse;
+  width: 100%;
+  padding: 4rem 2rem;
+  box-sizing: border-box;
+  border-radius: 12px;
 }
 
 .left {
@@ -65,22 +69,38 @@
   gap: 1rem;
 }
 
-.musicGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-  gap: 1rem;
-  width: 100%;
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
 }
 
-.artistList {
+/* Horizontal scrolling */
+.horizontalScroll {
   display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  gap: 1.5rem;
+  padding-bottom: 1rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.horizontalScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollItemWrapper {
+  flex: 0 0 175px;
+}
+
+.artistScrollWrapper {
+  flex: 0 0 120px;
 }
 
 @media (max-width: 768px) {
   .heroContainer {
     flex-direction: column;
+    width: auto;
   }
 
   .left {
@@ -100,14 +120,5 @@
 
   .section {
     padding: 1rem 0;
-  }
-
-  .musicGrid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.75rem;
-  }
-
-  .artistList {
-    gap: 1rem 0.5rem;
   }
 }

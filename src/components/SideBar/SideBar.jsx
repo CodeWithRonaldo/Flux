@@ -1,13 +1,17 @@
+import { useNavigate, NavLink } from "react-router-dom";
 import {
   CircleUserRound,
   HomeIcon,
   Mic,
   Music,
   Radio,
+  Search,
   Upload,
+  Crown,
 } from "lucide-react";
 import styles from "./SideBar.module.css";
-import { NavLink } from "react-router-dom";
+import { useSearch } from "../../context/SearchProvider";
+import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 
 const Links = [
   { name: "Home", icon: HomeIcon, path: "/" },
@@ -22,10 +26,23 @@ const SideBar = ({ currentUser }) => {
   const hasRegistered = currentUser?.length > 0;
   const canUpload =
     hasRegistered && currentUser[0]?.role.toLowerCase() === "artist";
+  const { setIsSearchOpen } = useSearch();
+  const { isSubscribed } = useFetchSubscription();
+  const navigate = useNavigate();
+
+  const handleSearchClick = () => {
+    if (window.innerWidth <= 768) navigate("/search");
+    else setIsSearchOpen(true);
+  };
 
   return (
     <div className={styles.sidebar}>
       <div>
+        <li>
+          <button className={styles.searchBtn} onClick={handleSearchClick}>
+            <Search className={styles.icon} />
+          </button>
+        </li>
         {Links.map((link) => {
           if (link.name === "Upload" && !canUpload) return null;
           if (link.name === "Profile" && !hasRegistered) return null;
@@ -35,7 +52,22 @@ const SideBar = ({ currentUser }) => {
                 to={link.path}
                 className={({ isActive }) => (isActive ? styles.active : "")}
               >
-                <link.icon className={styles.icon} />
+                {link.name === "Profile" ? (
+                  <div className={styles.profileIconWrapper}>
+                    <link.icon
+                      className={
+                        isSubscribed
+                          ? `${styles.icon} ${styles.premiumIcon}`
+                          : styles.icon
+                      }
+                    />
+                    {isSubscribed && (
+                      <Crown size={12} className={styles.premiumBadge} />
+                    )}
+                  </div>
+                ) : (
+                  <link.icon className={styles.icon} />
+                )}
               </NavLink>
             </li>
           );

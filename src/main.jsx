@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router.jsx";
 import { AudioProvider } from "./context/AudioProvider.jsx";
 import PlayListProvider from "./context/PlayListProvider.jsx";
+import { SearchProvider } from "./context/SearchProvider.jsx";
 import { IotaClientProvider, WalletProvider } from "@iota/dapp-kit";
 import { IotaProvider } from "./context/WalletProvider.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -23,9 +24,11 @@ createRoot(document.getElementById("root")).render(
           <WalletProvider autoConnect>
             <IotaProvider>
               <PlayListProvider>
-                <AudioProvider>
-                  <RouterProvider router={router} />
-                </AudioProvider>
+                <SearchProvider>
+                  <AudioProvider>
+                    <RouterProvider router={router} />
+                  </AudioProvider>
+                </SearchProvider>
               </PlayListProvider>
             </IotaProvider>
           </WalletProvider>

@@ -16,3 +16,69 @@
   align-items: center;
   gap: 0.75rem;
 }
+
+.proBadgeContainer {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.proBadge {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  color: white;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 10px rgba(99, 140, 254, 0.4);
+  transition: transform 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.proBadge:hover {
+  transform: scale(1.05);
+}
+
+.mobileMenuToggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 100;
+}
+
+@media (max-width: 768px) {
+  .mobileMenuToggle {
+    display: block;
+  }
+
+  .headerActions {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 1rem;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    z-index: 99;
+    min-width: 220px;
+  }
+
+  .headerActions.mobileOpen {
+    display: flex;
+  }
+
+  .hideOnMobile {
+    display: inline; /* We want text visible inside the mobile menu dropdown */
+  }
+}

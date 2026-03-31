@@ -292,7 +292,7 @@ export const useVibetraxHook = () => {
           setError("Insufficient balance to complete this transaction.");
           return;
         }
-        
+
         if (
           vibeTokenBalance &&
           vibeTokenBalance < Number(requiredAmount / 1_000_000n)
@@ -581,6 +581,116 @@ export const useVibetraxHook = () => {
     }
   };
 
+  const withdrawIota = async (amount, recipient) => {
+    if (!keypair) {
+      setError("Wallet not connected.");
+      return;
+    }
+    try {
+      setLoading(true);
+      setError("");
+      if (!balanceLoading) {
+        if (!balance || balance < amount) {
+          setError("Insufficient balance to complete this transaction.");
+          return;
+        }
+      }
+      const tx = new Transaction();
+      const [withdrawCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amount)]);
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::withdrawIotaBalance`,
+        arguments: [
+          withdrawCoin,
+          tx.pure.u64(amount),
+          tx.pure.address(recipient),
+        ],
+      });
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+
+      if (result.effects?.status?.status !== "success") {
+        setError("Unable to withdraw IOTA. Please try again.");
+        return null;
+      }
+      return result;
+    } catch (e) {
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const withdrawVibe = async (amount, recipient) => {
+    if (!keypair) {
+      setError("Wallet not connected.");
+      return;
+    }
+    try {
+      setLoading(true);
+      setError("");
+
+      const coins = await client.getCoins({
+        owner: keypair.toIotaAddress(),
+        coinType: `${vibeTraxPackageId}::vibe_token::VIBE_TOKEN`,
+      });
+
+      if (!coins.data.length) {
+        setError("No VIBE tokens found");
+        return null;
+      }
+
+      if (vibeTokenBalance && vibeTokenBalance < Number(amount / 1_000_000n)) {
+        setError("Insufficient VIBE balance");
+        return null;
+      }
+
+      const tx = new Transaction();
+      const coinIds = coins.data.map((c) => c.coinObjectId);
+      const primaryCoin = tx.object(coinIds[0]);
+
+      if (coinIds.length > 1) {
+        tx.mergeCoins(
+          primaryCoin,
+          coinIds.slice(1).map((id) => tx.object(id)),
+        );
+      }
+
+      const [withdrawCoin] = tx.splitCoins(primaryCoin, [tx.pure.u64(amount)]);
+
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::withdrawVibeBalance`,
+        arguments: [
+          withdrawCoin,
+          tx.pure.u64(amount),
+          tx.pure.address(recipient),
+        ],
+      });
+
+      const result = await client.signAndExecuteTransaction({
+        transaction: tx,
+        signer: keypair,
+        options: { showEffects: true },
+      });
+
+      if (result.effects?.status?.status !== "success") {
+        setError("Unable to withdraw VIBE. Please try again.");
+        return null;
+      }
+      return result;
+    } catch (e) {
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     registerUser,
     buyMusic,
@@ -594,6 +704,8 @@ export const useVibetraxHook = () => {
     updateMusic,
     toggleSale,
     deleteMusic,
+    withdrawIota,
+    withdrawVibe,
     loading,
     error,
   };

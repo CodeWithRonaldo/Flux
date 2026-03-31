@@ -553,7 +553,9 @@ public fun stream_music(
     assert!(!music.streaming_table.contains(streamer.user_address), EALREADY_STREAMED);
 
     music.streaming_count = music.streaming_count + 1;
-    music.price = music.price + LIKE_VALUE_INCREASE;
+    if (signer_address != music.artist.user_address) {
+        music.price = music.price + LIKE_VALUE_INCREASE;
+    };
     music.streaming_table.add(streamer.user_address, true);
 
     // ── Daily VIBE cap ────────────────────────────────────────────────────
@@ -565,17 +567,21 @@ public fun stream_music(
     };
 
     let mut vibe_earned = 0u64;
-    let remaining_cap = DAILY_VIBE_CAP - subscription.daily_vibe_earned;
-    if (remaining_cap > 0) {
-        let reward = if (STREAM_TOKEN_REWARD <= remaining_cap) {
-            STREAM_TOKEN_REWARD
-        } else {
-            remaining_cap
+    
+    // Only reward VIBE if the streamer is not the artist
+    if (signer_address != music.artist.user_address) {
+        let remaining_cap = DAILY_VIBE_CAP - subscription.daily_vibe_earned;
+        if (remaining_cap > 0) {
+            let reward = if (STREAM_TOKEN_REWARD <= remaining_cap) {
+                STREAM_TOKEN_REWARD
+            } else {
+                remaining_cap
+            };
+            // Accumulate into pending balance — user claims via claim_rewards()
+            subscription.pending_vibe = subscription.pending_vibe + reward;
+            subscription.daily_vibe_earned = subscription.daily_vibe_earned + reward;
+            vibe_earned = reward;
         };
-        // Accumulate into pending balance — user claims via claim_rewards()
-        subscription.pending_vibe = subscription.pending_vibe + reward;
-        subscription.daily_vibe_earned = subscription.daily_vibe_earned + reward;
-        vibe_earned = reward;
     };
 
     event::emit(MusicStreamed {

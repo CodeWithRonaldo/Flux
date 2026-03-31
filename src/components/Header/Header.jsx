@@ -6,29 +6,53 @@ import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { formatAddress } from "../../util/helper";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import SubscriptionModal from "../SubscriptionModal/SubscriptionModal";
-import { Radio } from "lucide-react";
+import { Radio, Menu, X } from "lucide-react";
 
 const Header = ({ currentUser }) => {
   const { connect, isConnected, loading } = useWeb3AuthConnect();
   const { address } = useIota();
   const { isSubscribed, isExpired, subscription } = useFetchSubscription();
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <div className={styles.header}>
       <h1 className={styles.logo}>FLUX</h1>
 
-      <div className={styles.headerActions}>
+      <button
+        className={styles.mobileMenuToggle}
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      >
+        {isMenuOpen ? (
+          <X size={24} color="white" />
+        ) : (
+          <Menu size={24} color="white" />
+        )}
+      </button>
+
+      <div
+        className={`${styles.headerActions} ${isMenuOpen ? styles.mobileOpen : ""}`}
+      >
         {isConnected && !isSubscribed && (
           <Button
             variant={isExpired ? undefined : "btn-ghost"}
-            onClick={() => setIsSubscriptionModalOpen(true)}
+            onClick={() => {
+              setIsSubscriptionModalOpen(true);
+              setIsMenuOpen(false);
+            }}
             icon={<Radio size={18} />}
+            className={styles.premiumBtn}
           >
-            {isExpired ? "Renew Subscription" : "Go Premium"}
+            <span>{isExpired ? "Renew Subscription" : "Go Premium"}</span>
           </Button>
         )}
-        <Button variant="primary" onClick={connect}>
+        <Button
+          variant="primary"
+          onClick={() => {
+            connect();
+            setIsMenuOpen(false);
+          }}
+        >
           {loading
             ? "Connecting..."
             : isConnected

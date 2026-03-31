@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
 import { useNetworkVariable } from "../config/networkConfig";
 import { useIotaClientQuery } from "@iota/dapp-kit";
 
 export const useFetchMusic = () => {
-  const [musics, setMusics] = useState([]);
   const vibeTraxPackageId = useNetworkVariable("vibeTraxPackageId");
 
   const {
@@ -16,10 +14,11 @@ export const useFetchMusic = () => {
       query: {
         MoveEventType: `${vibeTraxPackageId}::vibetrax::MusicUploaded`,
       },
+      order: "descending",
     },
     {
       select: (data) => data.data.map((x) => x.parsedJson.music_id),
-    }
+    },
   );
 
   const musicIds = data || [];
@@ -58,23 +57,19 @@ export const useFetchMusic = () => {
                 artist: f.artist?.fields ?? f.artist,
                 current_owner: f.current_owner?.fields ?? f.current_owner,
                 collaborators: (f.collaborators ?? []).map(
-                  (c) => c.fields ?? c
+                  (c) => c.fields ?? c,
                 ),
               };
             }),
-      }
+      },
     );
-
-  useEffect(() => {
-    if (!isEventsPending && musicObjects) {
-      setMusics(musicObjects);
-    }
-  }, [musicObjects, isEventsPending]);
 
   const hasMusicIds = musicIds.length > 0;
 
+  const musicsToReturn = !isEventsPending && musicObjects ? musicObjects : [];
+
   return {
-    musics: musics ?? [],
+    musics: musicsToReturn ?? [],
     isPending: isEventsPending || (hasMusicIds && isObjectsPending),
     isError,
   };

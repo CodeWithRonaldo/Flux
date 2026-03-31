@@ -29,6 +29,8 @@ import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useNetworkVariables } from "../../config/networkConfig";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
+import WithdrawModal from "../../components/WithdrawModal/WithdrawModal";
+import { useState } from "react";
 
 const Profile = () => {
   const { balance, address, balanceLoading, vibeTokenBalance } = useIota();
@@ -44,21 +46,24 @@ const Profile = () => {
     isSubscribed,
     refetch: refetchSubscription,
   } = useFetchSubscription();
-  const { claimRewards, loading: isClaiming, error: claimError } = useVibetraxHook();
+  const {
+    claimRewards,
+    loading: isClaiming,
+    error: claimError,
+  } = useVibetraxHook();
   const userProfile = registeredUsers?.filter((user) => user.owner === address);
-
- 
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   const userMusics = musics?.filter(
     (music) =>
       music?.artist?.user_address === address ||
       music?.current_owner?.user_address === address ||
       music?.collaborators.some(
-        (collaborator) => collaborator?.user_address === address
-      )
+        (collaborator) => collaborator?.user_address === address,
+      ),
   );
 
-  const profileLoading = balanceLoading ;
+  const profileLoading = balanceLoading;
 
   const stats = [
     {
@@ -169,6 +174,9 @@ const Profile = () => {
                 {isDisconnecting ? "Disconnecting..." : "Disconnect Wallet"}
               </Button>
               <Button variant="btn-ghost">Edit Profile</Button>
+              <Button onClick={() => setIsWithdrawModalOpen(true)}>
+                Withdraw
+              </Button>
             </div>
           </div>
 
@@ -197,7 +205,7 @@ const Profile = () => {
                   <strong>
                     {(subscription.pending_vibe / 1_000_000).toLocaleString(
                       undefined,
-                      { maximumFractionDigits: 2 }
+                      { maximumFractionDigits: 2 },
                     )}{" "}
                     VIBE
                   </strong>{" "}
@@ -215,12 +223,24 @@ const Profile = () => {
                 {isClaiming ? "Claiming..." : "Claim VIBE"}
               </Button>
               {claimError && (
-                <p style={{ color: "#f87171", fontSize: "0.8rem", marginTop: "0.5rem", width: "100%" }}>
+                <p
+                  style={{
+                    color: "#f87171",
+                    fontSize: "0.8rem",
+                    marginTop: "0.5rem",
+                    width: "100%",
+                  }}
+                >
                   {claimError}
                 </p>
               )}
             </div>
           )}
+
+          <WithdrawModal
+            isOpen={isWithdrawModalOpen}
+            onClose={() => setIsWithdrawModalOpen(false)}
+          />
         </div>
       </BlackCard>
 

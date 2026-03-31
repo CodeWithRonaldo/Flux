@@ -10,6 +10,7 @@ import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useNetworkVariables } from "./config/networkConfig";
 import { useIota } from "./hooks/useIota";
 import StreamEarnTracker from "./components/StreamEarnTracker/StreamEarnTracker";
+import GlobalSearch from "./components/GlobalSearch/GlobalSearch";
 
 function App() {
   const location = useLocation();
@@ -37,7 +38,7 @@ function App() {
       select: (data) => data.data.flatMap((x) => x.parsedJson),
       // .filter((y) => y.owner === address),
       refetchInterval: 3000,
-    }
+    },
   );
 
   const currentUser = registeredUsers?.filter((user) => user.owner === address);
@@ -68,6 +69,7 @@ function App() {
         isOpen={isSelectRole}
         onClose={() => setIsSelectRole(false)}
       />
+      <GlobalSearch />
     </div>
   );
 }
