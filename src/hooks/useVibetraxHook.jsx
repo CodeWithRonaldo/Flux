@@ -4,6 +4,7 @@ import { useIota } from "./useIota";
 import { useState } from "react";
 import { useNetworkVariables } from "../config/networkConfig";
 import { getContractError } from "../util/helper";
+import { TREASURY } from "../config/constant";
 
 export const useVibetraxHook = () => {
   const [loading, setLoading] = useState(false);
@@ -595,16 +596,19 @@ export const useVibetraxHook = () => {
           return;
         }
       }
+
+      const fee = amount / 100n;
+      const amountAfterFee = amount - fee;
+
       const tx = new Transaction();
-      const [withdrawCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amount)]);
-      tx.moveCall({
-        target: `${vibeTraxPackageId}::vibetrax::withdrawIotaBalance`,
-        arguments: [
-          withdrawCoin,
-          tx.pure.u64(amount),
-          tx.pure.address(recipient),
-        ],
-      });
+      const [feeCoin, withdrawCoin] = tx.splitCoins(tx.gas, [
+        tx.pure.u64(fee),
+        tx.pure.u64(amountAfterFee),
+      ]);
+
+      tx.transferObjects([feeCoin], tx.pure.address(TREASURY));
+      tx.transferObjects([withdrawCoin], tx.pure.address(recipient));
+
       const result = await client.signAndExecuteTransaction({
         transaction: tx,
         signer: keypair,
@@ -634,12 +638,12 @@ export const useVibetraxHook = () => {
       setLoading(true);
       setError("");
 
-      const coins = await client.getCoins({
+      const { data: vibeCoins } = await client.getCoins({
         owner: keypair.toIotaAddress(),
         coinType: `${vibeTraxPackageId}::vibe_token::VIBE_TOKEN`,
       });
 
-      if (!coins.data.length) {
+      if (!vibeCoins.length) {
         setError("No VIBE tokens found");
         return null;
       }
@@ -649,27 +653,26 @@ export const useVibetraxHook = () => {
         return null;
       }
 
-      const tx = new Transaction();
-      const coinIds = coins.data.map((c) => c.coinObjectId);
-      const primaryCoin = tx.object(coinIds[0]);
+      const fee = amount / 100n;
+      const amountAfterFee = amount - fee;
 
-      if (coinIds.length > 1) {
+      const tx = new Transaction();
+      const primaryCoin = tx.object(vibeCoins[0].coinObjectId);
+
+      if (vibeCoins.length > 1) {
         tx.mergeCoins(
           primaryCoin,
-          coinIds.slice(1).map((id) => tx.object(id)),
+          vibeCoins.slice(1).map((c) => tx.object(c.coinObjectId)),
         );
       }
 
-      const [withdrawCoin] = tx.splitCoins(primaryCoin, [tx.pure.u64(amount)]);
+      const [feeCoin, withdrawCoin] = tx.splitCoins(primaryCoin, [
+        tx.pure.u64(fee),
+        tx.pure.u64(amountAfterFee),
+      ]);
 
-      tx.moveCall({
-        target: `${vibeTraxPackageId}::vibetrax::withdrawVibeBalance`,
-        arguments: [
-          withdrawCoin,
-          tx.pure.u64(amount),
-          tx.pure.address(recipient),
-        ],
-      });
+      tx.transferObjects([feeCoin], tx.pure.address(TREASURY));
+      tx.transferObjects([withdrawCoin], tx.pure.address(recipient));
 
       const result = await client.signAndExecuteTransaction({
         transaction: tx,

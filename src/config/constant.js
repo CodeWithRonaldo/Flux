@@ -15,3 +15,6 @@ export const VIBETRAX_DISPLAY_MUSIC_ID =
   "0x41311e61932e6817ef323e7096c6712e8a9e4c30c41c1f7e42149847fc71ef36"; // Music NFT display template
 export const VIBETRAX_METADATA_CAP_ID =
   "0x272c650fe642c284564dfc26111b7703783bf4be2ee8dd2ac5995662f4d5da80"; // update VIBE token metadata
+
+export const TREASURY =
+  "0x7c7bbf348248342e6b1aebe7cc3bade1611df2e4bb95dae7b470c48393a7add3";
