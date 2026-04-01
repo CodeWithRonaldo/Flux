@@ -13,6 +13,7 @@ import styles from "./SideBar.module.css";
 
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useSearch } from "../../hooks/useSearch";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
 const Links = [
   { name: "Home", icon: HomeIcon, path: "/" },
@@ -23,7 +24,8 @@ const Links = [
   { name: "Profile", icon: CircleUserRound, path: "/profile" },
 ];
 
-const SideBar = ({ currentUser }) => {
+const SideBar = () => {
+  const { currentUser } = useFetchUsers();
   const hasRegistered = !!currentUser;
   const canUpload =
     hasRegistered && currentUser.role.toLowerCase() === "artist";

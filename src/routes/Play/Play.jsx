@@ -9,7 +9,7 @@ import MusicWrapper from "../../components/MusicWrapper/MusicWrapper";
 import PurchaseModal from "../../components/PurchaseModal/PurchaseModal";
 import AddToPlaylistModal from "../../components/AddToPlaylistModal/AddToPlaylistModal";
 import PlayListModal from "../../components/PlayListModal/PlayListModal";
-import { useParams, useNavigate, useOutletContext } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAudio } from "../../hooks/useAudio";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
 import { usePlaylist } from "../../hooks/usePlaylist";
@@ -23,10 +23,11 @@ import { useIota } from "../../hooks/useIota";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 import { useFetchLikes } from "../../hooks/useFetchLikes";
 import { useFetchMusicById } from "../../hooks/useFetchMusicById";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
 const Play = () => {
   const { id } = useParams();
-  const { currentUser } = useOutletContext();
+  const { currentUser } = useFetchUsers();
   const navigate = useNavigate();
   const { currentTrack, updateCurrentSrc } = useAudio();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();

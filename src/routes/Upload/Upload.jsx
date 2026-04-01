@@ -13,7 +13,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import { useOutletContext, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useIota } from "../../hooks/useIota";
 import { uploadToPinata } from "../../util/helper";
 import { useMusicUpload } from "../../hooks/useMusicUpload";
@@ -24,6 +24,7 @@ import modalStyles from "../../components/PurchaseModal/PurchaseModal.module.css
 import TransactionLoader from "../../components/TransactionLoader/TransactionLoader";
 import { useIotaClientQuery } from "@iota/dapp-kit";
 import { useNetworkVariable } from "../../config/networkConfig";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
 const Upload = () => {
   const { id } = useParams();
@@ -58,7 +59,7 @@ const Upload = () => {
     error: "",
   });
   const [activeStep, setActiveStep] = useState(1);
-  const { currentUser } = useOutletContext();
+  const { currentUser } = useFetchUsers();
   const { address } = useIota();
   const { uploadMusic, error: uploadError } = useMusicUpload();
   const { updateMusic } = useVibetraxHook();
@@ -225,12 +226,14 @@ const Upload = () => {
         collaboratorNames: contributors.map((c) => c.name),
         collaboratorAddresses: contributors.map((c) => c.address),
         collaboratorRoles: contributors.map((c) => c.role),
+        collaboratorImageUrls: contributors.map((c) => c.image_url ?? ""),
         collaboratorPercentage: contributors.map((c) => c.percentage),
         collaboratorHasRoyalty: contributors.map((c) => c.hasRoyalty),
         artist: {
           name: currentUser?.username,
           address,
           role: currentUser?.role,
+          imageUrl: currentUser?.image_url ?? "",
           artistPercentage,
           artistHasRoyalty,
         },

@@ -7,19 +7,20 @@ import { useAudio } from "../../hooks/useAudio";
 import { useState } from "react";
 import Subscribe from "../../components/Subscribe/Subscribe";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   LoadingState,
   EmptyState,
 } from "../../components/StateDisplay/StateDisplay";
 import { Music } from "lucide-react";
 import { useSearch } from "../../hooks/useSearch";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { setIsSearchOpen } = useSearch();
   const { musics, isPending } = useFetchMusic();
-  const { registeredArtists, currentUser } = useOutletContext();
+  const { registeredArtists, currentUser } = useFetchUsers();
   const navigate = useNavigate();
 
   const trendingMusics = [...musics].filter(

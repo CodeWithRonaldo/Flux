@@ -67,6 +67,7 @@ public struct User has copy, drop, store {
     role: Option<String>,
     split: Option<u64>,
     has_royalty: Option<bool>,
+    image_url: Option<String>,
 }
 
 public struct Music has key, store {
@@ -301,11 +302,13 @@ public fun upload_music(
     price: u64,
     artist_name: String,
     artist_role: String,
+    artist_image_url: String,
     artist_split: u64,
     artist_has_royalty: bool,
     collab_names: vector<String>,
     collab_addresses: vector<address>,
     collab_roles: vector<String>,
+    collab_image_urls: vector<String>,
     collab_splits: vector<u64>,
     collab_has_royalty: vector<bool>,
     clock: &Clock,
@@ -316,7 +319,8 @@ public fun upload_music(
     assert!(
         collab_names.length() == collab_addresses.length() &&
             collab_addresses.length() == collab_roles.length() &&
-            collab_roles.length() == collab_splits.length() &&
+            collab_roles.length() == collab_image_urls.length() &&
+            collab_image_urls.length() == collab_splits.length() &&
             collab_splits.length() == collab_has_royalty.length(),
         EINVALID_METADATA,
     );
@@ -330,6 +334,7 @@ public fun upload_music(
         role: option::some(artist_role),
         split: option::some(artist_split),
         has_royalty: option::some(artist_has_royalty),
+        image_url: option::some(artist_image_url),
     };
 
     // Reconstruct collaborators
@@ -342,6 +347,7 @@ public fun upload_music(
             role: option::some(collab_roles[i]),
             split: option::some(collab_splits[i]),
             has_royalty: option::some(collab_has_royalty[i]),
+            image_url: option::some(collab_image_urls[i]),
         };
         collaborators.push_back(collaborator);
         i = i + 1;
@@ -421,6 +427,7 @@ public fun purchase_music_nft(
         role: option::some(buyer_role),
         split: option::none(),
         has_royalty: option::none(),
+        image_url: option::none(),
     };
 
     assert!(buyer.user_address == signer_address, EADDRESS_MISMATCH);
@@ -507,6 +514,7 @@ public fun like_music(
         role: option::some(liker_role),
         split: option::none(),
         has_royalty: option::none(),
+        image_url: option::none(),
     };
     assert!(liker.user_address == signer_address, EADDRESS_MISMATCH);
     // Add check to ensure one like per account per music
@@ -546,6 +554,7 @@ public fun stream_music(
         role: option::some(streamer_role),
         split: option::none(),
         has_royalty: option::none(),
+        image_url: option::none(),
     };
     assert!(streamer.user_address == signer_address, EADDRESS_MISMATCH);
     assert!(subscription.subscriber.user_address == signer_address, ESUBSCRIPTION_MISMATCH);
@@ -827,6 +836,7 @@ public fun subscribe(
         role: option::some(subscriber_role),
         split: option::none(),
         has_royalty: option::none(),
+        image_url: option::none(),
     };
 
     let expiry_ms = clock.timestamp_ms() + SUBSCRIPTION_DURATION_MS;
@@ -954,8 +964,9 @@ public fun new_user(
     role: Option<std::ascii::String>,
     split: Option<u64>,
     has_royalty: Option<bool>,
+    image_url: Option<std::ascii::String>,
 ): User {
-    User { name, user_address, role, split, has_royalty }
+    User { name, user_address, role, split, has_royalty, image_url }
 }
 
 // === Private Functions ===

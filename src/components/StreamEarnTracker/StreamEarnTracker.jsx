@@ -2,8 +2,10 @@ import { useEffect, useRef } from "react";
 import { useAudio } from "../../hooks/useAudio";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
-const StreamEarnTracker = ({ currentUser }) => {
+const StreamEarnTracker = () => {
+  const { currentUser } = useFetchUsers();
   const { currentTrack, currentTime } = useAudio();
   const { subscription, isSubscribed } = useFetchSubscription();
   const { streamMusic } = useVibetraxHook();

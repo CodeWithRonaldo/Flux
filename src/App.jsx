@@ -25,7 +25,7 @@ function App() {
     isBottomPlayerVisible && currentTrack && !isHome && !isPlay && !isLibrary;
 
   const { address } = useIota();
-  const { registeredArtists, currentUser, isLoading } = useFetchUsers();
+  const { currentUser, isLoading } = useFetchUsers();
 
   useEffect(() => {
     if (address && !isLoading) {
@@ -41,18 +41,13 @@ function App() {
 
   return (
     <div className={styles.mainContainer}>
-      <Header currentUser={currentUser} />
+      <Header />
       <div className={styles.contentContainer}>
-        <Outlet
-          context={{
-            registeredArtists: registeredArtists,
-            currentUser: currentUser,
-          }}
-        />
+        <Outlet />
       </div>
-      <SideBar currentUser={currentUser} />
+      <SideBar />
       {shouldShowBottomPlayer && <BottomPlayer />}
-      <StreamEarnTracker currentUser={currentUser} />
+      <StreamEarnTracker />
 
       <RoleSelectionModal
         isOpen={isSelectRole}
