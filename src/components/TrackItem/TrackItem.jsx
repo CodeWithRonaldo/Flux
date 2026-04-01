@@ -5,9 +5,10 @@ import styles from "./TrackItem.module.css";
 import { useIota } from "../../hooks/useIota";
 import { useFetchLikes } from "../../hooks/useFetchLikes";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BlackCard } from "../GlassCard/GlassCard";
 import BoostModal from "../BoostModal/BoostModal";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
 const TrackItem = ({ music, rank }) => {
   const { currentTrack, playTrack, isPlaying } = useAudio();
@@ -15,7 +16,7 @@ const TrackItem = ({ music, rank }) => {
   const isActuallyPlaying = isCurrent && isPlaying;
 
   const { address } = useIota();
-  const { currentUser } = useOutletContext();
+  const { currentUser } = useFetchUsers();
 
   const navigate = useNavigate();
   const { liked } = useFetchLikes();

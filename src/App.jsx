@@ -7,11 +7,10 @@ import BottomPlayer from "./components/BottomPlayer/BottomPlayer";
 import { useAudio } from "./hooks/useAudio";
 import { useState, useEffect } from "react";
 import RoleSelectionModal from "./components/RoleSelectionModal/RoleSelectionModal";
-import { useIotaClientQuery } from "@iota/dapp-kit";
-import { useNetworkVariables } from "./config/networkConfig";
 import { useIota } from "./hooks/useIota";
 import StreamEarnTracker from "./components/StreamEarnTracker/StreamEarnTracker";
 import GlobalSearch from "./components/GlobalSearch/GlobalSearch";
+import useFetchUsers from "./hooks/useFetchUsers";
 
 function App() {
   const location = useLocation();
@@ -25,44 +24,12 @@ function App() {
   const shouldShowBottomPlayer =
     isBottomPlayerVisible && currentTrack && !isHome && !isPlay && !isLibrary;
 
-  const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const { address } = useIota();
-
-  const { data: registeredArtists, isLoading } = useIotaClientQuery(
-    "queryEvents",
-    {
-      query: {
-        MoveEventType: `${vibeTraxPackageId}::vibetrax::UserRegistered`,
-      },
-    },
-    {
-      select: (data) =>
-        data.data
-          .flatMap((x) => x.parsedJson)
-          .filter((y) => y.role === "artist"),
-      refetchInterval: 3000,
-    },
-  );
-
-  const { data: currentUser } = useIotaClientQuery(
-    "queryEvents",
-    {
-      query: {
-        MoveEventType: `${vibeTraxPackageId}::vibetrax::UserRegistered`,
-      },
-    },
-    {
-      select: (data) =>
-        data.data
-          .flatMap((x) => x.parsedJson)
-          .filter((y) => y.owner === address),
-      refetchInterval: 3000,
-    },
-  );
+  const { registeredArtists, currentUser, isLoading } = useFetchUsers();
 
   useEffect(() => {
     if (address && !isLoading) {
-      if (currentUser && currentUser.length > 0) {
+      if (currentUser) {
         setIsSelectRole(false);
       } else {
         setIsSelectRole(true);
@@ -74,18 +41,18 @@ function App() {
 
   return (
     <div className={styles.mainContainer}>
-      <Header currentUser={currentUser?.[0]} />
+      <Header currentUser={currentUser} />
       <div className={styles.contentContainer}>
         <Outlet
           context={{
             registeredArtists: registeredArtists,
-            currentUser: currentUser?.[0],
+            currentUser: currentUser,
           }}
         />
       </div>
-      <SideBar currentUser={currentUser?.[0]} />
+      <SideBar currentUser={currentUser} />
       {shouldShowBottomPlayer && <BottomPlayer />}
-      <StreamEarnTracker currentUser={currentUser?.[0]} />
+      <StreamEarnTracker currentUser={currentUser} />
 
       <RoleSelectionModal
         isOpen={isSelectRole}
