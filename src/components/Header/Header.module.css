@@ -15,6 +15,56 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  position: relative;
+}
+
+.walletMenuContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.walletDropdown {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: rgba(18, 18, 18, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  z-index: 100;
+  min-width: 200px;
+}
+
+.walletDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.walletDropdownItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-secondary, #17dcf5);
+}
+
+.walletDropdownItem.disconnect {
+  color: rgba(255, 59, 59, 0.9);
+}
+
+.walletDropdownItem.disconnect:hover {
+  background-color: rgba(255, 59, 59, 0.1);
+  color: rgba(255, 59, 59, 1);
 }
 
 .proBadgeContainer {

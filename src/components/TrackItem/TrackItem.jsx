@@ -16,7 +16,7 @@ const TrackItem = ({ music, rank }) => {
 
   const { address } = useIota();
   const { currentUser } = useOutletContext();
-  console.log(currentUser);
+
   const navigate = useNavigate();
   const { liked } = useFetchLikes();
   const {
