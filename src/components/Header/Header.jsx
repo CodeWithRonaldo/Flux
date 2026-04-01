@@ -10,10 +10,12 @@ import { formatAddress } from "../../util/helper";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import SubscriptionModal from "../SubscriptionModal/SubscriptionModal";
 import { Radio, Menu, X, Copy, LogOut, ChevronDown } from "lucide-react";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
-const Header = ({ currentUser }) => {
+const Header = () => {
   const { connect, isConnected, loading } = useWeb3AuthConnect();
   const { disconnect, loading: isDisconnecting } = useWeb3AuthDisconnect();
+  const { currentUser } = useFetchUsers();
   const { address } = useIota();
   const { isSubscribed, isExpired, subscription } = useFetchSubscription();
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);

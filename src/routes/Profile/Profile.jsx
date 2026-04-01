@@ -23,17 +23,18 @@ import MusicCard from "../../components/MusicCard/MusicCard";
 import { useIota } from "../../hooks/useIota";
 import { formatAddress } from "../../util/helper";
 import { useWeb3AuthDisconnect, useWeb3AuthUser } from "@web3auth/modal/react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import WithdrawModal from "../../components/WithdrawModal/WithdrawModal";
 import { useState } from "react";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
 const Profile = () => {
   const { balance, address, balanceLoading, vibeTokenBalance } = useIota();
   const { disconnect, loading: isDisconnecting } = useWeb3AuthDisconnect();
-  const { currentUser } = useOutletContext();
+  const { currentUser } = useFetchUsers();
   const { musics, isPending } = useFetchMusic();
   const { userInfo } = useWeb3AuthUser();
 

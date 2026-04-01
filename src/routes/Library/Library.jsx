@@ -21,7 +21,7 @@ import {
 } from "../../components/StateDisplay/StateDisplay";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
 import { useIota } from "../../hooks/useIota";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useFetchLikes } from "../../hooks/useFetchLikes";
 import { usePlaylist } from "../../hooks/usePlaylist";
@@ -30,13 +30,14 @@ import BoostModal from "../../components/BoostModal/BoostModal";
 import AddToPlaylistModal from "../../components/AddToPlaylistModal/AddToPlaylistModal";
 import PlayListModal from "../../components/PlayListModal/PlayListModal";
 import { useSearch } from "../../hooks/useSearch";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
 const Library = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const { musics, isPending, isError } = useFetchMusic();
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const { address } = useIota();
-  const {currentUser} = useOutletContext();
+  const { currentUser } = useFetchUsers();
   const navigate = useNavigate();
   const {
     likeMusic,
