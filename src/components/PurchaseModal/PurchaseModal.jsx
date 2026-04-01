@@ -1,13 +1,7 @@
 import Modal from "../Modal/Modal";
 import styles from "./PurchaseModal.module.css";
 import Button from "../Button/Button";
-import {
-  Zap,
-  TrendingUp,
-  Coins,
-  ShieldCheck,
-  CheckCircle,
-} from "lucide-react";
+import { Zap, TrendingUp, Coins, ShieldCheck, CheckCircle } from "lucide-react";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useState } from "react";
 import { formatPrice } from "../../util/helper";
@@ -25,8 +19,8 @@ const PurchaseModal = ({ music, isOpen, onClose, buyer }) => {
     const musicData = {
       musicId: music.music_id,
       amount: parseInt(music.price),
-      buyerName: buyer?.[0]?.username ?? "",
-      buyerRole: buyer?.[0]?.role ?? "",
+      buyerName: buyer?.username ?? "",
+      buyerRole: buyer?.role ?? "",
     };
     const result = await buyMusic(musicData);
     if (!result?.digest) return;

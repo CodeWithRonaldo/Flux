@@ -139,11 +139,11 @@ const Profile = () => {
               )}
               <div className={styles.profileInfo}>
                 <h1 className={styles.profileName}>
-                  {userProfile?.[0]?.username || userInfo?.name}
+                  {userProfile?.username || userInfo?.name}
                 </h1>
                 <p>
                   <User2 size={16} absoluteStrokeWidth />
-                  {userProfile?.[0]?.role || ""}
+                  {userProfile?.role || ""}
                 </p>
                 <p className={styles.walletRow}>
                   <Wallet size={16} absoluteStrokeWidth />
@@ -178,7 +178,7 @@ const Profile = () => {
           </div>
 
           <div className={styles.bio}>
-            <p>{userProfile?.[0]?.bio || ""}</p>
+            <p>{userProfile?.bio || ""}</p>
           </div>
 
           <div className={styles.statsRow}>

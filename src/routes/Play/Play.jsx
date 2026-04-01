@@ -65,9 +65,47 @@ const Play = () => {
     }
   }, [currentTrack, id]);
 
-  const recentSongs = musics?.slice(0, 3);
-  const moreSongs = musics?.slice(0, 4);
+  const [playedIds, setPlayedIds] = useState(() => {
+    try {
+      const stored = localStorage.getItem("recentlyPlayed");
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   const songToShow = currentTrack || songToPlay;
+
+  useEffect(() => {
+    if (!songToShow?.music_id) return;
+    setPlayedIds((prev) => {
+      let next = prev.filter((id) => id !== songToShow.music_id);
+      next.unshift(songToShow.music_id);
+      next = next.slice(0, 10);
+      try {
+        localStorage.setItem("recentlyPlayed", JSON.stringify(next));
+      } catch (e) {
+        console.error("Local storage error:", e);
+      }
+      return next;
+    });
+  }, [songToShow?.music_id]);
+
+  const recentSongs = React.useMemo(() => {
+    if (!musics) return [];
+    return playedIds
+      .map((id) => musics.find((m) => m.music_id === id))
+      .filter(Boolean)
+      .slice(0, 5);
+  }, [playedIds, musics]);
+
+  const moreSongs =
+    musics
+      ?.filter(
+        (music) =>
+          music.artist.user_address === songToShow?.artist.user_address,
+      )
+      .slice(0, 5) || [];
 
   const hasLiked =
     liked

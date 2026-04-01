@@ -16,6 +16,7 @@ const TrackItem = ({ music, rank }) => {
 
   const { address } = useIota();
   const { currentUser } = useOutletContext();
+  console.log(currentUser);
   const navigate = useNavigate();
   const { liked } = useFetchLikes();
   const {
@@ -40,8 +41,8 @@ const TrackItem = ({ music, rank }) => {
   const handleLike = async () => {
     if (!music || !address || isLiking || hasLiked.length > 0) return;
 
-    const name = currentUser?.[0]?.username;
-    const role = currentUser?.[0]?.role || "listener";
+    const name = currentUser?.username;
+    const role = currentUser?.role || "listener";
 
     setIsLiking(true);
     const result = await likeMusic({

@@ -18,8 +18,8 @@ const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
 
   const handleSubscribe = async () => {
     const subData = {
-      subscriberName: subscriber?.[0]?.username || userInfo?.name,
-      subscriberRole: subscriber?.[0]?.role || "",
+      subscriberName: subscriber?.username || userInfo?.name,
+      subscriberRole: subscriber?.role || "",
     };
 
     const result = isRenewal
@@ -102,7 +102,11 @@ const SubscriptionModal = ({ isOpen, onClose, subscriber, subscription }) => {
       )}
 
       {loading && (
-        <TransactionLoader title={isRenewal ? "Renewing subscription" : "Processing subscription"} />
+        <TransactionLoader
+          title={
+            isRenewal ? "Renewing subscription" : "Processing subscription"
+          }
+        />
       )}
 
       {done && (

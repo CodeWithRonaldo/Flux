@@ -228,9 +228,9 @@ const Upload = () => {
         collaboratorPercentage: contributors.map((c) => c.percentage),
         collaboratorHasRoyalty: contributors.map((c) => c.hasRoyalty),
         artist: {
-          name: currentUser[0]?.username,
+          name: currentUser?.username,
           address,
-          role: currentUser[0]?.role,
+          role: currentUser?.role,
           artistPercentage,
           artistHasRoyalty,
         },
