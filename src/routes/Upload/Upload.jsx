@@ -3,7 +3,16 @@ import { BlackCard, GlassCard } from "../../components/GlassCard/GlassCard";
 import Form from "../../components/Form/Form";
 import styles from "./Upload.module.css";
 import Button from "../../components/Button/Button";
-import { Check, Music, UploadIcon, User, X, CheckCircle2, CheckCircle, XCircle } from "lucide-react";
+import {
+  Check,
+  Music,
+  UploadIcon,
+  User,
+  X,
+  CheckCircle2,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { useOutletContext, useParams, useNavigate } from "react-router-dom";
 import { useIota } from "../../hooks/useIota";
 import { uploadToPinata } from "../../util/helper";
@@ -13,6 +22,8 @@ import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import Modal from "../../components/Modal/Modal";
 import modalStyles from "../../components/PurchaseModal/PurchaseModal.module.css";
 import TransactionLoader from "../../components/TransactionLoader/TransactionLoader";
+import { useIotaClientQuery } from "@iota/dapp-kit";
+import { useNetworkVariable } from "../../config/networkConfig";
 
 const Upload = () => {
   const { id } = useParams();
@@ -33,26 +44,48 @@ const Upload = () => {
   const [contributors, setContributors] = useState([]);
   const [newCollaborator, setNewCollaborator] = useState({
     name: "",
+    image_url: "",
     role: "",
     address: "",
     percentage: "",
     hasRoyalty: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadState, setUploadState] = useState({ isOpen: false, step: "", isDone: false, error: "" });
+  const [uploadState, setUploadState] = useState({
+    isOpen: false,
+    step: "",
+    isDone: false,
+    error: "",
+  });
   const [activeStep, setActiveStep] = useState(1);
-  const registeredUsers = useOutletContext();
+  const { currentUser } = useOutletContext();
   const { address } = useIota();
-  const currentUser = registeredUsers?.filter((user) => user.owner === address);
   const { uploadMusic, error: uploadError } = useMusicUpload();
   const { updateMusic } = useVibetraxHook();
   const { musics } = useFetchMusic();
+  const vibeTraxPackageId = useNetworkVariable("vibeTraxPackageId");
+
+  const { data: registeredUsers } = useIotaClientQuery(
+    "queryEvents",
+    {
+      query: {
+        MoveEventType: `${vibeTraxPackageId}::vibetrax::UserRegistered`,
+      },
+    },
+    {
+      select: (data) => data.data.flatMap((x) => x.parsedJson),
+      // .filter((y) => y.role === "artist"),
+      refetchInterval: 3000,
+    },
+  );
 
   useEffect(() => {
     if (uploadError) setUploadState((s) => ({ ...s, error: uploadError }));
   }, [uploadError]);
 
-  const existingMusic = isEditMode ? musics?.find((m) => m.music_id === id) : null;
+  const existingMusic = isEditMode
+    ? musics?.find((m) => m.music_id === id)
+    : null;
 
   useEffect(() => {
     if (!existingMusic) return;
@@ -62,7 +95,7 @@ const Upload = () => {
     setExistingImageUrl(existingMusic.music_image ?? "");
     setExistingPreviewUrl(existingMusic.preview_music ?? "");
     setExistingFullUrl(existingMusic.full_music ?? "");
-  }, [existingMusic?.music_id]);
+  }, [existingMusic]);
 
   const uploadSteps = [
     { id: 1, label: "Basics", icon: <Music size={18} /> },
@@ -113,12 +146,18 @@ const Upload = () => {
         imageUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
       }
       if (lowQualityFile) {
-        setUploadState((s) => ({ ...s, step: "Uploading standard quality track" }));
+        setUploadState((s) => ({
+          ...s,
+          step: "Uploading standard quality track",
+        }));
         const cid = await uploadToPinata(lowQualityFile);
         previewUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
       }
       if (highQualityFile) {
-        setUploadState((s) => ({ ...s, step: "Uploading premium quality track" }));
+        setUploadState((s) => ({
+          ...s,
+          step: "Uploading premium quality track",
+        }));
         const cid = await uploadToPinata(highQualityFile);
         fullUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${cid}`;
       }
@@ -134,9 +173,13 @@ const Upload = () => {
         fullMusic: fullUrl || null,
       });
 
-      if (result) setUploadState((s) => ({ ...s, step: "Changes saved!", isDone: true }));
+      if (result)
+        setUploadState((s) => ({ ...s, step: "Changes saved!", isDone: true }));
     } catch (e) {
-      setUploadState((s) => ({ ...s, error: e.message || "File upload failed. Please try again." }));
+      setUploadState((s) => ({
+        ...s,
+        error: e.message || "File upload failed. Please try again.",
+      }));
     } finally {
       setIsSubmitting(false);
     }
@@ -145,16 +188,26 @@ const Upload = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setUploadState({ isOpen: true, step: "Uploading cover art to IPFS", isDone: false });
+    setUploadState({
+      isOpen: true,
+      step: "Uploading cover art to IPFS",
+      isDone: false,
+    });
     try {
       const imageCid = await uploadToPinata(imageFile);
 
-      setUploadState((s) => ({ ...s, step: "Uploading standard quality track" }));
+      setUploadState((s) => ({
+        ...s,
+        step: "Uploading standard quality track",
+      }));
       const lowQualityCid = await uploadToPinata(lowQualityFile);
 
       let highQualityCid = null;
       if (highQualityFile) {
-        setUploadState((s) => ({ ...s, step: "Uploading premium quality track" }));
+        setUploadState((s) => ({
+          ...s,
+          step: "Uploading premium quality track",
+        }));
         highQualityCid = await uploadToPinata(highQualityFile);
       }
 
@@ -184,9 +237,17 @@ const Upload = () => {
       };
 
       const result = await uploadMusic(musicData);
-      if (result) setUploadState((s) => ({ ...s, step: "Track published successfully!", isDone: true }));
+      if (result)
+        setUploadState((s) => ({
+          ...s,
+          step: "Track published successfully!",
+          isDone: true,
+        }));
     } catch (e) {
-      setUploadState((s) => ({ ...s, error: e.message || "File upload failed. Please try again." }));
+      setUploadState((s) => ({
+        ...s,
+        error: e.message || "File upload failed. Please try again.",
+      }));
     } finally {
       setIsSubmitting(false);
     }
@@ -295,36 +356,106 @@ const Upload = () => {
                   <div className={styles.editMediaField}>
                     <label className={styles["form-label"]}>Cover Image</label>
                     {existingImageUrl && !imageFile && (
-                      <img src={existingImageUrl} alt="current cover" className={styles.editMediaPreview} />
+                      <img
+                        src={existingImageUrl}
+                        alt="current cover"
+                        className={styles.editMediaPreview}
+                      />
                     )}
-                    <label htmlFor="editImageFile" className={`${styles.mediaLabel} ${imageFile ? styles.mediaLabelSelected : ""}`}>
-                      {imageFile ? <CheckCircle2 size={32} className={styles.mediaSelectedIcon} /> : <UploadIcon size={32} />}
+                    <label
+                      htmlFor="editImageFile"
+                      className={`${styles.mediaLabel} ${imageFile ? styles.mediaLabelSelected : ""}`}
+                    >
+                      {imageFile ? (
+                        <CheckCircle2
+                          size={32}
+                          className={styles.mediaSelectedIcon}
+                        />
+                      ) : (
+                        <UploadIcon size={32} />
+                      )}
                       {imageFile ? imageFile.name : "Replace cover image"}
-                      <input type="file" id="editImageFile" accept="image/*" onChange={(e) => { if (e.target.files[0]) setImageFile(e.target.files[0]); }} />
+                      <input
+                        type="file"
+                        id="editImageFile"
+                        accept="image/*"
+                        onChange={(e) => {
+                          if (e.target.files[0])
+                            setImageFile(e.target.files[0]);
+                        }}
+                      />
                     </label>
                   </div>
 
                   <div className={styles.editMediaField}>
-                    <label className={styles["form-label"]}>Standard Quality Track</label>
+                    <label className={styles["form-label"]}>
+                      Standard Quality Track
+                    </label>
                     {existingPreviewUrl && !lowQualityFile && (
-                      <p className={styles.editMediaUrl}>Current: {existingPreviewUrl.split("/").pop()}</p>
+                      <p className={styles.editMediaUrl}>
+                        Current: {existingPreviewUrl.split("/").pop()}
+                      </p>
                     )}
-                    <label htmlFor="editLowFile" className={`${styles.mediaLabel} ${lowQualityFile ? styles.mediaLabelSelected : ""}`}>
-                      {lowQualityFile ? <CheckCircle2 size={32} className={styles.mediaSelectedIcon} /> : <UploadIcon size={32} />}
-                      {lowQualityFile ? lowQualityFile.name : "Replace standard audio"}
-                      <input type="file" id="editLowFile" accept="audio/*" onChange={(e) => { if (e.target.files[0]) setLowQualityFile(e.target.files[0]); }} />
+                    <label
+                      htmlFor="editLowFile"
+                      className={`${styles.mediaLabel} ${lowQualityFile ? styles.mediaLabelSelected : ""}`}
+                    >
+                      {lowQualityFile ? (
+                        <CheckCircle2
+                          size={32}
+                          className={styles.mediaSelectedIcon}
+                        />
+                      ) : (
+                        <UploadIcon size={32} />
+                      )}
+                      {lowQualityFile
+                        ? lowQualityFile.name
+                        : "Replace standard audio"}
+                      <input
+                        type="file"
+                        id="editLowFile"
+                        accept="audio/*"
+                        onChange={(e) => {
+                          if (e.target.files[0])
+                            setLowQualityFile(e.target.files[0]);
+                        }}
+                      />
                     </label>
                   </div>
 
                   <div className={styles.editMediaField}>
-                    <label className={styles["form-label"]}>Premium Quality Track</label>
+                    <label className={styles["form-label"]}>
+                      Premium Quality Track
+                    </label>
                     {existingFullUrl && !highQualityFile && (
-                      <p className={styles.editMediaUrl}>Current: {existingFullUrl.split("/").pop()}</p>
+                      <p className={styles.editMediaUrl}>
+                        Current: {existingFullUrl.split("/").pop()}
+                      </p>
                     )}
-                    <label htmlFor="editHighFile" className={`${styles.mediaLabel} ${highQualityFile ? styles.mediaLabelSelected : ""}`}>
-                      {highQualityFile ? <CheckCircle2 size={32} className={styles.mediaSelectedIcon} /> : <UploadIcon size={32} />}
-                      {highQualityFile ? highQualityFile.name : "Replace premium audio (optional)"}
-                      <input type="file" id="editHighFile" accept="audio/*" onChange={(e) => { if (e.target.files[0]) setHighQualityFile(e.target.files[0]); }} />
+                    <label
+                      htmlFor="editHighFile"
+                      className={`${styles.mediaLabel} ${highQualityFile ? styles.mediaLabelSelected : ""}`}
+                    >
+                      {highQualityFile ? (
+                        <CheckCircle2
+                          size={32}
+                          className={styles.mediaSelectedIcon}
+                        />
+                      ) : (
+                        <UploadIcon size={32} />
+                      )}
+                      {highQualityFile
+                        ? highQualityFile.name
+                        : "Replace premium audio (optional)"}
+                      <input
+                        type="file"
+                        id="editHighFile"
+                        accept="audio/*"
+                        onChange={(e) => {
+                          if (e.target.files[0])
+                            setHighQualityFile(e.target.files[0]);
+                        }}
+                      />
                     </label>
                   </div>
                 </div>
@@ -552,19 +683,27 @@ const Upload = () => {
                           id="address"
                           className={styles["form-select"]}
                           value={newCollaborator.address}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const selected = e.target.selectedOptions[0];
                             setNewCollaborator((prev) => ({
                               ...prev,
-                              address: e.target.value,
-                            }))
-                          }
+                              address: selected.value,
+                              name: selected.dataset.name,
+                              image_url: selected.dataset.imageUrl ?? "",
+                            }));
+                          }}
                         >
                           <option value="" disabled>
                             Select User
                           </option>
                           {registeredUsers?.map((user) => (
-                            <option key={user.owner} value={user.owner}>
-                              {user.owner}
+                            <option
+                              key={user.owner}
+                              value={user.owner}
+                              data-name={user.username}
+                              data-image-url={user.image_url ?? ""}
+                            >
+                              {user.username}
                             </option>
                           ))}
                         </select>
@@ -608,22 +747,26 @@ const Upload = () => {
                         onClick={() => {
                           const {
                             role,
+                            name,
+                            image_url,
                             address: addr,
                             percentage,
                             hasRoyalty,
                           } = newCollaborator;
-                          if (!role || !addr || !percentage) return;
-
-                          const collaboratorUser = registeredUsers?.find(
-                            (u) => u.owner === addr,
-                          );
-                          const collaboratorName =
-                            collaboratorUser?.username || "Unknown User";
+                          if (
+                            !role ||
+                            !addr ||
+                            !percentage ||
+                            !name ||
+                            !image_url
+                          )
+                            return;
 
                           setContributors((prev) => [
                             ...prev,
                             {
-                              name: collaboratorName,
+                              name,
+                              image_url,
                               role,
                               address: addr,
                               percentage: Number(percentage),
@@ -632,6 +775,7 @@ const Upload = () => {
                           ]);
                           setNewCollaborator({
                             name: "",
+                            image_url: "",
                             role: "",
                             address: "",
                             percentage: "",
@@ -650,7 +794,10 @@ const Upload = () => {
                 <div className={styles.review}>
                   <div className={styles.reviewImage}>
                     {imageFile ? (
-                      <img src={URL.createObjectURL(imageFile)} alt="cover art" />
+                      <img
+                        src={URL.createObjectURL(imageFile)}
+                        alt="cover art"
+                      />
                     ) : existingImageUrl ? (
                       <img src={existingImageUrl} alt="cover art" />
                     ) : null}
@@ -785,16 +932,29 @@ const Upload = () => {
       <Modal isOpen={uploadState.isOpen} onClose={() => {}} size="small">
         {uploadState.error ? (
           <div className={modalStyles.successContainer}>
-            <div className={modalStyles.successIcon} style={{ color: "#f87171" }}>
+            <div
+              className={modalStyles.successIcon}
+              style={{ color: "#f87171" }}
+            >
               <XCircle size={56} />
             </div>
             <h2 className={modalStyles.successTitle}>Upload Failed</h2>
-            <p className={modalStyles.successSubtitle} style={{ color: "#f87171", textTransform: "none" }}>
+            <p
+              className={modalStyles.successSubtitle}
+              style={{ color: "#f87171", textTransform: "none" }}
+            >
               {uploadState.error}
             </p>
             <Button
               variant="btn-ghost"
-              onClick={() => setUploadState({ isOpen: false, step: "", isDone: false, error: "" })}
+              onClick={() =>
+                setUploadState({
+                  isOpen: false,
+                  step: "",
+                  isDone: false,
+                  error: "",
+                })
+              }
             >
               Dismiss
             </Button>
@@ -809,7 +969,12 @@ const Upload = () => {
             <h2 className={modalStyles.successTitle}>{uploadState.step}</h2>
             <Button
               onClick={() => {
-                setUploadState({ isOpen: false, step: "", isDone: false, error: "" });
+                setUploadState({
+                  isOpen: false,
+                  step: "",
+                  isDone: false,
+                  error: "",
+                });
                 navigate(isEditMode ? `/play/${id}` : "/");
               }}
             >

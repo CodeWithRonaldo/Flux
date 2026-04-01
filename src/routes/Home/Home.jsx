@@ -8,20 +8,18 @@ import { useState } from "react";
 import Subscribe from "../../components/Subscribe/Subscribe";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { useIota } from "../../hooks/useIota";
 import {
   LoadingState,
   EmptyState,
 } from "../../components/StateDisplay/StateDisplay";
 import { Music } from "lucide-react";
-import { useSearch } from "../../context/SearchProvider";
+import { useSearch } from "../../hooks/useSearch";
 
 const Home = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { address } = useIota();
   const { setIsSearchOpen } = useSearch();
   const { musics, isPending } = useFetchMusic();
-  const registeredUsers = useOutletContext();
+  const { registeredArtists, currentUser } = useOutletContext();
   const navigate = useNavigate();
 
   const trendingMusics = [...musics].filter(
@@ -34,9 +32,6 @@ const Home = () => {
   };
 
   const { currentTrack } = useAudio();
-  const currentUser = registeredUsers?.filter(
-    (user) => user.owner === address,
-  )?.[0];
 
   const hour = new Date().getHours();
   const greeting =
@@ -122,7 +117,7 @@ const Home = () => {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Top Artists</h2>
         <div className={styles.horizontalScroll}>
-          {registeredUsers?.slice(0, 8).map((artist, index) => (
+          {registeredArtists?.slice(0, 8).map((artist, index) => (
             <div key={index} className={styles.artistScrollWrapper}>
               <ArtistCard artist={artist} />
             </div>

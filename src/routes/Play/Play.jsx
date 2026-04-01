@@ -22,12 +22,13 @@ import { formatPrice } from "../../util/helper";
 import { useIota } from "../../hooks/useIota";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 import { useFetchLikes } from "../../hooks/useFetchLikes";
+import { useFetchMusicById } from "../../hooks/useFetchMusicById";
 
 const Play = () => {
   const { id } = useParams();
-  const registeredUsers = useOutletContext();
+  const { currentUser } = useOutletContext();
   const navigate = useNavigate();
-  const { currentTrack, playTrack, updateCurrentSrc } = useAudio();
+  const { currentTrack, updateCurrentSrc } = useAudio();
   const { createPlaylist, setCurrentPlaylist } = usePlaylist();
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,24 +38,25 @@ const Play = () => {
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const { musics, isPending } = useFetchMusic();
+  const { music: songToPlay } = useFetchMusicById(id);
   const { address } = useIota();
   const { isSubscribed } = useFetchSubscription();
-  const { likeMusic, toggleSale, deleteMusic, error: actionError } = useVibetraxHook();
-  const { liked, isLikeLoading } = useFetchLikes();
+
+  const {
+    likeMusic,
+    toggleSale,
+    deleteMusic,
+    error: actionError,
+  } = useVibetraxHook();
+  const { liked } = useFetchLikes();
   const { userInfo } = useWeb3AuthUser();
 
-  const currentUser = registeredUsers?.filter((user) => user.owner === address);
-
   // Sync context with URL param on mount or URL change
-  useEffect(() => {
-    if (id && currentTrack?.music_id !== parseInt(id)) {
-      const songToPlay = musics?.find((s) => s.music_id === parseInt(id));
-      if (songToPlay) {
-        playTrack(songToPlay);
-      }
-    }
-  }, []);
-  // }, [id]);
+  // useEffect(() => {
+  //   if (songToPlay) {
+  //     playTrack(songToPlay);
+  //   }
+  // }, [songToPlay, playTrack]);
 
   // Sync URL with context change (e.g. via Next/Prev buttons)
   useEffect(() => {
@@ -65,7 +67,7 @@ const Play = () => {
 
   const recentSongs = musics?.slice(0, 3);
   const moreSongs = musics?.slice(0, 4);
-  const songToShow = currentTrack || musics?.[0];
+  const songToShow = currentTrack || songToPlay;
 
   const hasLiked =
     liked
@@ -75,9 +77,8 @@ const Play = () => {
   const handleLike = async () => {
     if (!songToShow || !address || isLiking || hasLiked.length > 0) return;
 
-   
-    const name = currentUser?.[0]?.username || userInfo?.name;
-    const role = currentUser?.[0]?.role || "listener";
+    const name = currentUser?.username || userInfo?.name;
+    const role = currentUser?.role || "listener";
 
     setIsLiking(true);
     const result = await likeMusic({
@@ -116,7 +117,7 @@ const Play = () => {
         ? songToShow.full_music
         : songToShow.preview_music;
     updateCurrentSrc(src);
-  }, [isPremium, isSubscribed, songToShow?.music_id]);
+  }, [isPremium, isSubscribed, songToShow, updateCurrentSrc]);
 
   const handleOpenPurchaseModal = () => setIsPurchaseModalOpen(true);
   const handleClosePurchaseModal = () => setIsPurchaseModalOpen(false);
@@ -207,7 +208,13 @@ const Play = () => {
             </div>
           </div>
           {actionError && (
-            <p style={{ color: "#f87171", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+            <p
+              style={{
+                color: "#f87171",
+                fontSize: "0.8rem",
+                marginTop: "0.5rem",
+              }}
+            >
               {actionError}
             </p>
           )}

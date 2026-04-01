@@ -25,8 +25,6 @@ import { formatAddress } from "../../util/helper";
 import { useWeb3AuthDisconnect, useWeb3AuthUser } from "@web3auth/modal/react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
-import { useIotaClientQuery } from "@iota/dapp-kit";
-import { useNetworkVariables } from "../../config/networkConfig";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import WithdrawModal from "../../components/WithdrawModal/WithdrawModal";
@@ -35,12 +33,11 @@ import { useState } from "react";
 const Profile = () => {
   const { balance, address, balanceLoading, vibeTokenBalance } = useIota();
   const { disconnect, loading: isDisconnecting } = useWeb3AuthDisconnect();
-  const registeredUsers = useOutletContext();
-  const { musics, isPending, isError } = useFetchMusic();
+  const { currentUser } = useOutletContext();
+  const { musics, isPending } = useFetchMusic();
   const { userInfo } = useWeb3AuthUser();
 
   const navigate = useNavigate();
-  const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const {
     subscription,
     isSubscribed,
@@ -51,7 +48,7 @@ const Profile = () => {
     loading: isClaiming,
     error: claimError,
   } = useVibetraxHook();
-  const userProfile = registeredUsers?.filter((user) => user.owner === address);
+  const userProfile = currentUser;
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   const userMusics = musics?.filter(

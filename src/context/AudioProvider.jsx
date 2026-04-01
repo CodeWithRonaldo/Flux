@@ -1,5 +1,4 @@
-import { useState, useRef, useEffect } from "react";
-import { songs } from "../util/songList";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { AudioContext } from "./AudioContext";
 import { useFetchMusic } from "../hooks/useFetchMusic";
 
@@ -11,6 +10,60 @@ export const AudioProvider = ({ children }) => {
   const [duration, setDuration] = useState(0);
   const [isBottomPlayerVisible, setIsBottomPlayerVisible] = useState(false);
   const audioRef = useRef(new Audio());
+
+  const togglePlay = useCallback(() => {
+    setIsPlaying(!isPlaying);
+  }, [isPlaying]);
+
+  const playTrack = useCallback(
+    (music) => {
+      if (currentTrack?.music_id === music?.music_id) {
+        togglePlay();
+      } else {
+        setCurrentTrack(music);
+        setIsPlaying(true);
+        setIsBottomPlayerVisible(true);
+      }
+    },
+    [currentTrack, togglePlay],
+  );
+
+  const nextTrack = useCallback(() => {
+    const currentIndex = musics?.findIndex(
+      (s) => s?.music_id === currentTrack?.music_id,
+    );
+    const nextIndex = (currentIndex + 1) % musics?.length;
+    setCurrentTrack(musics[nextIndex]);
+    setIsPlaying(true);
+  }, [currentTrack, musics]);
+
+  const prevTrack = () => {
+    const currentIndex = musics?.findIndex(
+      (s) => s?.music_id === currentTrack?.music_id,
+    );
+    const prevIndex = (currentIndex - 1 + musics?.length) % musics?.length;
+    setCurrentTrack(musics[prevIndex]);
+    setIsPlaying(true);
+  };
+
+  const seek = (time) => {
+    audioRef.current.currentTime = time;
+    setCurrentTime(time);
+  };
+
+  const updateCurrentSrc = useCallback(
+    (src) => {
+      if (!src) return;
+      const audio = audioRef.current;
+      const wasPlaying = isPlaying;
+      audio.src = src;
+      audio.load();
+      if (wasPlaying) {
+        audio.play().catch((err) => console.error("Playback failed:", err));
+      }
+    },
+    [isPlaying],
+  );
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -35,7 +88,7 @@ export const AudioProvider = ({ children }) => {
       audio.removeEventListener("timeupdate", setAudioTime);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, []);
+  }, [nextTrack]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -47,7 +100,7 @@ export const AudioProvider = ({ children }) => {
         audio.play().catch((err) => console.error("Playback failed:", err));
       }
     }
-  }, [currentTrack]);
+  }, [currentTrack, isPlaying]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -59,54 +112,6 @@ export const AudioProvider = ({ children }) => {
       audioRef.current.pause();
     }
   }, [isPlaying]);
-
-  const playTrack = (music) => {
-    if (currentTrack?.music_id === music?.music_id) {
-      togglePlay();
-    } else {
-      setCurrentTrack(music);
-      setIsPlaying(true);
-      setIsBottomPlayerVisible(true);
-    }
-  };
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const nextTrack = () => {
-    const currentIndex = musics?.findIndex(
-      (s) => s?.music_id === currentTrack?.music_id,
-    );
-    const nextIndex = (currentIndex + 1) % musics?.length;
-    setCurrentTrack(musics[nextIndex]);
-    setIsPlaying(true);
-  };
-
-  const prevTrack = () => {
-    const currentIndex = musics?.findIndex(
-      (s) => s?.music_id === currentTrack?.music_id,
-    );
-    const prevIndex = (currentIndex - 1 + musics?.length) % musics?.length;
-    setCurrentTrack(musics[prevIndex]);
-    setIsPlaying(true);
-  };
-
-  const seek = (time) => {
-    audioRef.current.currentTime = time;
-    setCurrentTime(time);
-  };
-
-  const updateCurrentSrc = (src) => {
-    if (!src) return;
-    const audio = audioRef.current;
-    const wasPlaying = isPlaying;
-    audio.src = src;
-    audio.load();
-    if (wasPlaying) {
-      audio.play().catch((err) => console.error("Playback failed:", err));
-    }
-  };
 
   const value = {
     currentTrack,

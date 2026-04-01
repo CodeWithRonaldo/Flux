@@ -10,15 +10,12 @@ export function IotaProvider({ children }) {
   const web3Auth = useWeb3Auth();
   const [keypair, setKeypair] = useState(null);
   const [address, setAddress] = useState("");
-  const [balance, setBalance] = useState("");
-  const [vibeTokenBalance, setVibeTokenBalance] = useState("")
 
   useEffect(() => {
     const getAddress = async () => {
       if (!web3Auth.provider) {
         setAddress("");
         setKeypair(null);
-        setBalance("");
         return;
       }
       console.log("getting address");
@@ -34,7 +31,7 @@ export function IotaProvider({ children }) {
       }
 
       const privateKeyUint8Array = new Uint8Array(
-        privateKeyHex.map((byte) => parseInt(byte, 16))
+        privateKeyHex.map((byte) => parseInt(byte, 16)),
       );
 
       const keyPair = Ed25519Keypair.fromSecretKey(privateKeyUint8Array);
@@ -55,7 +52,7 @@ export function IotaProvider({ children }) {
     },
     {
       enabled: !!address,
-    }
+    },
   );
 
   const { data: vibeBalanceData, isPending: vibeBalanceLoading } =
@@ -65,33 +62,24 @@ export function IotaProvider({ children }) {
         owner: address ?? "",
         coinType: `${VIBETRAX_PACKAGE_ID}::vibe_token::VIBE_TOKEN`,
       },
-      { enabled: !!address }
+      { enabled: !!address },
     );
 
-  
-   
+  const balance = data ? (+data.totalBalance / 1_000_000_000).toFixed(2) : 0.0;
 
-  useEffect(() => {
-    if (data) {
-      const balance = (+data.totalBalance / 1_000_000_000).toFixed(2);
-      setBalance(balance);
-       
-
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (vibeBalanceData) {
-      const balance = (+vibeBalanceData.totalBalance / 1_000_000).toFixed(2);
-      setVibeTokenBalance(balance);
-    }
-  }, [vibeBalanceData]);
-
-
+  const vibeTokenBalance = vibeBalanceData
+    ? (+vibeBalanceData.totalBalance / 1_000_000).toFixed(2)
+    : 0.0;
 
   return (
     <WalletContext.Provider
-      value={{ keypair, address, balance,vibeTokenBalance, balanceLoading: isPending || vibeBalanceLoading }}
+      value={{
+        keypair,
+        address,
+        balance,
+        vibeTokenBalance,
+        balanceLoading: isPending || vibeBalanceLoading,
+      }}
     >
       {children}
     </WalletContext.Provider>

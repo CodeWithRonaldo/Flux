@@ -47,7 +47,7 @@ const Header = ({ currentUser }) => {
           </Button>
         )}
         <Button
-          variant="primary"
+          variant={"btn-primary"}
           onClick={() => {
             connect();
             setIsMenuOpen(false);

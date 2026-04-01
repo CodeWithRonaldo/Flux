@@ -1,9 +1,9 @@
 import { Transaction } from "@iota/iota-sdk/transactions";
 import { useIotaClient } from "@iota/dapp-kit";
 import { useIota } from "./useIota";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNetworkVariables } from "../config/networkConfig";
-import { getContractError } from "../util/helper";
+import { formatPrice, getContractError } from "../util/helper";
 import { TREASURY } from "../config/constant";
 
 export const useVibetraxHook = () => {
@@ -74,7 +74,7 @@ export const useVibetraxHook = () => {
       setLoading(true);
       setError("");
       if (!balanceLoading) {
-        if (!balance || balance <= musicData.amount) {
+        if (!balance || balance < formatPrice(musicData.amount)) {
           setError("Insufficient balance to complete this transaction.");
           return;
         }
@@ -346,42 +346,45 @@ export const useVibetraxHook = () => {
     }
   };
 
-  const streamMusic = async (streamData) => {
-    if (!keypair) return null;
-    try {
-      setLoading(true);
-      const tx = new Transaction();
-      tx.moveCall({
-        target: `${vibeTraxPackageId}::vibetrax::stream_music`,
-        arguments: [
-          tx.object(streamData.musicId),
-          tx.object(streamData.subscriptionId),
-          tx.pure.string(streamData.streamerName),
-          tx.pure.string(streamData.streamerRole),
-          tx.object("0x6"),
-        ],
-      });
-      const result = await client.signAndExecuteTransaction(
-        {
-          transaction: tx,
-          signer: keypair,
-          options: { showEffects: true },
-        },
-        {},
-      );
-      if (result.effects?.status?.status !== "success") {
-        console.log("Stream failed:", result.effects?.status);
+  const streamMusic = useCallback(
+    async (streamData) => {
+      if (!keypair) return null;
+      try {
+        setLoading(true);
+        const tx = new Transaction();
+        tx.moveCall({
+          target: `${vibeTraxPackageId}::vibetrax::stream_music`,
+          arguments: [
+            tx.object(streamData.musicId),
+            tx.object(streamData.subscriptionId),
+            tx.pure.string(streamData.streamerName),
+            tx.pure.string(streamData.streamerRole),
+            tx.object("0x6"),
+          ],
+        });
+        const result = await client.signAndExecuteTransaction(
+          {
+            transaction: tx,
+            signer: keypair,
+            options: { showEffects: true },
+          },
+          {},
+        );
+        if (result.effects?.status?.status !== "success") {
+          console.log("Stream failed:", result.effects?.status);
+          return null;
+        }
+        return result;
+      } catch (e) {
+        const errorMessage = getContractError(e);
+        console.log("Error:", errorMessage);
         return null;
+      } finally {
+        setLoading(false);
       }
-      return result;
-    } catch (e) {
-      const errorMessage = getContractError(e);
-      console.log("Error:", errorMessage);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [client, keypair, vibeTraxPackageId],
+  );
 
   const claimRewards = async (subscriptionId) => {
     if (!keypair) {

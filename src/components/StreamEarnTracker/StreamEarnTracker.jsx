@@ -16,15 +16,31 @@ const StreamEarnTracker = ({ currentUser }) => {
     const musicId = currentTrack.music_id;
     if (streamedRef.current.has(musicId)) return;
 
-    const name = subscription.subscriber?.name || currentUser?.[0]?.role || "user";
-    const role = currentUser?.[0]?.role || "listener";
+    if (currentUser.owner === currentTrack.artist?.user_address) return; // Don't track if the artist is streaming their own music
+    if (currentUser.owner === currentTrack.current_owner?.user_address) return; // Don't track if the current owner is streaming their own music
+
+    const name = subscription.subscriber?.name || currentUser?.role || "user";
+    const role = currentUser?.role || "listener";
 
     streamedRef.current.add(musicId);
-    streamMusic({ musicId, subscriptionId: subscription.id, streamerName: name, streamerRole: role })
-      .then((result) => {
-        if (!result) streamedRef.current.delete(musicId);
-      });
-  }, [isSubscribed, currentTrack?.music_id, subscription?.id, currentTime]);
+    streamMusic({
+      musicId,
+      subscriptionId: subscription.id,
+      streamerName: name,
+      streamerRole: role,
+    }).then((result) => {
+      if (!result) streamedRef.current.delete(musicId);
+    });
+  }, [
+    isSubscribed,
+    currentTrack?.music_id,
+    subscription?.id,
+    currentTime,
+    streamMusic,
+    currentUser,
+    currentTrack,
+    subscription,
+  ]);
 
   return null;
 };

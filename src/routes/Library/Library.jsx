@@ -29,14 +29,14 @@ import TipModal from "../../components/TipModal/TipModal";
 import BoostModal from "../../components/BoostModal/BoostModal";
 import AddToPlaylistModal from "../../components/AddToPlaylistModal/AddToPlaylistModal";
 import PlayListModal from "../../components/PlayListModal/PlayListModal";
-import { useSearch } from "../../context/SearchProvider";
+import { useSearch } from "../../hooks/useSearch";
 
 const Library = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const { musics, isPending, isError } = useFetchMusic();
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const { address } = useIota();
-  const registeredUsers = useOutletContext();
+  const {currentUser} = useOutletContext();
   const navigate = useNavigate();
   const {
     likeMusic,
@@ -59,8 +59,6 @@ const Library = () => {
     if (window.innerWidth <= 768) navigate("/search");
     else setIsSearchOpen(true);
   };
-
-  const currentUser = registeredUsers?.filter((user) => user.owner === address);
 
   const featuredSongs = musics?.slice(0, 3);
 
@@ -87,8 +85,8 @@ const Library = () => {
   const handleLike = async () => {
     if (!currentFeatured || !address || isLiking || hasLiked.length > 0) return;
 
-    const name = currentUser?.[0]?.username || "Listener";
-    const role = currentUser?.[0]?.role || "listener";
+    const name = currentUser?.username || "Listener";
+    const role = currentUser?.role || "listener";
 
     setIsLiking(true);
     const result = await likeMusic({

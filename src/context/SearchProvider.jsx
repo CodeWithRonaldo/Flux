@@ -1,10 +1,5 @@
-import { createContext, useState, useContext } from "react";
-
-const SearchContext = createContext();
-
-export const useSearch = () => {
-  return useContext(SearchContext);
-};
+import { useState } from "react";
+import { SearchContext } from "./searchContext";
 
 export const SearchProvider = ({ children }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);

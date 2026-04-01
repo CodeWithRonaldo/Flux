@@ -15,18 +15,23 @@ const TrackItem = ({ music, rank }) => {
   const isActuallyPlaying = isCurrent && isPlaying;
 
   const { address } = useIota();
-  const registeredUsers = useOutletContext();
+  const { currentUser } = useOutletContext();
   const navigate = useNavigate();
   const { liked } = useFetchLikes();
-  const { likeMusic, toggleSale, deleteMusic, error: actionError } = useVibetraxHook();
+  const {
+    likeMusic,
+    toggleSale,
+    deleteMusic,
+    error: actionError,
+  } = useVibetraxHook();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
 
-  const currentUser = registeredUsers?.filter((user) => user.owner === address);
-
   const hasLiked =
-    liked?.filter((like) => like.music_id === music?.music_id).map((like) => like.music_id) || [];
+    liked
+      ?.filter((like) => like.music_id === music?.music_id)
+      .map((like) => like.music_id) || [];
 
   const showEditButton =
     music?.current_owner?.user_address === music?.artist?.user_address &&
@@ -78,7 +83,10 @@ const TrackItem = ({ music, rank }) => {
           onClick={handleLike}
           style={{ cursor: hasLiked.length > 0 ? "default" : "pointer" }}
         >
-          <Heart size={18} fill={hasLiked.length > 0 ? "currentColor" : "none"} />
+          <Heart
+            size={18}
+            fill={hasLiked.length > 0 ? "currentColor" : "none"}
+          />
         </button>
 
         {showEditButton && (
@@ -118,7 +126,12 @@ const TrackItem = ({ music, rank }) => {
                   </li>
                   <li
                     onClick={async () => {
-                      if (!window.confirm("Delete this track? This cannot be undone.")) return;
+                      if (
+                        !window.confirm(
+                          "Delete this track? This cannot be undone.",
+                        )
+                      )
+                        return;
                       setIsMenuOpen(false);
                       const result = await deleteMusic(music?.music_id);
                       if (result) navigate("/");
@@ -133,9 +146,7 @@ const TrackItem = ({ music, rank }) => {
         )}
       </div>
 
-      {actionError && (
-        <p className={styles.actionError}>{actionError}</p>
-      )}
+      {actionError && <p className={styles.actionError}>{actionError}</p>}
 
       <BoostModal
         isOpen={isBoostModalOpen}

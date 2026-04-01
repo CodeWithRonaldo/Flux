@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./ArtistCard.module.css";
-import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
+// import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 
 const ArtistCard = ({ artist }) => {
   // console.log("Artist Image URL:", artist?.image_url);

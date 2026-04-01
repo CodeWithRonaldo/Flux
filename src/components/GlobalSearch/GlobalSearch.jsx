@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { Search, Clock } from "lucide-react";
 import styles from "./GlobalSearch.module.css";
-import { useSearch } from "../../context/SearchProvider";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import Modal from "../Modal/Modal";
 import TrackList from "../TrackList/TrackList";
+import { useSearch } from "../../hooks/useSearch";
 
 const GlobalSearch = () => {
   const { isSearchOpen, setIsSearchOpen } = useSearch();

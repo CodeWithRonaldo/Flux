@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { Outlet, useLocation } from "react-router-dom";
 import styles from "./App.module.css";
 import Header from "./components/Header/Header";
@@ -27,7 +28,7 @@ function App() {
   const { vibeTraxPackageId } = useNetworkVariables("vibeTraxPackageId");
   const { address } = useIota();
 
-  const { data: registeredUsers, isLoading } = useIotaClientQuery(
+  const { data: registeredArtists, isLoading } = useIotaClientQuery(
     "queryEvents",
     {
       query: {
@@ -35,13 +36,29 @@ function App() {
       },
     },
     {
-      select: (data) => data.data.flatMap((x) => x.parsedJson),
-      // .filter((y) => y.owner === address),
+      select: (data) =>
+        data.data
+          .flatMap((x) => x.parsedJson)
+          .filter((y) => y.role === "artist"),
       refetchInterval: 3000,
     },
   );
 
-  const currentUser = registeredUsers?.filter((user) => user.owner === address);
+  const { data: currentUser } = useIotaClientQuery(
+    "queryEvents",
+    {
+      query: {
+        MoveEventType: `${vibeTraxPackageId}::vibetrax::UserRegistered`,
+      },
+    },
+    {
+      select: (data) =>
+        data.data
+          .flatMap((x) => x.parsedJson)
+          .filter((y) => y.owner === address),
+      refetchInterval: 3000,
+    },
+  );
 
   useEffect(() => {
     if (address && !isLoading) {
@@ -53,17 +70,22 @@ function App() {
     } else if (!address) {
       setIsSelectRole(false);
     }
-  }, [address, isLoading]);
+  }, [address, isLoading, currentUser]);
 
   return (
     <div className={styles.mainContainer}>
-      <Header currentUser={currentUser} />
+      <Header currentUser={currentUser?.[0]} />
       <div className={styles.contentContainer}>
-        <Outlet context={registeredUsers} />
+        <Outlet
+          context={{
+            registeredArtists: registeredArtists,
+            currentUser: currentUser?.[0],
+          }}
+        />
       </div>
-      <SideBar currentUser={currentUser} />
+      <SideBar currentUser={currentUser?.[0]} />
       {shouldShowBottomPlayer && <BottomPlayer />}
-      <StreamEarnTracker currentUser={currentUser} />
+      <StreamEarnTracker currentUser={currentUser?.[0]} />
 
       <RoleSelectionModal
         isOpen={isSelectRole}

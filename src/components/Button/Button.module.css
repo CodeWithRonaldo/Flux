@@ -5,11 +5,11 @@
   padding: 0.75rem 1rem;
   font-size: 1rem;
   color: black;
-  background-image: linear-gradient(
+  /* background-image: linear-gradient(
     to right,
     var(--color-primary),
     var(--color-secondary)
-  );
+  ); */
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -36,21 +36,35 @@
 .btn-primary {
   background-color: #007bff;
 }
+
 .btn-primary:hover {
   background-color: #0056b3;
 }
+
 .btn-secondary {
   background-color: #6c757d;
 }
+
 .btn-secondary:hover {
   background-color: #5a6268;
 }
+
 .btn-ghost {
   background-image: none;
   background-color: transparent;
   color: #fff;
   border: 1px solid white;
 }
+
 .btn-ghost:hover {
   color: #fff;
+}
+
+.btn-premium {
+  background-color: #ffd700;
+  color: black;
+}
+
+.btn-premium:hover {
+  background-color: #e6c200;
 }

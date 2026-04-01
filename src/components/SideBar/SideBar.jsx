@@ -10,8 +10,9 @@ import {
   Crown,
 } from "lucide-react";
 import styles from "./SideBar.module.css";
-import { useSearch } from "../../context/SearchProvider";
+
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
+import { useSearch } from "../../hooks/useSearch";
 
 const Links = [
   { name: "Home", icon: HomeIcon, path: "/" },
@@ -23,9 +24,9 @@ const Links = [
 ];
 
 const SideBar = ({ currentUser }) => {
-  const hasRegistered = currentUser?.length > 0;
+  const hasRegistered = !!currentUser;
   const canUpload =
-    hasRegistered && currentUser[0]?.role.toLowerCase() === "artist";
+    hasRegistered && currentUser.role.toLowerCase() === "artist";
   const { setIsSearchOpen } = useSearch();
   const { isSubscribed } = useFetchSubscription();
   const navigate = useNavigate();
