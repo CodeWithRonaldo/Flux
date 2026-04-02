@@ -7,7 +7,6 @@ import { useFetchLikes } from "../../hooks/useFetchLikes";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
 import { useNavigate } from "react-router-dom";
 import { BlackCard } from "../GlassCard/GlassCard";
-import BoostModal from "../BoostModal/BoostModal";
 import useFetchUsers from "../../hooks/useFetchUsers";
 
 const TrackItem = ({ music, rank }) => {
@@ -28,7 +27,6 @@ const TrackItem = ({ music, rank }) => {
   } = useVibetraxHook();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
-  const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
 
   const hasLiked =
     liked
@@ -121,7 +119,7 @@ const TrackItem = ({ music, rank }) => {
                   <li
                     onClick={() => {
                       setIsMenuOpen(false);
-                      setIsBoostModalOpen(true);
+                      navigate(`/boost/${music?.music_id}`);
                     }}
                   >
                     Boost Music
@@ -149,12 +147,6 @@ const TrackItem = ({ music, rank }) => {
       </div>
 
       {actionError && <p className={styles.actionError}>{actionError}</p>}
-
-      <BoostModal
-        isOpen={isBoostModalOpen}
-        onClose={() => setIsBoostModalOpen(false)}
-        music={music}
-      />
     </div>
   );
 };

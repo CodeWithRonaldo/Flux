@@ -14,7 +14,6 @@ import { useAudio } from "../../hooks/useAudio";
 import { BlackCard } from "../../components/GlassCard/GlassCard";
 import { usePlaylist } from "../../hooks/usePlaylist";
 import TipModal from "../../components/TipModal/TipModal";
-import BoostModal from "../../components/BoostModal/BoostModal";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import { useVibetraxHook } from "../../hooks/useVibetraxHook";
@@ -36,7 +35,6 @@ const Play = () => {
   const [isAddToPlaylistOpen, setIsAddToPlaylistOpen] = useState(false);
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
   const [isTipModalOpen, setIsTipModalOpen] = useState(false);
-  const [isBoostModalOpen, setIsBoostModalOpen] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const { musics, isPending } = useFetchMusic();
   const { music: songToPlay } = useFetchMusicById(id);
@@ -280,7 +278,7 @@ const Play = () => {
                 <li
                   onClick={() => {
                     setIsMenuOpen(false);
-                    setIsBoostModalOpen(true);
+                    navigate(`/boost/${songToShow?.music_id}`);
                   }}
                 >
                   Boost Music
@@ -340,11 +338,6 @@ const Play = () => {
           </div>
         </section>
       )}
-      <BoostModal
-        isOpen={isBoostModalOpen}
-        onClose={() => setIsBoostModalOpen(false)}
-        music={songToShow}
-      />
       <TipModal
         isOpen={isTipModalOpen}
         onClose={() => setIsTipModalOpen(false)}

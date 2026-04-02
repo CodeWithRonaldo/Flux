@@ -18,8 +18,9 @@ import {
   ChevronDown,
   CheckCircle,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useFetchUsers from "../../hooks/useFetchUsers";
+import VibeTraxLogo from "../../assets/VibeTraxLogo2.png";
 
 const Header = () => {
   const { connect, isConnected, loading } = useWeb3AuthConnect();
@@ -67,7 +68,13 @@ const Header = () => {
 
   return (
     <div className={styles.header}>
-      <h1 className={styles.logo}>FLUX</h1>
+      <Link to="/">
+        <img
+          className={styles.logo}
+          src={VibeTraxLogo}
+          alt="VibeTrax Logo"
+        ></img>
+      </Link>
 
       <button
         className={styles.mobileMenuToggle}

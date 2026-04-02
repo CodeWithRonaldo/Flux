@@ -20,6 +20,17 @@
   overflow-y: auto;
 }
 
+@media (max-width: 600px) {
+  .modal {
+    width: 100%;
+    max-width: 100% !important;
+    max-height: 90vh;
+    border-radius: 0 !important;
+    border-left: none;
+    border-right: none;
+  }
+}
+
 /* Size variants */
 .small {
   max-width: 400px;

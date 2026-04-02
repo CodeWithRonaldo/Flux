@@ -284,13 +284,65 @@
   to   { transform: scale(1); }
 }
 
-/* Mobile responsive */
-@media (max-width: 768px) {
+/* Mobile toggle — hidden on desktop */
+.mobileToggle {
+  display: none;
+}
+
+.toggleBtn {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.toggleBtnActive {
+  color: white;
+  border-bottom-color: var(--color-primary);
+}
+
+/* Hidden card on mobile */
+.mobileHidden {
+  display: flex; /* desktop: always visible */
+}
+
+@media (max-width: 600px) {
+  .mobileToggle {
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .mobileHidden {
+    display: none;
+  }
+
   .roleCards {
     grid-template-columns: 1fr;
   }
 
+  .roleCard {
+    padding: 1.5rem 1rem;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+  }
+
   .title {
     font-size: 1.5rem;
+  }
+
+  .iconWrapper {
+    width: 64px;
+    height: 64px;
   }
 }

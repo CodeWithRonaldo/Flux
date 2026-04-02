@@ -11,6 +11,7 @@ import TransactionLoader from "../TransactionLoader/TransactionLoader";
 
 const RoleSelectionModal = ({ isOpen, onClose }) => {
   const [role, setRole] = useState("");
+  const [activeCard, setActiveCard] = useState("listener");
   const [done, setDone] = useState(false);
   const { registerUser, loading, error } = useVibetraxHook();
   const { userInfo } = useWeb3AuthUser();
@@ -38,11 +39,29 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
       {role === "" && (
         <div className={styles.content}>
           <div className={styles.header}>
-            <h1 className={styles.title}>Welcome to Flux</h1>
-            <p className={styles.subtitle}>How will you use Flux today?</p>
+            <h1 className={styles.title}>Welcome to VibeTrax</h1>
+            <p className={styles.subtitle}>How will you use VibeTrax today?</p>
           </div>
+          <div className={styles.mobileToggle}>
+            <button
+              className={`${styles.toggleBtn} ${activeCard === "listener" ? styles.toggleBtnActive : ""}`}
+              onClick={() => setActiveCard("listener")}
+            >
+              Listener
+            </button>
+            <button
+              className={`${styles.toggleBtn} ${activeCard === "artist" ? styles.toggleBtnActive : ""}`}
+              onClick={() => setActiveCard("artist")}
+            >
+              Artist
+            </button>
+          </div>
+
           <div className={styles.roleCards}>
-            <div className={styles.roleCard} onClick={onListener}>
+            <div
+              className={`${styles.roleCard} ${activeCard !== "listener" ? styles.mobileHidden : ""}`}
+              onClick={onListener}
+            >
               <div className={styles.iconWrapper}>
                 <Headphones size={48} />
               </div>
@@ -55,7 +74,10 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
                 Continue as Listener
               </Button>
             </div>
-            <div className={styles.roleCard} onClick={onArtist}>
+            <div
+              className={`${styles.roleCard} ${activeCard !== "artist" ? styles.mobileHidden : ""}`}
+              onClick={onArtist}
+            >
               <div className={styles.iconWrapper}>
                 <Music size={48} />
               </div>
@@ -93,7 +115,7 @@ const RoleSelectionModal = ({ isOpen, onClose }) => {
           </div>
           <h2 className={styles.successTitle}>You&apos;re all set!</h2>
           <p className={styles.successSubtitle}>
-            Welcome to Flux as a{role === "artist" ? "n" : ""}{" "}
+            Welcome to VibeTrax as a{role === "artist" ? "n" : ""}{" "}
             <strong>{role}</strong>
           </p>
         </div>

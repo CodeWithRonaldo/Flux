@@ -7,8 +7,9 @@
 }
 
 .logo {
-  color: white;
-  font-size: 1.5em;
+  /* color: white; */
+  /* font-size: 2px; */
+  height: 70px;
 }
 
 .headerActions {
