@@ -2,14 +2,25 @@ import { useNavigate } from "react-router-dom";
 import { Play, Pause } from "lucide-react";
 import { useAudio } from "../../hooks/useAudio";
 import styles from "./MusicCard.module.css";
+import { useIota } from "../../hooks/useIota";
+import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 
 const MusicCard = ({ music }) => {
   const navigate = useNavigate();
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
+  const { address } = useIota();
+  const { isSubscribed } = useFetchSubscription();
 
   const isCurrent = currentTrack?.id === music.music_id;
   const isPlayingCurrent = isCurrent && isPlaying;
-  const trackType = "premium";
+  const isPremium =
+    address === music?.current_owner?.user_address ||
+    address === music?.artist?.user_address ||
+    music?.collaborators.some(
+      (collaborator) => collaborator.user_address === address,
+    ) ||
+    isSubscribed;
+  const trackType = isPremium ? "premium" : "standard";
 
   const handleCardClick = () => {
     if (!isCurrent) {
