@@ -21,6 +21,10 @@ const Player = ({ music, className }) => {
     nextTrack,
     prevTrack,
     seek,
+    isRepeat,
+    isShuffle,
+    toggleRepeat,
+    toggleShuffle,
   } = useAudio();
 
   const isCurrent = music ? currentTrack?.music_id === music?.music_id : true;
@@ -95,10 +99,23 @@ const Player = ({ music, className }) => {
       </div>
 
       <div className={styles.controls}>
-        <button className={styles.iconBtn}>
+        <button
+          className={`${styles.iconBtn} ${isShuffle ? styles.active : ""}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleShuffle();
+          }}
+          style={{ color: isShuffle ? "var(--color-primary)" : undefined }}
+        >
           <Shuffle size={20} />
         </button>
-        <button className={styles.iconBtn} onClick={prevTrack}>
+        <button
+          className={styles.iconBtn}
+          onClick={(e) => {
+            e.stopPropagation();
+            prevTrack();
+          }}
+        >
           <SkipBack size={24} fill="currentColor" />
         </button>
         <button
@@ -118,10 +135,23 @@ const Player = ({ music, className }) => {
             <Play size={32} fill="black" color="black" />
           )}
         </button>
-        <button className={styles.iconBtn} onClick={nextTrack}>
+        <button
+          className={styles.iconBtn}
+          onClick={(e) => {
+            e.stopPropagation();
+            nextTrack();
+          }}
+        >
           <SkipForward size={24} fill="currentColor" />
         </button>
-        <button className={styles.iconBtn}>
+        <button
+          className={`${styles.iconBtn} ${isRepeat ? styles.active : ""}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleRepeat();
+          }}
+          style={{ color: isRepeat ? "var(--color-primary)" : undefined }}
+        >
           <Repeat size={20} />
         </button>
       </div>

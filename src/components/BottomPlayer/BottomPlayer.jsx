@@ -1,7 +1,15 @@
 import React from "react";
 import styles from "./BottomPlayer.module.css";
 import { useAudio } from "../../hooks/useAudio";
-import { Play, Pause, SkipForward, SkipBack, X } from "lucide-react";
+import {
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack,
+  X,
+  Shuffle,
+  Repeat,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const BottomPlayer = () => {
@@ -13,6 +21,10 @@ const BottomPlayer = () => {
     nextTrack,
     prevTrack,
     setIsBottomPlayerVisible,
+    isRepeat,
+    toggleRepeat,
+    isShuffle,
+    toggleShuffle,
   } = useAudio();
 
   if (!currentTrack) return null;
@@ -59,6 +71,16 @@ const BottomPlayer = () => {
       </div>
 
       <div className={styles.center}>
+        <button
+          className={styles.controlBtn}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleShuffle();
+          }}
+          style={{ color: isShuffle ? "var(--color-primary)" : undefined }}
+        >
+          <Shuffle size={20} />
+        </button>
         <button className={styles.controlBtn} onClick={handlePrev}>
           <SkipBack size={24} fill="currentColor" />
         </button>
@@ -71,6 +93,16 @@ const BottomPlayer = () => {
         </button>
         <button className={styles.controlBtn} onClick={handleNext}>
           <SkipForward size={24} fill="currentColor" />
+        </button>
+        <button
+          className={styles.controlBtn}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleRepeat();
+          }}
+          style={{ color: isRepeat ? "var(--color-primary)" : undefined }}
+        >
+          <Repeat size={20} />
         </button>
       </div>
 

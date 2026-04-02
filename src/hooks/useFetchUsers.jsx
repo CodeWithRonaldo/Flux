@@ -22,7 +22,7 @@ const useFetchUsers = () => {
     },
   );
 
-  const { data: currentUser } = useIotaClientQuery(
+  const { data: userEvents } = useIotaClientQuery(
     "queryEvents",
     {
       query: {
@@ -38,9 +38,30 @@ const useFetchUsers = () => {
     },
   );
 
+  const currentEvent = userEvents?.[0];
+
+  const { data: userProfileObject } = useIotaClientQuery(
+    "getObject",
+    {
+      id: currentEvent?.profile_id,
+      options: {
+        showContent: true,
+      },
+    },
+    {
+      enabled: !!currentEvent?.profile_id,
+      refetchInterval: 3000, // keep the UI updated with live streams/likes
+      select: (data) => {
+        if (!data?.data?.content?.fields) return null;
+        return data.data.content.fields;
+      },
+    },
+  );
+
   return {
     registeredArtists,
-    currentUser: currentUser?.[0],
+    currentUser: currentEvent,
+    userProfile: userProfileObject, // This contains stream_count, like_count, etc.
     isLoading,
   };
 };

@@ -9,7 +9,16 @@ import {
 import { formatAddress } from "../../util/helper";
 import { useFetchSubscription } from "../../hooks/useFetchSubscription";
 import SubscriptionModal from "../SubscriptionModal/SubscriptionModal";
-import { Radio, Menu, X, Copy, LogOut, ChevronDown } from "lucide-react";
+import {
+  Radio,
+  Menu,
+  X,
+  Copy,
+  LogOut,
+  ChevronDown,
+  CheckCircle,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import useFetchUsers from "../../hooks/useFetchUsers";
 
 const Header = () => {
@@ -22,6 +31,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isWalletMenuOpen, setIsWalletMenuOpen] = useState(false);
   const walletMenuRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -73,6 +83,20 @@ const Header = () => {
       <div
         className={`${styles.headerActions} ${isMenuOpen ? styles.mobileOpen : ""}`}
       >
+        {isConnected && currentUser && (
+          <Button
+            variant="btn-primary"
+            onClick={() => {
+              navigate("/quests");
+              setIsMenuOpen(false);
+            }}
+            icon={<CheckCircle size={18} />}
+            className={styles.premiumBtn}
+          >
+            <span>Quests</span>
+          </Button>
+        )}
+
         {isConnected && !isSubscribed && (
           <Button
             variant={isExpired ? undefined : "btn-ghost"}

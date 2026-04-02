@@ -6,6 +6,7 @@ import MusicCard from "../../components/MusicCard/MusicCard";
 import Button from "../../components/Button/Button";
 import Player from "../../components/Player/Player";
 import { useFetchMusic } from "../../hooks/useFetchMusic";
+import { useFetchTopGlobalMusic } from "../../hooks/useFetchTopGlobalMusic";
 import {
   BanknoteArrowUp,
   Ellipsis,
@@ -35,6 +36,8 @@ import useFetchUsers from "../../hooks/useFetchUsers";
 const Library = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const { musics, isPending, isError } = useFetchMusic();
+  const { topGlobalMusics, isPending: isTopGlobalPending } =
+    useFetchTopGlobalMusic();
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
   const { address } = useIota();
   const { currentUser } = useFetchUsers();
@@ -126,7 +129,10 @@ const Library = () => {
   });
 
   return (
-    <MusicWrapper musics={musics} isPending={isPending}>
+    <MusicWrapper
+      musics={topGlobalMusics}
+      isPending={isPending || isTopGlobalPending}
+    >
       <div className={styles.libraryContainer}>
         <section className={styles.topSection}>
           <div className={styles.header}>

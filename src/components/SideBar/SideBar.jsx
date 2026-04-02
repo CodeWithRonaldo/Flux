@@ -18,8 +18,8 @@ import useFetchUsers from "../../hooks/useFetchUsers";
 const Links = [
   { name: "Home", icon: HomeIcon, path: "/" },
   { name: "Music", icon: Music, path: "/library" },
-  { name: "Radio", icon: Radio, path: "/radio" },
-  { name: "Mic", icon: Mic, path: "/mic" },
+  // { name: "Radio", icon: Radio, path: "/radio" },
+  // { name: "Mic", icon: Mic, path: "/mic" },
   { name: "Upload", icon: Upload, path: "/upload" },
   { name: "Profile", icon: CircleUserRound, path: "/profile" },
 ];

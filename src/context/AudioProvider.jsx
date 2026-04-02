@@ -9,11 +9,24 @@ export const AudioProvider = ({ children }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isBottomPlayerVisible, setIsBottomPlayerVisible] = useState(false);
+
+  // New States for repeat and shuffle
+  const [isRepeat, setIsRepeat] = useState(false);
+  const [isShuffle, setIsShuffle] = useState(false);
+
   const audioRef = useRef(new Audio());
 
   const togglePlay = useCallback(() => {
-    setIsPlaying(!isPlaying);
-  }, [isPlaying]);
+    setIsPlaying((prev) => !prev);
+  }, []);
+
+  const toggleRepeat = useCallback(() => {
+    setIsRepeat((prev) => !prev);
+  }, []);
+
+  const toggleShuffle = useCallback(() => {
+    setIsShuffle((prev) => !prev);
+  }, []);
 
   const playTrack = useCallback(
     (music) => {
@@ -29,26 +42,42 @@ export const AudioProvider = ({ children }) => {
   );
 
   const nextTrack = useCallback(() => {
-    const currentIndex = musics?.findIndex(
-      (s) => s?.music_id === currentTrack?.music_id,
-    );
-    const nextIndex = (currentIndex + 1) % musics?.length;
-    setCurrentTrack(musics[nextIndex]);
-    setIsPlaying(true);
-  }, [currentTrack, musics]);
+    if (!musics || musics.length === 0) return;
 
-  const prevTrack = () => {
-    const currentIndex = musics?.findIndex(
-      (s) => s?.music_id === currentTrack?.music_id,
-    );
-    const prevIndex = (currentIndex - 1 + musics?.length) % musics?.length;
-    setCurrentTrack(musics[prevIndex]);
+    if (isShuffle) {
+      const randomIndex = Math.floor(Math.random() * musics.length);
+      setCurrentTrack(musics[randomIndex]);
+    } else {
+      const currentIndex = musics.findIndex(
+        (s) => s?.music_id === currentTrack?.music_id,
+      );
+      const nextIndex = (currentIndex + 1) % musics.length;
+      setCurrentTrack(musics[nextIndex]);
+    }
     setIsPlaying(true);
-  };
+  }, [currentTrack, musics, isShuffle]);
+
+  const prevTrack = useCallback(() => {
+    if (!musics || musics.length === 0) return;
+
+    if (isShuffle) {
+      const randomIndex = Math.floor(Math.random() * musics.length);
+      setCurrentTrack(musics[randomIndex]);
+    } else {
+      const currentIndex = musics.findIndex(
+        (s) => s?.music_id === currentTrack?.music_id,
+      );
+      const prevIndex = (currentIndex - 1 + musics.length) % musics.length;
+      setCurrentTrack(musics[prevIndex]);
+    }
+    setIsPlaying(true);
+  }, [currentTrack, musics, isShuffle]);
 
   const seek = (time) => {
-    audioRef.current.currentTime = time;
-    setCurrentTime(time);
+    if (!isNaN(time) && isFinite(time)) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
   };
 
   const updateCurrentSrc = useCallback(
@@ -56,8 +85,10 @@ export const AudioProvider = ({ children }) => {
       if (!src) return;
       const audio = audioRef.current;
       const wasPlaying = isPlaying;
-      audio.src = src;
-      audio.load();
+      if (audio.src !== src) {
+        audio.src = src;
+        audio.load();
+      }
       if (wasPlaying) {
         audio.play().catch((err) => console.error("Playback failed:", err));
       }
@@ -76,7 +107,12 @@ export const AudioProvider = ({ children }) => {
     const setAudioTime = () => setCurrentTime(audio.currentTime);
 
     const handleEnded = () => {
-      nextTrack();
+      if (isRepeat) {
+        audio.currentTime = 0;
+        audio.play().catch((err) => console.error("Playback failed:", err));
+      } else {
+        nextTrack();
+      }
     };
 
     audio.addEventListener("loadedmetadata", setAudioData);
@@ -88,30 +124,28 @@ export const AudioProvider = ({ children }) => {
       audio.removeEventListener("timeupdate", setAudioTime);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [nextTrack]);
+  }, [nextTrack, isRepeat]);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (currentTrack?.preview_music) {
-      const wasPlaying = isPlaying;
-      audio.src = currentTrack.preview_music;
-      audio.load();
-      if (wasPlaying) {
-        audio.play().catch((err) => console.error("Playback failed:", err));
+      if (audio.src !== currentTrack.preview_music) {
+        audio.src = currentTrack.preview_music;
+        audio.load();
+      }
+
+      if (isPlaying) {
+        audio.play().catch((err) => {
+          console.error("Playback failed:", err);
+          setIsPlaying(false);
+        });
+      } else {
+        audio.pause();
       }
     }
   }, [currentTrack, isPlaying]);
 
-  useEffect(() => {
-    if (isPlaying) {
-      audioRef.current.play().catch((err) => {
-        console.error("Playback failed:", err);
-        setIsPlaying(false);
-      });
-    } else {
-      audioRef.current.pause();
-    }
-  }, [isPlaying]);
+  // Remove the duplicate isPlaying useEffect since we handle it in the dependencies above
 
   const value = {
     currentTrack,
@@ -120,6 +154,10 @@ export const AudioProvider = ({ children }) => {
     duration,
     isBottomPlayerVisible,
     setIsBottomPlayerVisible,
+    isRepeat,
+    isShuffle,
+    toggleRepeat,
+    toggleShuffle,
     playTrack,
     togglePlay,
     nextTrack,

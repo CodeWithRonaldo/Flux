@@ -6,6 +6,7 @@ import Library from "./routes/Library/Library";
 import Upload from "./routes/Upload/Upload";
 import Profile from "./routes/Profile/Profile";
 import Search from "./routes/Search/Search";
+import Quests from "./routes/Quests/Quests";
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path: "search",
         element: <Search />,
+      },
+      {
+        path: "quests",
+        element: <Quests />,
       },
     ],
   },

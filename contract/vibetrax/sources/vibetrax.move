@@ -32,6 +32,13 @@ const ESUBSCRIPTION_MISMATCH: u64 = 15;
 const EINVALID_BOOST_PLAN: u64 = 16;
 const EUNAUTHORIZED: u64 = 17;
 const EREWARDS_EMPTY: u64 = 18;
+const EALREADY_CLAIMED: u64 = 19;
+const ENOT_ENOUGH_UPLOADS: u64 = 20;
+const ENOT_ENOUGH_BOOSTS: u64 = 21;
+const ENOT_ENOUGH_STREAMS: u64 = 22;
+const ENOT_ENOUGH_LIKES: u64 = 23;
+const ENOT_ENOUGH_TIPS: u64 = 24;
+const ENO_PREMIUM_ACTION: u64 = 25;
 
 // === Constants ===
 const BASIS_POINTS: u64 = 10_000; // For percentage calculations
@@ -112,6 +119,14 @@ public struct UserProfile has key {
     bio: Option<String>,
     genres: Option<vector<String>>,
     image_url: Option<String>,
+    stream_count: u64,
+    like_count: u64,
+    tip_count: u64,
+    upload_count: u64,
+    boost_count: u64,
+    subscribe_count: u64,
+    purchase_count: u64,
+    bounty_claimed: bool,
 }
 
 // === Events ===
@@ -293,6 +308,7 @@ fun init(otw: VIBETRAX, ctx: &mut TxContext) {
 
 // === Public-Mutative Functions ===
 public fun upload_music(
+    profile: &mut UserProfile,
     title: String,
     description: String,
     genre: String,
@@ -324,6 +340,8 @@ public fun upload_music(
             collab_splits.length() == collab_has_royalty.length(),
         EINVALID_METADATA,
     );
+    
+    profile.upload_count = profile.upload_count + 1;
 
     let sender = tx_context::sender(ctx);
 
@@ -409,12 +427,15 @@ public fun upload_music(
 }
 
 public fun purchase_music_nft(
+    profile: &mut UserProfile,
     music: &mut Music,
     mut payment: Coin<IOTA>,
     buyer_name: String,
     buyer_role: String,
     ctx: &mut TxContext,
 ) {
+    profile.purchase_count = profile.purchase_count + 1;
+    
     assert!(music.for_sale, EINVALID_PURCHASE);
     let payment_amount = payment.value();
     assert!(payment_amount == music.price, EINSUFFICIENT_AMOUNT);
@@ -502,11 +523,14 @@ public fun purchase_music_nft(
 }
 
 public fun like_music(
+    profile: &mut UserProfile,
     music: &mut Music,
     liker_name: String,
     liker_role: String,
     ctx: &mut TxContext,
 ) {
+    profile.like_count = profile.like_count + 1;
+
     let signer_address = tx_context::sender(ctx);
     let liker = User {
         name: liker_name,
@@ -540,6 +564,7 @@ public fun like_music(
 }
 
 public fun stream_music(
+    profile: &mut UserProfile,
     music: &mut Music,
     subscription: &mut Subscription,
     streamer_name: String,
@@ -547,6 +572,8 @@ public fun stream_music(
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
+    profile.stream_count = profile.stream_count + 1;
+
     let signer_address = tx_context::sender(ctx);
     let streamer = User {
         name: streamer_name,
@@ -683,7 +710,9 @@ public fun toggle_sale(music: &mut Music, ctx: &mut TxContext) {
 // ── Tip Artist ───────────────────────────────────────────────────────────
 // Sends VIBE directly from the caller's wallet to the music's original artist.
 // The tipper must hold enough VIBE (earned from streaming or bought on the DEX).
-public fun tip_artist(music: &Music, tip: iota::coin::Coin<VIBE_TOKEN>, ctx: &mut TxContext) {
+public fun tip_artist(profile: &mut UserProfile, music: &Music, tip: iota::coin::Coin<VIBE_TOKEN>, ctx: &mut TxContext) {
+    profile.tip_count = profile.tip_count + 1;
+
     let tipper = ctx.sender();
     let amount = tip.value();
     assert!(amount > 0, EINSUFFICIENT_AMOUNT);
@@ -706,6 +735,7 @@ public fun tip_artist(music: &Music, tip: iota::coin::Coin<VIBE_TOKEN>, ctx: &mu
 // If the music is already boosted the expiry extends from today (not from
 // the current expiry), which keeps things simple.
 public fun boost_music(
+    profile: &mut UserProfile,
     music: &mut Music,
     treasury: &mut VibeTreasury,
     manager: &mut CoinManager<VIBE_TOKEN>,
@@ -714,6 +744,8 @@ public fun boost_music(
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
+    profile.boost_count = profile.boost_count + 1;
+
     let signer_address = ctx.sender();
     assert!(music.artist.user_address == signer_address, ENOT_ARTIST);
     assert!(plan <= 2, EINVALID_BOOST_PLAN);
@@ -783,6 +815,14 @@ public fun register_user(
             bio,
             genres: option::some(genres_vec),
             image_url,
+            stream_count: 0,
+            like_count: 0,
+            tip_count: 0,
+            upload_count: 0,
+            boost_count: 0,
+            subscribe_count: 0,
+            purchase_count: 0,
+            bounty_claimed: false,
         },
         owner,
     );
@@ -818,13 +858,39 @@ public fun update_profile(
     });
 }
 
+// ── Claim KPI Bounty ─────────────────────────────────────────────────────
+public fun claim_kpi_bounty(profile: &mut UserProfile, ctx: &TxContext) {
+    assert!(profile.owner == tx_context::sender(ctx), EUNAUTHORIZED);
+    assert!(!profile.bounty_claimed, EALREADY_CLAIMED);
+    let is_artist = profile.role == std::ascii::string(b"Artist");
+    if (is_artist) {
+        assert!(profile.upload_count >= 2, ENOT_ENOUGH_UPLOADS);
+        assert!(profile.boost_count >= 2, ENOT_ENOUGH_BOOSTS);
+        assert!(profile.stream_count >= 5, ENOT_ENOUGH_STREAMS);
+        assert!(profile.like_count >= 3, ENOT_ENOUGH_LIKES);
+        assert!(profile.tip_count >= 2, ENOT_ENOUGH_TIPS);
+    } else {
+        assert!(profile.stream_count >= 5, ENOT_ENOUGH_STREAMS);
+        assert!(profile.like_count >= 3, ENOT_ENOUGH_LIKES);
+        assert!(profile.tip_count >= 1, ENOT_ENOUGH_TIPS);
+    };
+    
+    // doing ANY of them (purchase OR subscribe) should get the claim available
+    assert!(profile.purchase_count >= 1 || profile.subscribe_count >= 1, ENO_PREMIUM_ACTION);
+
+    profile.bounty_claimed = true;
+}
+
 public fun subscribe(
+    profile: &mut UserProfile,
     subscriber_name: String,
     subscriber_role: String,
     payment: Coin<IOTA>,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
+    profile.subscribe_count = profile.subscribe_count + 1;
+    
     let subscriber_address = ctx.sender();
     assert!(payment.value() == SUBSCRIPTION_PRICE, EINSUFFICIENT_AMOUNT);
     let price = payment.value();

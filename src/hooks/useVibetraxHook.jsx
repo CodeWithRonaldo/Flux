@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 import { Transaction } from "@iota/iota-sdk/transactions";
 import { useIotaClient } from "@iota/dapp-kit";
 import { useIota } from "./useIota";
@@ -5,12 +6,14 @@ import { useCallback, useState } from "react";
 import { useNetworkVariables } from "../config/networkConfig";
 import { formatPrice, getContractError } from "../util/helper";
 import { TREASURY } from "../config/constant";
+import useFetchUsers from "./useFetchUsers";
 
 export const useVibetraxHook = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const client = useIotaClient();
   const { keypair, balance, balanceLoading, vibeTokenBalance } = useIota();
+  const { currentUser } = useFetchUsers();
   const { vibeTraxPackageId, vibeTraxTreasuryId, vibeTraxCoinManagerId } =
     useNetworkVariables(
       "vibeTraxPackageId",
@@ -60,14 +63,24 @@ export const useVibetraxHook = () => {
       setError("");
 
       const tx = new Transaction();
+
+      const toAscii = (str) =>
+        str ? str.replace(/[^\x00-\x7F]/g, "").trim() : "";
+
+      const safeRole = toAscii(userData.role);
+      const safeArtistName = toAscii(userData.artistName);
+      const safeBio = toAscii(userData.bio);
+      const safeImageUrl = toAscii(userData.imageUrl);
+      const safeGenre = userData.genre ? userData.genre.map(toAscii) : null;
+
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::register_user`,
         arguments: [
-          tx.pure.string(userData.role),
-          tx.pure.option("string", userData.artistName),
-          tx.pure.option("string", userData.bio),
-          tx.pure.option("vector<string>", userData.genre),
-          tx.pure.option("string", userData.imageUrl ?? null),
+          tx.pure.string(safeRole),
+          tx.pure.option("string", safeArtistName || null),
+          tx.pure.option("string", safeBio || null),
+          tx.pure.option("vector<string>", safeGenre),
+          tx.pure.option("string", safeImageUrl || null),
         ],
       });
 
@@ -102,11 +115,18 @@ export const useVibetraxHook = () => {
           return;
         }
       }
+      const profileId = currentUser?.profile_id;
+      if (!profileId) {
+        setError("User profile not found");
+        return null;
+      }
+
       const tx = new Transaction();
       const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(musicData.amount)]);
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::purchase_music_nft`,
         arguments: [
+          tx.object(profileId),
           tx.object(musicData.musicId),
           coin,
           tx.pure.string(musicData.buyerName),
@@ -149,11 +169,18 @@ export const useVibetraxHook = () => {
           return;
         }
       }
+      const profileId = currentUser?.profile_id;
+      if (!profileId) {
+        setError("User profile not found");
+        return null;
+      }
+
       const tx = new Transaction();
       const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(5_000_000_000)]);
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::subscribe`,
         arguments: [
+          tx.object(profileId),
           tx.pure.string(subData.subscriberName),
           tx.pure.string(subData.subscriberRole),
           coin,
@@ -255,9 +282,15 @@ export const useVibetraxHook = () => {
 
       const [tipCoin] = tx.splitCoins(primaryCoin, [tx.pure.u64(amountInBase)]);
 
+      const profileId = currentUser?.profile_id;
+      if (!profileId) {
+        setError("User profile not found");
+        return null;
+      }
+
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::tip_artist`,
-        arguments: [tx.object(tipData.musicId), tipCoin],
+        arguments: [tx.object(profileId), tx.object(tipData.musicId), tipCoin],
       });
 
       const result = await executeSponsoredTx(tx);
@@ -323,9 +356,16 @@ export const useVibetraxHook = () => {
         tx.pure.u64(requiredAmount),
       ]);
 
+      const profileId = currentUser?.profile_id;
+      if (!profileId) {
+        setError("User profile not found");
+        return null;
+      }
+
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::boost_music`,
         arguments: [
+          tx.object(profileId),
           tx.object(boostData.musicId),
           tx.object(vibeTraxTreasuryId),
           tx.object(vibeTraxCoinManagerId),
@@ -357,9 +397,17 @@ export const useVibetraxHook = () => {
       try {
         setLoading(true);
         const tx = new Transaction();
+
+        const profileId = currentUser?.profile_id;
+        if (!profileId) {
+          console.log("Error: User profile not found");
+          return null;
+        }
+
         tx.moveCall({
           target: `${vibeTraxPackageId}::vibetrax::stream_music`,
           arguments: [
+            tx.object(profileId),
             tx.object(streamData.musicId),
             tx.object(streamData.subscriptionId),
             tx.pure.string(streamData.streamerName),
@@ -381,7 +429,7 @@ export const useVibetraxHook = () => {
         setLoading(false);
       }
     },
-    [client, keypair, vibeTraxPackageId],
+    [client, keypair, vibeTraxPackageId, currentUser],
   );
 
   const claimRewards = async (subscriptionId) => {
@@ -423,10 +471,18 @@ export const useVibetraxHook = () => {
     try {
       setLoading(true);
       setError("");
+
+      const profileId = currentUser?.profile_id;
+      if (!profileId) {
+        setError("User profile not found");
+        return null;
+      }
+
       const tx = new Transaction();
       tx.moveCall({
         target: `${vibeTraxPackageId}::vibetrax::like_music`,
         arguments: [
+          tx.object(profileId),
           tx.object(likeData.musicId),
           tx.pure.string(likeData.likerName),
           tx.pure.string(likeData.likerRole),
@@ -657,6 +713,43 @@ export const useVibetraxHook = () => {
     }
   };
 
+  const claimKpiBounty = async () => {
+    if (!keypair) {
+      setError("Wallet not connected.");
+      return;
+    }
+    try {
+      setLoading(true);
+      setError("");
+
+      const profileId = currentUser?.profile_id;
+      if (!profileId) {
+        setError("User profile not found.");
+        return null;
+      }
+
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${vibeTraxPackageId}::vibetrax::claim_kpi_bounty`,
+        arguments: [tx.object(profileId)],
+      });
+
+      const result = await executeSponsoredTx(tx);
+
+      if (result.effects?.status?.status !== "success") {
+        setError("Unable to claim KPI bounty. Please try again.");
+        return null;
+      }
+      return result;
+    } catch (e) {
+      const errorMessage = getContractError(e);
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     registerUser,
     buyMusic,
@@ -672,6 +765,7 @@ export const useVibetraxHook = () => {
     deleteMusic,
     withdrawIota,
     withdrawVibe,
+    claimKpiBounty,
     loading,
     error,
   };

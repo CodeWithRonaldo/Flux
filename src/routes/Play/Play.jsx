@@ -327,17 +327,19 @@ const Play = () => {
           isPending={isPending}
         />
       </section>
-      <section className={styles.section}>
-        <h2 className={styles.featuredTitle}>Contributors</h2>
-        <div className={styles.artistList}>
-          {songToShow?.collaborators?.map((collaborator) => (
-            <ArtistCard
-              artist={collaborator}
-              key={collaborator?.user_address}
-            />
-          ))}
-        </div>
-      </section>
+      {songToShow?.collaborators?.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.featuredTitle}>Contributors</h2>
+          <div className={styles.artistList}>
+            {songToShow?.collaborators?.map((collaborator) => (
+              <ArtistCard
+                artist={collaborator}
+                key={collaborator?.user_address}
+              />
+            ))}
+          </div>
+        </section>
+      )}
       <BoostModal
         isOpen={isBoostModalOpen}
         onClose={() => setIsBoostModalOpen(false)}

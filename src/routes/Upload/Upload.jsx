@@ -912,16 +912,6 @@ const Upload = () => {
 
         <div className={styles.uploadFormAside}>
           <BlackCard className={styles.aside}>
-            <h3>Gas Estimates</h3>
-            <p>
-              You need approx. 0.1 IOTA for transaction fees on the network.
-            </p>
-            <Button type="button" variant="btn-secondary">
-              Get Testnet Token
-            </Button>
-          </BlackCard>
-
-          <BlackCard className={styles.aside}>
             <h3>Quick Guidelines</h3>
             <ul>
               <li>Use high-quality WAV or FLAC for premium audio.</li>
